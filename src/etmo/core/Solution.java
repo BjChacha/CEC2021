@@ -169,7 +169,7 @@ public class Solution implements Serializable {
 	/**
 	 * Constructor
 	 * 
-	 * @param problem
+	 * @param problemSet
 	 *            The problem to solve
 	 */
 	public Solution(ProblemSet problemSet, Variable[] variables) {

@@ -30,7 +30,7 @@ public class MOMFEA_main {
 		
 		HashMap parameters; // Operator parameters
 
-		problemSet = ETMOF17.getProblem();
+		problemSet = ETMOF3.getProblem();
 		int taskNumber = problemSet.size();
 		System.out.println("taskNumber = "+taskNumber);
 		String pf = "PF/StaticPF/" + problemSet.get(0).getHType() + "_" + problemSet.get(0).getNumberOfObjectives() + "D.pf";

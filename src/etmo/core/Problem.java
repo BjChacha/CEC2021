@@ -321,7 +321,7 @@ public abstract class Problem implements Serializable {
 	}
 	
 
-	protected double[] scaleVariables(Solution solution) throws JMException {
+	public double[] scaleVariables(Solution solution) throws JMException {
 		Variable[] decisionVariables = solution.getDecisionVariables();
 		double[] x = new double[numberOfVariables_];
 
