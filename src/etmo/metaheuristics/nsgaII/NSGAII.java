@@ -41,7 +41,7 @@ public class NSGAII extends Algorithm {
 	/**
 	 * Constructor
 	 * 
-	 * @param problem
+	 * @param problemSet
 	 *            Problem to solve
 	 */
 	public NSGAII(ProblemSet problemSet) {

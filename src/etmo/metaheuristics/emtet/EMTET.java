@@ -19,8 +19,8 @@ public class EMTET extends MtoAlgorithm {
 
     private SolutionSet[] population;
     private SolutionSet offspringPopulation;
-    private SolutionSet transferPopulation;
-    private SolutionSet union;
+//    private SolutionSet transferPopulation;
+//    private SolutionSet union;
 
     int evaluations;
     int maxEvaluations;
@@ -86,12 +86,15 @@ public class EMTET extends MtoAlgorithm {
             for (int j = 0; j < population.length; j++){
                 if (i == j) continue;
                 //            若无存活个体则直接从源任务里面选排名前G个并作标记
+                SolutionSet rankHignG = new SolutionSet(G);
                 if (survivalPopulation.size() == 0){
                     for (int k = 0; k < G; k++){
                         population[j].get(k).setSkillFactor(1);
-
-                        population[i].add(population[j].get(k));
+                        problemSet_.get(i).evaluate(population[j].get(k));
+                        evaluations++;
+                        rankHignG.add(population[j].get(k));
                     }
+                    population[i] = population[i].union(rankHignG);
                 }
 //                存在存活个体，转换到源任务j寻找最近的邻居作为新的迁移解
                 else {
@@ -102,7 +105,7 @@ public class EMTET extends MtoAlgorithm {
                            Variable[] x = survivalPopulation.get(k).getDecisionVariables();
                            int num = cycle;
                            if (k < more) num += 1;
-                           population[i].union(transferNeighbor(x,j,num));
+                           population[i] = population[i].union(transferNeighbor(x,j,i,num));
                     }
 
                 }
@@ -112,7 +115,7 @@ public class EMTET extends MtoAlgorithm {
 
     }
 
-    private SolutionSet transferNeighbor(Variable[] x, int source, int num) throws JMException {
+    private SolutionSet transferNeighbor(Variable[] x, int source, int target, int num) throws JMException {
 //        记得要做标记
         SolutionSet closestNeighbor = new SolutionSet(num);
         Map<Double,Integer> dis = new TreeMap<Double,Integer>();
@@ -129,6 +132,8 @@ public class EMTET extends MtoAlgorithm {
             if (cnt > num)  break;
             Solution t = population[source].get(dis.get(key));
             t.setSkillFactor(1);
+            problemSet_.get(target).evaluate(t);
+            evaluations++;
             closestNeighbor.add(t);
             cnt++;
         }
@@ -157,7 +162,7 @@ public class EMTET extends MtoAlgorithm {
                 evaluations += 1;
                 offspringPopulation.add(offspring[0]);
             }
-            population[i].union(offspringPopulation);
+            population[i] = population[i].union(offspringPopulation);
         }
 
     }
@@ -171,8 +176,11 @@ public class EMTET extends MtoAlgorithm {
         for (int i = 0; i < population.length; i++){
             assignFitness(population[i]);
             population[i].sort(new LocationComparator());
-            for (int j = populationSize; j < populationSize * 2; j++)
-                population[i].remove(j);
+            SolutionSet nextPop = new SolutionSet();
+            nextPop = nextPop.union(population[i]);
+            population[i].clear();
+            for (int j = 0; j < populationSize; j++)
+                population[i].add(nextPop.get(j));
         }
     }
 

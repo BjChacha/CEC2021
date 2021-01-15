@@ -35,7 +35,7 @@ public class EMTET_main {
 
         algorithm.setInputParameter("populationSize",100);
         algorithm.setInputParameter("maxEvaluations",100*taskNumber * 1000);
-        algorithm.setInputParameter("transferNum",8);
+        algorithm.setInputParameter("transferNum",0);
 
         parameters = new HashMap();
         parameters.put("probability", 0.9);
@@ -67,7 +67,27 @@ public class EMTET_main {
 
         double ave[] = new double[taskNumber];
         for (int t = 1; t <= times; t++) {
-            SolutionSet[] resPopulation = algorithm.execute();
+            SolutionSet[] res = algorithm.execute();
+            SolutionSet[] resPopulation = new SolutionSet[problemSet.size()];
+            for (int i = 0; i < problemSet.size(); i++)
+                resPopulation[i] = new SolutionSet();
+
+            for(int i = 0; i < res.length; i++){
+                for (int j = 0; j < res[i].size(); j++) {
+                    Solution sol = res[i].get(j);
+
+                    int start = problemSet.get(i).getStartObjPos();
+                    int end = problemSet.get(i).getEndObjPos();
+
+                    Solution newSolution = new Solution(end - start + 1);
+
+                    for (int k = start; k <= end; k++)
+                        newSolution.setObjective(k - start, sol.getObjective(k));
+
+                    resPopulation[i].add(newSolution);
+                }
+
+            }
 
             double igd;
             System.out.print(t + "\t");
@@ -78,7 +98,7 @@ public class EMTET_main {
 //				getTask中用到add影响problem起始和结束值
 //				resPopulation[i].printObjectivesToFile("MOMFEA_"+problemSet.getTask(i).get(0).getNumberOfObjectives()+"Obj_"+
 //						problemSet.getTask(i).get(0).getName()+ "_" + problemSet.getTask(i).get(0).getNumberOfVariables() + "D_run"+t+".txt");
-                resPopulation[i].printObjectivesToFile("MOMFEA_"+problemSet.get(i).getNumberOfObjectives()+"Obj_"+
+                resPopulation[i].printObjectivesToFile("ETMET_"+problemSet.get(i).getNumberOfObjectives()+"Obj_"+
                         problemSet.get(i).getName()+ "_" + problemSet.get(i).getNumberOfVariables() + "D_run"+t+".txt");
 
                 igd =  indicator.getIGD(resPopulation[i]);

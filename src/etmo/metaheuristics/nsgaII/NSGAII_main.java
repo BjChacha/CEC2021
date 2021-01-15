@@ -25,7 +25,7 @@ public class NSGAII_main {
 
 		HashMap parameters; // Operator parameters
 
-		problemSet1 = ETMOF3.getProblem();
+		problemSet1 = ETMOF8.getProblem();
 		int taskNumber = problemSet1.size();
 		System.out.println("taskNumber = "+taskNumber);
 		for (int tsk=0;tsk<taskNumber;tsk++) {
@@ -62,7 +62,7 @@ public class NSGAII_main {
 			System.out.println("RunID\t" + "IGD for " + problemSet2.get(0).getName());
 			DecimalFormat form = new DecimalFormat("#.####E0");
 			QualityIndicator indicator = new QualityIndicator(problemSet2.get(0), pf);
-			int times = 1;
+			int times = 21;
 			double aveIGD = 0;
 				for (int i = 1; i <= times; i++) {
 					SolutionSet population = algorithm.execute();
