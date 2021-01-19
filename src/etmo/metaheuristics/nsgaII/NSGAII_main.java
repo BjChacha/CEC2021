@@ -25,7 +25,7 @@ public class NSGAII_main {
 
 		HashMap parameters; // Operator parameters
 
-		problemSet1 = ETMOF8.getProblem();
+		problemSet1 = ETMOF1.getProblem();
 		int taskNumber = problemSet1.size();
 		System.out.println("taskNumber = "+taskNumber);
 		for (int tsk=0;tsk<taskNumber;tsk++) {

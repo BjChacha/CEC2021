@@ -71,7 +71,6 @@ public class MMDTLZ extends Problem {
 		double[] f = new double[numberOfObjectives_];
 
 		double g = evalG(xII);
-		
 		double[] h = evalH(xI, g);
 		
 		if(genType_.equalsIgnoreCase("addition")){

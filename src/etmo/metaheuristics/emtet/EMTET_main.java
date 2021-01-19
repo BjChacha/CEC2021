@@ -17,7 +17,8 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 
 public class EMTET_main {
-    public static void main(String args[]) throws IOException, JMException, ClassNotFoundException {
+    public static void main(
+            String args[]) throws IOException, JMException, ClassNotFoundException {
         ProblemSet problemSet; // The problem to solve
         MtoAlgorithm algorithm; // The algorithm to use
         Operator crossover; // Crossover operator
@@ -29,13 +30,17 @@ public class EMTET_main {
         problemSet = ETMOF1.getProblem();
         int taskNumber = problemSet.size();
         System.out.println("taskNumber = "+taskNumber);
-        String pf = "PF/StaticPF/" + problemSet.get(0).getHType() + "_" + problemSet.get(0).getNumberOfObjectives() + "D.pf";
+
+        String[] pf = new String[problemSet.size()];
+        for (int i = 0; i < pf.length; i++){
+            pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
+        }
 
         algorithm = new EMTET(problemSet);
 
         algorithm.setInputParameter("populationSize",100);
         algorithm.setInputParameter("maxEvaluations",100*taskNumber * 1000);
-        algorithm.setInputParameter("transferNum",0);
+        algorithm.setInputParameter("transferNum",8);
 
         parameters = new HashMap();
         parameters.put("probability", 0.9);
@@ -92,7 +97,7 @@ public class EMTET_main {
             double igd;
             System.out.print(t + "\t");
             for(int i = 0; i < taskNumber; i++){
-                QualityIndicator indicator = new QualityIndicator(problemSet.get(i), pf);
+                QualityIndicator indicator = new QualityIndicator(problemSet.get(i), pf[i]);
                 if(resPopulation[i].size()==0)
                     continue;
 //				getTask中用到add影响problem起始和结束值
