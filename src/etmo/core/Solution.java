@@ -23,6 +23,8 @@
 
 package etmo.core;
 
+
+
 import java.io.Serializable;
 
 /**
@@ -108,6 +110,12 @@ public class Solution implements Serializable {
 	
 	private double gFunValue_;
 
+
+//	add from moeac
+	private double[] normalizedObjective_;
+	private double distanceToIdealPoint;
+	private double[] unitHyperplaneObjective_;
+
 	/**
 	 * Constructor.
 	 */
@@ -119,6 +127,7 @@ public class Solution implements Serializable {
 		type_ = null;
 		variable_ = null;
 		objective_ = null;
+
 	} // Solution
 
 	/**
@@ -134,12 +143,20 @@ public class Solution implements Serializable {
 	public Solution(int numberOfObjectives) {
 		numberOfObjectives_ = numberOfObjectives;
 		objective_ = new double[numberOfObjectives];
+
+
+		normalizedObjective_ = new double[numberOfObjectives_];
+		unitHyperplaneObjective_ = new double[numberOfObjectives_];
+		this.translatedObjectives = new double[this.numberOfObjectives_];
+//		lamda_ = this;
+		rank1 = -1;
+		isMarked = false;
 	}
 
 	/**
 	 * Constructor.
 	 * 
-	 * @param problem
+	 * @param problemSet
 	 *            The problem to solve
 	 * @throws ClassNotFoundException
 	 */
@@ -157,9 +174,30 @@ public class Solution implements Serializable {
 		kDistance_ = 0.0;
 		crowdingDistance_ = 0.0;
 		skillFactor_ = -1;
-		distanceToSolutionSet_ = Double.POSITIVE_INFINITY;
+
+
 
 		variable_ = type_.createVariables();
+
+//		add from moeac
+		normalizedObjective_ = new double[numberOfObjectives_];
+		unitHyperplaneObjective_ = new double[numberOfObjectives_];
+		remove = false;
+		localDensity_ = -1;
+		gaussianLocalDensity_ = 0.0;
+		centerDistance_ = 0.0;
+		convergenceDistance_ = 0.0;
+		distanceToSolutionSet_ = Double.POSITIVE_INFINITY;
+		distanceToIdealPoint = Double.POSITIVE_INFINITY;
+		distanceToNadirPoint = 0.0;
+		sumValue = Double.POSITIVE_INFINITY;
+
+		this.translatedObjectives = new double[this.numberOfObjectives_];
+//		lamda_ = this;
+		rank1 = -1;
+		isMarked = false;
+
+
 	} // Solution
 
 	static public Solution getNewSolution(ProblemSet problemSet) throws ClassNotFoundException {
@@ -223,6 +261,47 @@ public class Solution implements Serializable {
 		location_ = solution.getLocation();
 
 		skillFactor_ = solution.getSkillFactor();
+
+
+		type_ = solution.type_;
+
+		normalizedObjective_ = new double[numberOfObjectives_];
+		unitHyperplaneObjective_ = new double[numberOfObjectives_];
+
+		for (int i = 0; i < objective_.length; i++) {
+			objective_[i] = solution.getObjective(i);
+			normalizedObjective_[i] = solution.getNormalizedObjective(i);
+			unitHyperplaneObjective_[i] = solution.getUnitHyperplaneObjective(i);
+		} // for
+		// <-
+		this.translatedObjectives = new double[this.numberOfObjectives_];
+		remove = false;
+		variable_ = type_.copyVariables(solution.variable_);
+		overallConstraintViolation_ = solution.getOverallConstraintViolation();
+		numberOfViolatedConstraints_ = solution.getNumberOfViolatedConstraint();
+		distanceToSolutionSet_ = solution.getDistanceToSolutionSet();
+		distanceToIdealPoint = Double.POSITIVE_INFINITY;
+		distanceToNadirPoint = 0.0;
+		sumValue = Double.POSITIVE_INFINITY;
+		crowdingDistance_ = solution.getCrowdingDistance();
+		localDensity_ = solution.getLocalDensity_();
+		gaussianLocalDensity_ = solution.getGaussianLocalDensity_();
+		centerDistance_ = solution.getCenterDistance_();
+		convergenceDistance_ = solution.getConvergenceDistance_();
+		kDistance_ = solution.getKDistance();
+		fitness_ = solution.getFitness();
+		marked_ = solution.isMarked_();
+		rank_ = solution.getRank();
+		location_ = solution.getLocation();
+//		max_distance_=  solution.getmaxDistance();
+//		min_distance_=  solution.getminDistance();
+//		cross_type=  solution.getcross_type();
+//		clone_num=  solution.getclone_num();
+
+
+		rank1 = solution.getRank1();
+		isMarked = solution.getRank2();
+
 	} // Solution
 
 	/**
@@ -546,4 +625,246 @@ public class Solution implements Serializable {
 	public void setGFunValue(double gfv) {
 		gFunValue_ = gfv;
 	}
+
+
+//add from moeac
+    public void setNormalizedObjective(int j, double val) {
+		normalizedObjective_[j] = val;
+    }
+
+	public double getNormalizedObjective(int j) {
+		return normalizedObjective_[j];
+	}
+
+	public void setDistanceToIdealPoint(double distanceToIdealPoint) {
+		this.distanceToIdealPoint = distanceToIdealPoint;
+	}
+	public double getDistanceToIdealPoint() {
+		return distanceToIdealPoint;
+	}
+
+	private double sumValue;
+	public void setSumValue(double sumValue) {
+		this.sumValue = sumValue;
+	}
+	public double getSumValue() {
+		return sumValue;
+	}
+
+	public double getUnitHyperplaneObjective(int i) {
+		return unitHyperplaneObjective_[i];
+	}
+	public void setUnitHyperplaneObjective(int i,double unitValue) {
+		unitHyperplaneObjective_[i] = unitValue;
+	}
+
+	private boolean remove;
+	public boolean isRemove() {
+		return remove;
+	}
+	public void setRemove(boolean remove) {
+		this.remove = remove;
+	}
+
+	private int localDensity_;
+	public int getLocalDensity_() {
+		return localDensity_;
+	}
+	public void setLocalDensity_(int localDensity_) {
+		this.localDensity_ = localDensity_;
+	}
+
+	private double gaussianLocalDensity_;
+
+	public double getGaussianLocalDensity_() {
+		return gaussianLocalDensity_;
+	}
+
+	public void setGaussianLocalDensity_(double gaussianLocalDensity_) {
+		this.gaussianLocalDensity_ = gaussianLocalDensity_;
+	}
+
+	private double centerDistance_;
+
+	public double getCenterDistance_() {
+		return centerDistance_;
+	}
+
+	public void setCenterDistance_(double centerDistance_) {
+		this.centerDistance_ = centerDistance_;
+	}
+
+	private double convergenceDistance_;
+
+	public double getConvergenceDistance_() {
+		return convergenceDistance_;
+	}
+
+	public void setConvergenceDistance_(double convergenceDistance_) {
+		this.convergenceDistance_ = convergenceDistance_;
+	}
+
+	private double distanceToNadirPoint;
+
+	public double getDistanceToNadirPoint() {
+		return distanceToNadirPoint;
+	}
+
+	public void setDistanceToNadirPoint(double distanceToNadirPoint) {
+		this.distanceToNadirPoint = distanceToNadirPoint;
+	}
+
+	private double[] translatedObjectives;
+	private int rank1;
+	private boolean isMarked;
+	public int getRank1() {
+
+		return this.rank1;
+	}
+	public void setRank1(int id1) {
+		this.rank1 = id1;
+	}
+
+	public boolean getRank2() {
+		return this.isMarked;
+	}
+	public void setRank2(boolean id2) {
+		this.isMarked = id2;
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param numberOfObjectives
+	 *            Number of objectives of the solution
+	 *
+	 *            This constructor is used mainly to read objective values from
+	 *            a file to variables of a SolutionSet to apply quality
+	 *            indicators
+	 */
+
+
+	/**
+	 * Constructor.
+	 *
+	 * @param problem
+	 *            The problem to solve
+	 * @throws ClassNotFoundException
+	 */
+	public Solution(Problem problem) throws ClassNotFoundException {
+//		problem_ = problem;
+		type_ = problem.getSolutionType();
+		numberOfObjectives_ = problem.getNumberOfObjectives();
+		objective_ = new double[numberOfObjectives_];
+		//clone_num=new int[numberOfObjectives_];
+
+		normalizedObjective_ = new double[numberOfObjectives_];
+		unitHyperplaneObjective_ = new double[numberOfObjectives_];
+		remove = false;
+		// Setting initial values
+		fitness_ = 0.0;
+		kDistance_ = 0.0;
+		crowdingDistance_ = 0.0;
+		localDensity_ = -1;
+		gaussianLocalDensity_ = 0.0;
+		centerDistance_ = 0.0;
+		convergenceDistance_ = 0.0;
+		distanceToSolutionSet_ = Double.POSITIVE_INFINITY;
+		distanceToIdealPoint = Double.POSITIVE_INFINITY;
+		distanceToNadirPoint = 0.0;
+		sumValue = Double.POSITIVE_INFINITY;
+		// <-
+		// variable_ = problem.solutionType_.createVariables() ;
+		variable_ = type_.createVariables();
+		this.translatedObjectives = new double[this.numberOfObjectives_];
+//		lamda_ = this;
+		rank1 = -1;
+		isMarked = false;
+	} // Solution
+
+	public Solution(Problem problem, int groupSize) throws ClassNotFoundException {
+
+		type_ = problem.getSolutionType();
+		numberOfObjectives_ = problem.getNumberOfObjectives();
+		objective_ = new double[numberOfObjectives_];
+		//clone_num=new int[numberOfObjectives_];
+
+		normalizedObjective_ = new double[numberOfObjectives_];
+		unitHyperplaneObjective_ = new double[numberOfObjectives_];
+		remove = false;
+		// Setting initial values
+		fitness_ = 0.0;
+		kDistance_ = 0.0;
+		crowdingDistance_ = 0.0;
+		localDensity_ = -1;
+		gaussianLocalDensity_ = 0.0;
+		centerDistance_ = 0.0;
+		convergenceDistance_ = 0.0;
+		distanceToSolutionSet_ = Double.POSITIVE_INFINITY;
+		distanceToIdealPoint = Double.POSITIVE_INFINITY;
+		distanceToNadirPoint = 0.0;
+		sumValue = Double.POSITIVE_INFINITY;
+		// variable_ = problem.solutionType_.createVariables() ;
+		variable_ = type_.createVariables();
+
+		rank1 = -1;
+		isMarked = false;
+
+	} // Solution
+
+	static public Solution getNewSolution(Problem problem)
+			throws ClassNotFoundException {
+		return new Solution(problem);
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param problem
+	 *            The problem to solve
+	 */
+	public Solution(Problem problem, Variable[] variables) {
+
+		type_ = problem.getSolutionType();
+		numberOfObjectives_ = problem.getNumberOfObjectives();
+		objective_ = new double[numberOfObjectives_];
+
+		normalizedObjective_ = new double[numberOfObjectives_];
+		unitHyperplaneObjective_ = new double[numberOfObjectives_];
+
+		remove = false;
+		// Setting initial values
+		fitness_ = 0.0;
+		kDistance_ = 0.0;
+		crowdingDistance_ = 0.0;
+		localDensity_ = -1;
+		gaussianLocalDensity_ = 0.0;
+		centerDistance_ = 0.0;
+		convergenceDistance_ = 0.0;
+		distanceToSolutionSet_ = Double.POSITIVE_INFINITY;
+		distanceToIdealPoint = Double.POSITIVE_INFINITY;
+		distanceToNadirPoint = 0.0;
+		sumValue = Double.POSITIVE_INFINITY;
+
+		variable_ = variables;
+		this.translatedObjectives = new double[this.numberOfObjectives_];
+
+		rank1 = -1;
+		isMarked = false;
+	} // Constructor
+
+	/**
+	 * Copy constructor.
+	 *
+	 * @param solution
+	 *            Solution to copy.
+	 */
+
+
+
+
+	private boolean marked_;
+	public boolean isMarked_() {
+		return this.marked_;
+	} // isMarked
 } // Solution

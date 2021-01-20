@@ -452,4 +452,46 @@ public class SolutionSet implements Serializable {
 	public int getCapacity() {
 		return capacity_;
 	}
+
+//	add from moeac
+    public Solution getCentroidVector() {
+		int objectNumb = 0;
+		if(solutionsList_.size() != 0){
+			objectNumb = solutionsList_.get(0).getNumberOfObjectives();
+		}else{
+			System.out.println("solutionsList size == 0");
+			System.exit(0);
+		}
+		Solution sol = new Solution(objectNumb);
+		double sumValue = 0.0;
+		for (int m = 0; m < objectNumb; m++) {
+			double value = 0;
+			for (int k = 0; k < solutionsList_.size(); k++) {
+				value += solutionsList_.get(k).getNormalizedObjective(m);
+			}
+			value = value / solutionsList_.size();
+			sol.setNormalizedObjective(m, value);
+			sumValue += value;
+		}
+
+		double normDistance = 0.0;
+		for(int i=0;i<objectNumb;i++){
+			double unitValue = 0.0;
+			normDistance += sol.getNormalizedObjective(i)*sol.getNormalizedObjective(i);
+			unitValue = sol.getNormalizedObjective(i)/sumValue;
+			sol.setUnitHyperplaneObjective(i, unitValue);
+		}
+		normDistance = Math.sqrt(normDistance);
+
+		sol.setDistanceToIdealPoint(normDistance);
+		return sol;
+    }
+
+	private boolean remove;
+	public boolean isRemove() {
+		return remove;
+	}
+	public void setRemove(boolean remove) {
+		this.remove = remove;
+	}
 } // SolutionSet
