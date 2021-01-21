@@ -2,6 +2,7 @@ package etmo.metaheuristics.momfea;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
@@ -21,7 +22,7 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 
 public class MOMFEA_main {
-	public static void main(String args[]) throws IOException, JMException, ClassNotFoundException {
+	public static void main(String args[]) throws IOException, JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 		ProblemSet problemSet; // The problem to solve
 		Algorithm algorithm; // The algorithm to use
 		Operator crossover; // Crossover operator
@@ -30,66 +31,23 @@ public class MOMFEA_main {
 
 		HashMap parameters; // Operator parameters
 
+		int taskStart = 1;
+		int taskEnd = 40;
 
-		for (int pCase = 9; pCase <= 16; pCase++ ){
-			switch (pCase){
-				case 1:
-					problemSet = ETMOF1.getProblem();
-					break;
-				case 2:
-					problemSet = ETMOF2.getProblem();
-					break;
-				case 3:
-					problemSet = ETMOF3.getProblem();
-					break;
-				case 4:
-					problemSet = ETMOF4.getProblem();
-					break;
-				case 5:
-					problemSet = ETMOF5.getProblem();
-					break;
-				case 6:
-					problemSet = ETMOF6.getProblem();
-					break;
-				case 7:
-					problemSet = ETMOF7.getProblem();
-					break;
-				case 8:
-					problemSet = ETMOF8.getProblem();
-					break;
-				case 9:
-					problemSet = ETMOF9.getProblem();
-					break;
-				case 10:
-					problemSet = ETMOF10.getProblem();
-					break;
-				case 11:
-					problemSet = ETMOF11.getProblem();
-					break;
-				case 12:
-					problemSet = ETMOF12.getProblem();
-					break;
-				case 13:
-					problemSet = ETMOF13.getProblem();
-					break;
-				case 14:
-					problemSet = ETMOF14.getProblem();
-					break;
-				case 15:
-					problemSet = ETMOF15.getProblem();
-					break;
-				case 16:
-					problemSet = ETMOF16.getProblem();
-					break;
-				default:
-					problemSet = ETMOF1.getProblem();
-			}
+		int times = 21;
+
+		DecimalFormat form = new DecimalFormat("#.####E0");
+
+		for (int pCase = taskStart; pCase <= taskEnd; pCase++ ){
+			problemSet = (ProblemSet) Class
+					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+					.getMethod("getProblem")
+					.invoke(null, null);
 
 			int taskNumber = problemSet.size();
 			System.out.println("taskNumber = "+taskNumber);
 
-
-			String[] pf = new String[problemSet.size()];
+			String[] pf = new String[taskNumber];
 			for (int i = 0; i < pf.length; i++){
 				pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
 			}
@@ -122,18 +80,14 @@ public class MOMFEA_main {
 			algorithm.addOperator("mutation", mutation);
 			algorithm.addOperator("selection", selection);
 
-			DecimalFormat form = new DecimalFormat("#.####E0");
-
 			System.out.println("RunID\t" + "IGD for "+problemSet.get(0).getName()+" to "+problemSet.get(taskNumber-1).getName());
-
-			int times = 21;
 
 			double ave[] = new double[taskNumber];
 			for (int t = 1; t <= times; t++) {
 				SolutionSet population = algorithm.execute();
 
-				SolutionSet[] resPopulation = new SolutionSet[problemSet.size()];
-				for (int i = 0; i < problemSet.size(); i++)
+				SolutionSet[] resPopulation = new SolutionSet[taskNumber];
+				for (int i = 0; i < taskNumber; i++)
 					resPopulation[i] = new SolutionSet();
 
 				for (int i = 0; i < population.size(); i++) {
@@ -152,24 +106,12 @@ public class MOMFEA_main {
 					resPopulation[pid].add(newSolution);
 				}
 
-				//测试种群中不同任务的个体数量
-//			for (int i = 0; i < problemSet.size(); i++){
-//				System.out.print(i+":"+resPopulation[i].size()+"\t");
-//			}
-//			System.out.println("");
-
 				double igd;
 				System.out.print(t + "\t");
 				for(int i = 0; i < taskNumber; i++){
 					QualityIndicator indicator = new QualityIndicator(problemSet.get(i), pf[i]);
 					if(resPopulation[i].size()==0)
 						continue;
-//				getTask中用到add影响problem起始和结束值
-//				resPopulation[i].printObjectivesToFile("MOMFEA_"+problemSet.getTask(i).get(0).getNumberOfObjectives()+"Obj_"+
-//						problemSet.getTask(i).get(0).getName()+ "_" + problemSet.getTask(i).get(0).getNumberOfVariables() + "D_run"+t+".txt");
-//					resPopulation[i].printObjectivesToFile("MOMFEA_"+problemSet.get(i).getNumberOfObjectives()+"Obj_"+
-//							problemSet.get(i).getName()+ "_" + problemSet.get(i).getNumberOfVariables() + "D_run"+t+".txt");
-
 					igd =  indicator.getIGD(resPopulation[i]);
 					System.out.print(form.format(igd) + "\t" );
 					ave[i] += igd;
