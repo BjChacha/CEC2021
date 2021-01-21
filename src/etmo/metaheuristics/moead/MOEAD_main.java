@@ -48,8 +48,8 @@ public class MOEAD_main {
 				ProblemSet pS = problemSet.getTask(tsk);
 				algorithm = new MOEAD(pS);
 
-				algorithm.setInputParameter("populationSize", 100 * taskNum);
-				algorithm.setInputParameter("maxEvaluations", 100 * 1000 * taskNum);
+				algorithm.setInputParameter("populationSize", 100);
+				algorithm.setInputParameter("maxEvaluations", 100 * 1000);
 
 				algorithm.setInputParameter("dataDirectory", "D:\\_r\\EA\\ETMO\\MTO-cec2021-\\resources\\weightVectorFiles\\moead");
 

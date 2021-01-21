@@ -53,7 +53,7 @@ public class MaOEAC_main {
                 algorithm = new MaOEAC(pS);
 
                 algorithm.setInputParameter("populationSize", 100);
-                algorithm.setInputParameter("maxGenerations",300);
+                algorithm.setInputParameter("maxGenerations",1000 * 100);
 
                 parameters = new HashMap();
                 parameters.put("probability", 1.0);
