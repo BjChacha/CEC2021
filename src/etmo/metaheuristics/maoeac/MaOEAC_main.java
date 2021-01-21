@@ -26,8 +26,8 @@ public class MaOEAC_main {
 
         HashMap parameters;
 
-        int taskStart = 6;
-        int taskEnd = 8;
+        int taskStart = 1;
+        int taskEnd = 40;
 
         int times = 21;
 
@@ -80,7 +80,7 @@ public class MaOEAC_main {
                     QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
 
                     SolutionSet population = algorithm.execute();
-                    population.printObjectivesToFile("MaOEA_D"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
+                    population.printObjectivesToFile("MaOEAC_"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
                             problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
                     double igd =  indicator.getIGD(population);
                     ave[tsk] += igd;
