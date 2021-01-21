@@ -23,13 +23,11 @@ public class MaOEAC_main {
         Operator crossover; // Crossover operator
         Operator mutation; // Mutation operator
         Operator selection; //Selection operator
-        Operator learning1; //Learning operator
-        Operator learning2; //Learning operator
 
         HashMap parameters;
 
-        int taskStart = 10;
-        int taskEnd = 15;
+        int taskStart = 6;
+        int taskEnd = 8;
 
         int times = 21;
 
@@ -50,37 +48,37 @@ public class MaOEAC_main {
 
             for (int tsk = 0; tsk < taskNum; tsk++){
                 ProblemSet pS = problemSet.getTask(tsk);
-                algorithm = new MaOEAC(pS);
-
-                algorithm.setInputParameter("populationSize", 100);
-                algorithm.setInputParameter("maxGenerations",1000 * 100);
-
-                parameters = new HashMap();
-                parameters.put("probability", 1.0);
-                parameters.put("distributionIndex", 30.0);
-                crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover",
-                        parameters);
-
-                parameters = new HashMap();
-                parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
-                parameters.put("distributionIndex", 20.0);
-                mutation = MutationFactory.getMutationOperator("PolynomialMutation",
-                        parameters);
-
-                parameters = null;
-                selection = SelectionFactory.getSelectionOperator("RandomSelection",
-                        parameters);
-
-                algorithm.addOperator("crossover", crossover);
-                algorithm.addOperator("mutation", mutation);
-                algorithm.addOperator("selection", selection);
-
                 System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
-
                 pf[tsk] = "PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
-                QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
 
                 for (int t = 1; t <= times; t++){
+                    algorithm = new MaOEAC(pS);
+
+                    algorithm.setInputParameter("populationSize",100);
+                    algorithm.setInputParameter("maxGenerations",1000);
+
+                    parameters = new HashMap();
+                    parameters.put("probability", 1.0);
+                    parameters.put("distributionIndex", 30.0);
+                    crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover",
+                            parameters);
+
+                    parameters = new HashMap();
+                    parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
+                    parameters.put("distributionIndex", 20.0);
+                    mutation = MutationFactory.getMutationOperator("PolynomialMutation",
+                            parameters);
+
+                    parameters = null;
+                    selection = SelectionFactory.getSelectionOperator("RandomSelection",
+                            parameters);
+
+                    algorithm.addOperator("crossover", crossover);
+                    algorithm.addOperator("mutation", mutation);
+                    algorithm.addOperator("selection", selection);
+
+                    QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
+
                     SolutionSet population = algorithm.execute();
                     population.printObjectivesToFile("MaOEA_D"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
                             problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
@@ -88,7 +86,6 @@ public class MaOEAC_main {
                     ave[tsk] += igd;
                 }
                 System.out.println("Average IGD for " + problemSet.get(tsk).getName() + ": " + form.format(ave[tsk] / times));
-
             }
             System.out.println();
             // for briefly summarization

@@ -26,8 +26,8 @@ public class MaOEAC extends Algorithm{
 	Operator mutation_;
 	Operator learning_;
 
-	private double[] zideal_; //ideal point
-	private double[] znadir_;//Nadir point
+	private final double[] zideal_; //ideal point
+	private final double[] znadir_;//Nadir point
 
 	public MaOEAC(ProblemSet problemSet) {
 		super(problemSet);
@@ -173,7 +173,7 @@ public class MaOEAC extends Algorithm{
 		/*
 		 * step5.1:Combine the Population and the Offspring Population
 		 */
-		union_ = ((SolutionSet) population_).union(offspringPopulation_);
+		union_ = population_.union(offspringPopulation_);
 		/*
 		 * step5.2:Normalization the Combined Population
 		 */
@@ -458,7 +458,7 @@ public class MaOEAC extends Algorithm{
 		return sets;
 	 }
    public void bestSolutionSelection(List<SolutionSet> list,int k){
-	  double minClustering2Axis = 1.0e+30;
+		double minClustering2Axis = 1.0e+30;
 		int minClustering2AxisID = -1;
 		for(int i=0;i<list.size();i++){
 			SolutionSet sols = list.get(i);
