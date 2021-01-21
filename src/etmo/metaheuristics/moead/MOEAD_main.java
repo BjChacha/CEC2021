@@ -23,15 +23,14 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 3;
-		int taskEnd = 40;
+		int taskStart = 1;
+		int taskEnd = 8;
 
-		int times = 1;
+		int times = 21;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-//			problemSet = ETMOF7.getProblem();
 			problemSet = (ProblemSet) Class
 					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
 					.getMethod("getProblem")
@@ -46,38 +45,39 @@ public class MOEAD_main {
 
 			for (int tsk = 0; tsk < taskNum; tsk++){
 				ProblemSet pS = problemSet.getTask(tsk);
-				algorithm = new MOEAD(pS);
-
-				algorithm.setInputParameter("populationSize", 100);
-				algorithm.setInputParameter("maxEvaluations", 100 * 1000);
-
-				algorithm.setInputParameter("dataDirectory", "D:\\_r\\EA\\ETMO\\MTO-cec2021-\\resources\\weightVectorFiles\\moead");
-
-				algorithm.setInputParameter("T", 20);
-				algorithm.setInputParameter("delta", 0.9);
-				algorithm.setInputParameter("nr", 2);
-
-				parameters = new HashMap();
-				parameters.put("CR", 1.0);
-				parameters.put("F", 0.5);
-				crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
-
-				// Mutation operator
-				parameters = new HashMap();
-				parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
-				parameters.put("distributionIndex", 20.0);
-				mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
-
-
-				algorithm.addOperator("crossover", crossover);
-				algorithm.addOperator("mutation", mutation);
 
 				System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
 
 				pf[tsk] = "PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
-				QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
 
 				for (int t = 1; t <= times; t++){
+					algorithm = new MOEAD(pS);
+
+					algorithm.setInputParameter("populationSize", 100);
+					algorithm.setInputParameter("maxEvaluations", 1000);
+
+					algorithm.setInputParameter("dataDirectory", "D:\\_r\\EA\\ETMO\\MTO-cec2021-\\resources\\weightVectorFiles\\moead");
+
+					algorithm.setInputParameter("T", 20);
+					algorithm.setInputParameter("delta", 0.9);
+					algorithm.setInputParameter("nr", 2);
+
+					parameters = new HashMap();
+					parameters.put("CR", 1.0);
+					parameters.put("F", 0.5);
+					crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
+
+					// Mutation operator
+					parameters = new HashMap();
+					parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
+					parameters.put("distributionIndex", 20.0);
+					mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+
+					algorithm.addOperator("crossover", crossover);
+					algorithm.addOperator("mutation", mutation);
+
+					QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
+
 					SolutionSet population = algorithm.execute();
 					population.printObjectivesToFile("MOEAD_"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
 							problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");

@@ -119,7 +119,11 @@ public class MOEAD extends Algorithm {
 
 		crossover_ = operators_.get("crossover"); // default: DE crossover
 		mutation_ = operators_.get("mutation"); // default: polynomial mutation
-		H_= 19;
+
+		H_= 0;
+
+		while ((H_+3) * (H_+2) / 2 < populationSize_)
+			H_++;
 
 		// STEP 1. Initialization
 		// STEP 1.1. Compute euclidean distances between weight vectors and find
@@ -268,7 +272,7 @@ public class MOEAD extends Algorithm {
 		else if(problemSet_.get(0).getNumberOfObjectives() == 3) {
 			int i, j;
 			for (i = 0; i <= H_; i++) {
-				for (j = 0; j < H_ - i; j++) {
+				for (j = 0; j <= H_ - i; j++) {
 					lambda_[nw][0] = (1.0 * i) / H_;
 					lambda_[nw][1] = (1.0 * j) / H_;
 					lambda_[nw][2] = 1.0 * (H_ - i - j) / H_;
