@@ -197,6 +197,9 @@ public class MaOEAC extends Algorithm{
 		 */
 		SolutionSet[] solutionSets = new PartitionalSolutionSet(union_,problemSet_.get(0).getNumberOfObjectives()).partitional();
 		for(int k=0;k<problemSet_.get(0).getNumberOfObjectives();k++){
+			// temporary fix: calculate populationSize.
+			populationSize_ = solutionSets[k].size() * problemSet_.get(0).getNumberOfObjectives() / 2;
+
 			if(solutionSets[k].size() != 2*populationSize_/problemSet_.get(0).getNumberOfObjectives()){
 				System.out.println("solutionSets["+k+"] = "+ solutionSets[k].size());
 				System.exit(0);
