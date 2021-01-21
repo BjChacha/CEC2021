@@ -6,121 +6,91 @@ import etmo.core.ProblemSet;
 import etmo.core.SolutionSet;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
-import etmo.problems.benchmarks_ETMO.ETMOF1;
-import etmo.problems.benchmarks_ETMO.*;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
-import etmo.util.Ranking;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
 public class MOEAD_main {
-    public static void main(String args[]) throws IOException, JMException, ClassNotFoundException {
-        ProblemSet problemSet1; // The problem to solve
-        ProblemSet problemSet2;
+	public static void main(String[] args) throws JMException, SecurityException, IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+		ProblemSet problemSet; // The problem to solve
+		Algorithm algorithm; // The algorithm to use
+		Operator crossover; // Crossover operator
+		Operator mutation; // Mutation operator
 
-        Algorithm algorithm; // The algorithm to use
-        Operator crossover; // Crossover operator
-        Operator mutation; // Mutation operator
-        Operator selection;
+		HashMap parameters; // Operator parameters
 
-        HashMap parameters; // Operator parameters
+		int taskStart = 3;
+		int taskEnd = 40;
 
-        for (int pCase = 10; pCase <= 10; pCase++ ){
-            switch (pCase){
-                case 1:
-                    problemSet1 = ETMOF1.getProblem();
-                    break;
-                case 2:
-                    problemSet1 = ETMOF2.getProblem();
-                    break;
-                case 3:
-                    problemSet1 = ETMOF3.getProblem();
-                    break;
-                case 4:
-                    problemSet1 = ETMOF4.getProblem();
-                    break;
-                case 5:
-                    problemSet1 = ETMOF5.getProblem();
-                    break;
-                case 6:
-                    problemSet1 = ETMOF6.getProblem();
-                    break;
-                case 7:
-                    problemSet1 = ETMOF7.getProblem();
-                    break;
-                case 8:
-                    problemSet1 = ETMOF8.getProblem();
-                    break;
-                case 10:
-                    problemSet1 = ETMOF16.getProblem();
-                    break;
-                default:
-                    problemSet1 = ETMOF1.getProblem();
-            }
+		int times = 1;
 
-            int taskNumber = problemSet1.size();
-            System.out.println("taskNumber = "+taskNumber);
-            for (int tsk=0; tsk < taskNumber; tsk++) {
+		DecimalFormat form = new DecimalFormat("#.####E0");
 
-                problemSet2 = problemSet1.getTask(tsk);
-                algorithm = new MOEAD(problemSet2);
+		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
+//			problemSet = ETMOF7.getProblem();
+			problemSet = (ProblemSet) Class
+					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+					.getMethod("getProblem")
+					.invoke(null, null);
 
-                String pf = "PF/StaticPF/" + problemSet2.get(0).getHType() + "_" + problemSet2.get(0).getNumberOfObjectives() + "D.pf";
+			int taskNum = problemSet.size();
 
-                algorithm.setInputParameter("populationSize", 495);
-                algorithm.setInputParameter("maxEvaluations", 100 * 1000);
+			String[] pf = new String[taskNum];
+			double[] ave = new double[taskNum];
 
-                algorithm.setInputParameter("dataDirectory", "D:\\Workspace\\EMTO2021\\myRes\\MTO-cec2021-\\resources\\weightVectorFiles\\moead");
+			System.out.println("taskNum = "+taskNum);
+
+			for (int tsk = 0; tsk < taskNum; tsk++){
+				ProblemSet pS = problemSet.getTask(tsk);
+				algorithm = new MOEAD(pS);
+
+				algorithm.setInputParameter("populationSize", 100 * taskNum);
+				algorithm.setInputParameter("maxEvaluations", 100 * 1000 * taskNum);
+
+				algorithm.setInputParameter("dataDirectory", "D:\\_r\\EA\\ETMO\\MTO-cec2021-\\resources\\weightVectorFiles\\moead");
+
+				algorithm.setInputParameter("T", 20);
+				algorithm.setInputParameter("delta", 0.9);
+				algorithm.setInputParameter("nr", 2);
+
+				parameters = new HashMap();
+				parameters.put("CR", 1.0);
+				parameters.put("F", 0.5);
+				crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
+
+				// Mutation operator
+				parameters = new HashMap();
+				parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
+				parameters.put("distributionIndex", 20.0);
+				mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 
 
-                algorithm.setInputParameter("T", 20);
-                algorithm.setInputParameter("delta", 0.9);
-                algorithm.setInputParameter("nr", 2);
+				algorithm.addOperator("crossover", crossover);
+				algorithm.addOperator("mutation", mutation);
 
-                parameters = new HashMap();
-                parameters.put("CR", 1.0);
-                parameters.put("F", 0.5);
-                crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
+				System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
 
-                // Mutation operator
-                parameters = new HashMap();
-                parameters.put("probability", 1.0 / problemSet2.get(0).getNumberOfVariables());
-                parameters.put("distributionIndex", 20.0);
-                mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+				pf[tsk] = "PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
+				QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
 
-
-                algorithm.addOperator("crossover", crossover);
-                algorithm.addOperator("mutation", mutation);
-
-                System.out.println("RunID\t" + "IGD for " + problemSet2.get(0).getName());
-                DecimalFormat form = new DecimalFormat("#.####E0");
-                QualityIndicator indicator = new QualityIndicator(problemSet2.get(0), pf);
-                int times = 21;
-                double aveIGD = 0;
-                for (int i = 1; i <= times; i++) {
-                    SolutionSet population = algorithm.execute();
-//                population.printObjectivesToFile("MOEAD_"+problemSet.get(0).getNumberOfObjectives()+"Obj_"+
-//                        problemSet.get(0).getName()+ "_" + problemSet.get(0).getNumberOfVariables() + "D_run"+i+".txt");
-                    double igd = indicator.getIGD(population);
-                    aveIGD += igd;
-                    System.out.println(i + "\t" + form.format(igd));
-                }
-                System.out.println("Average IGD for " + problemSet2.get(0).getName() + ": " + form.format(aveIGD / times));
-                System.out.println();
-
-
-
-
-            }
-
-        }
-
-
-
-
-
-        }
-}
+				for (int t = 1; t <= times; t++){
+					SolutionSet population = algorithm.execute();
+					population.printObjectivesToFile("MOEAD_"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
+							problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
+					double igd =  indicator.getIGD(population);
+					ave[tsk] += igd;
+				}
+				System.out.println("Average IGD for " + problemSet.get(tsk).getName() + ": " + form.format(ave[tsk] / times));
+			}
+			System.out.println();
+			// for briefly summarization
+//			for(int i=0;i<taskNum;i++) {
+//				System.out.println("Average IGD for " + problemSet.get(i).getName() + ": " + form.format(ave[i] / times));
+//			}
+		}
+	} // main
+} // MOEAD_main

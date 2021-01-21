@@ -248,6 +248,7 @@ public class SolutionSet implements Serializable {
 	public void printObjectivesToFile(String path) {
 		try {
 			/* Open the file */
+			path = "datas//" + path;
 			FileOutputStream fos = new FileOutputStream(path);
 			OutputStreamWriter osw = new OutputStreamWriter(fos);
 			BufferedWriter bw = new BufferedWriter(osw);

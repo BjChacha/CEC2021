@@ -1,6 +1,5 @@
 package etmo.metaheuristics.maoeac;
 
-
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
 
@@ -9,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public class HierarchicalClustering1 {
-
     List<SolutionSet> list = new <SolutionSet>ArrayList();
     public HierarchicalClustering1(List list){
         this.list = list;

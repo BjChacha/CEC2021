@@ -21,6 +21,8 @@
 
 package etmo.core;
 
+import etmo.util.JMException;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

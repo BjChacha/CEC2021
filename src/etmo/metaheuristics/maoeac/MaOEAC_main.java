@@ -4,140 +4,97 @@ import etmo.core.Algorithm;
 import etmo.core.Operator;
 import etmo.core.ProblemSet;
 import etmo.core.SolutionSet;
-import etmo.metaheuristics.nsgaII.NSGAII;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
-import etmo.problems.benchmarks_ETMO.ETMOF1;
-import etmo.problems.benchmarks_ETMO.*;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.Ranking;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
 public class MaOEAC_main {
-    public static void main(String[] args) throws IOException, JMException, ClassNotFoundException {
-        ProblemSet problemSet1; // The problem to solve
-        ProblemSet problemSet2;
+    public static void main(String args[]) throws JMException, ClassNotFoundException, SecurityException, IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        ProblemSet problemSet; // The problem to solve
         Algorithm algorithm; // The algorithm to use
         Operator crossover; // Crossover operator
         Operator mutation; // Mutation operator
-        Operator selection;
+        Operator selection; //Selection operator
+        Operator learning1; //Learning operator
+        Operator learning2; //Learning operator
 
-        HashMap parameters; // Operator parameters
+        HashMap parameters;
 
-        for (int pCase = 4; pCase <= 4; pCase++ ){
-            switch (pCase){
-                case 1:
-                    problemSet1 = ETMOF1.getProblem();
-                    break;
-                case 2:
-                    problemSet1 = ETMOF2.getProblem();
-                    break;
-                case 3:
-                    problemSet1 = ETMOF3.getProblem();
-                    break;
-                case 4:
-                    problemSet1 = ETMOF4.getProblem();
-                    break;
-                case 5:
-                    problemSet1 = ETMOF5.getProblem();
-                    break;
-                case 6:
-                    problemSet1 = ETMOF6.getProblem();
-                    break;
-                case 7:
-                    problemSet1 = ETMOF7.getProblem();
-                    break;
-                case 8:
-                    problemSet1 = ETMOF8.getProblem();
-                    break;
-                case 9:
-                    problemSet1 = ETMOF9.getProblem();
-                    break;
-                case 10:
-                    problemSet1 = ETMOF10.getProblem();
-                    break;
-                case 11:
-                    problemSet1 = ETMOF11.getProblem();
-                    break;
-                case 12:
-                    problemSet1 = ETMOF12.getProblem();
-                    break;
-                case 13:
-                    problemSet1 = ETMOF13.getProblem();
-                    break;
-                case 14:
-                    problemSet1 = ETMOF14.getProblem();
-                    break;
-                case 15:
-                    problemSet1 = ETMOF15.getProblem();
-                    break;
-                case 16:
-                    problemSet1 = ETMOF16.getProblem();
-                    break;
-                default:
-                    problemSet1 = ETMOF1.getProblem();
-            }
+        int taskStart = 10;
+        int taskEnd = 15;
 
+        int times = 21;
 
-            int taskNumber = problemSet1.size();
-            System.out.println("taskNumber = "+taskNumber);
-            for (int tsk=0;tsk<taskNumber;tsk++) {
+        DecimalFormat form = new DecimalFormat("#.####E0");
 
-                problemSet2 = problemSet1.getTask(tsk);
-                algorithm = new MaOEAC(problemSet2);
+        for (int pCase = taskStart; pCase <= taskEnd; pCase++){
+            problemSet = (ProblemSet) Class
+                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                    .getMethod("getProblem")
+                    .invoke(null, null);
 
-                String pf = "PF/StaticPF/" + problemSet2.get(0).getHType() + "_" + problemSet2.get(0).getNumberOfObjectives() + "D.pf";
-                //String pf = "PF/StaticPF/" + "convex.pf";
-                //System.out.println(pf);
-                algorithm.setInputParameter("populationSize", 99);
-                algorithm.setInputParameter("maxGenerations",1000);
+            int taskNum = problemSet.size();
+
+            String[] pf = new String[taskNum];
+            double[] ave = new double[taskNum];
+
+            System.out.println("taskNum = "+taskNum);
+
+            for (int tsk = 0; tsk < taskNum; tsk++){
+                ProblemSet pS = problemSet.getTask(tsk);
+                algorithm = new MaOEAC(pS);
+
+                algorithm.setInputParameter("populationSize", 100);
+                algorithm.setInputParameter("maxGenerations",300);
 
                 parameters = new HashMap();
-                parameters.put("probability", 0.9);
-                parameters.put("distributionIndex", 20.0);
-                crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+                parameters.put("probability", 1.0);
+                parameters.put("distributionIndex", 30.0);
+                crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover",
+                        parameters);
 
-                // Mutation operator
                 parameters = new HashMap();
-                parameters.put("probability", 1.0 / problemSet2.getMaxDimension());
+                parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
                 parameters.put("distributionIndex", 20.0);
-                mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+                mutation = MutationFactory.getMutationOperator("PolynomialMutation",
+                        parameters);
 
-                // Selection Operator
-                parameters = null ;
-                selection = SelectionFactory.getSelectionOperator("BinaryTournament", parameters) ;
+                parameters = null;
+                selection = SelectionFactory.getSelectionOperator("RandomSelection",
+                        parameters);
 
-                // Add the operators to the algorithm
                 algorithm.addOperator("crossover", crossover);
                 algorithm.addOperator("mutation", mutation);
                 algorithm.addOperator("selection", selection);
 
-                System.out.println("RunID\t" + "IGD for " + problemSet2.get(0).getName());
-                DecimalFormat form = new DecimalFormat("#.####E0");
-                QualityIndicator indicator = new QualityIndicator(problemSet2.get(0), pf);
-                int times = 21;
-                double aveIGD = 0;
-                for (int i = 1; i <= times; i++) {
+                System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
+
+                pf[tsk] = "PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
+                QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
+
+                for (int t = 1; t <= times; t++){
                     SolutionSet population = algorithm.execute();
-                    Ranking ranking = new Ranking(population);
-                    population = ranking.getSubfront(0);
-//                    population.printObjectivesToFile("MaOEAC_"+problemSet2.get(0).getNumberOfObjectives()+"Obj_"+
-//                            problemSet2.get(0).getName()+ "_" + problemSet2.get(0).getNumberOfVariables() + "D_run"+i+".txt");
-                    double igd = indicator.getIGD(population);
-                    aveIGD += igd;
-                    System.out.println(i + "\t" + form.format(igd));
+                    population.printObjectivesToFile("MaOEA_D"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
+                            problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
+                    double igd =  indicator.getIGD(population);
+                    ave[tsk] += igd;
                 }
-                System.out.println("Average IGD for " + problemSet2.get(0).getName() + ": " + form.format(aveIGD / times));
-                System.out.println();
+                System.out.println("Average IGD for " + problemSet.get(tsk).getName() + ": " + form.format(ave[tsk] / times));
+
             }
-        }
-
-
-
-    }
+            System.out.println();
+            // for briefly summarization
+//			for(int i=0;i<taskNum;i++) {
+//				System.out.println("Average IGD for " + problemSet.get(i).getName() + ": " + form.format(ave[i] / times));
+//			}
+        }//for-fun
+    }//main
 }
