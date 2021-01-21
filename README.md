@@ -13,4 +13,4 @@ To promote the research on ETMO, benchmark problems are of great importance to E
 
 The detail definitions of these 40 benchmark problems can be found in technical report, which can be downloaded in https://www.scholat.com/vpost.html?pid=160180, and all benchmark functions have been implemented in JAVA code.
 
-test: pull multiple git.
+test: pull multiple git simultaneously.
