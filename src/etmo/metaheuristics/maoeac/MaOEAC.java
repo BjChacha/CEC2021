@@ -291,7 +291,7 @@ public class MaOEAC extends Algorithm{
 
 			for(int j=0; j<problemSet_.get(0).getNumberOfObjectives(); j++){
 				double val = 0.0;
-				val = (sol.getObjective(j) - zideal_[j])/(znadir_[j]-zideal_[j]);
+				val = (sol.getObjective(j) - zideal_[j])/(znadir_[j]-zideal_[j] + 1e-30);
 				//val = (sol.getObjective(j) - zideal_[j]);
 				sol.setNormalizedObjective(j, val);
 			}
@@ -471,7 +471,11 @@ public class MaOEAC extends Algorithm{
 			}
 
 			double angle1 = Math.acos(Math.abs(sols.getCentroidVector().getNormalizedObjective(k)/sols.getCentroidVector().getDistanceToIdealPoint()));
-
+			// TODO: for now
+			if (angle1 == Double.NaN) {
+				angle1 = 0.0;
+				System.out.println("Warning: angle being Nan.");
+			}
 
 			if(angle1 < minClustering2Axis){
 				minClustering2Axis = angle1;
