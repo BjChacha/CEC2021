@@ -25,6 +25,8 @@ package etmo.core;
 
 
 
+import etmo.util.JMException;
+
 import java.io.Serializable;
 
 /**
@@ -459,6 +461,10 @@ public class Solution implements Serializable {
 	public Variable[] getDecisionVariables() {
 		return variable_;
 	} // getDecisionVariables
+
+	public double getDecisionVariablesOf(int idx) throws JMException {
+		return variable_[idx].getValue();
+	}
 
 	/**
 	 * Sets the decision variables for the solution.

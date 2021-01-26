@@ -25,6 +25,7 @@ import java.io.*;
 import java.util.*;
 
 import etmo.util.Configuration;
+import etmo.util.JMException;
 
 /**
  * Class representing a SolutionSet (a set of solutions)
@@ -487,6 +488,15 @@ public class SolutionSet implements Serializable {
 		sol.setDistanceToIdealPoint(normDistance);
 		return sol;
     }
+
+    public double getMeanOfIdx(int idx) throws JMException {
+		double sum = 0;
+		for (int i = 0; i < solutionsList_.size(); i++){
+			sum += solutionsList_.get(i).getDecisionVariablesOf(idx);
+		}
+		return sum / solutionsList_.size();
+	}
+
 
 	private boolean remove;
 	public boolean isRemove() {
