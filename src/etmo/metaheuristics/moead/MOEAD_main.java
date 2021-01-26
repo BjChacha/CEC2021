@@ -23,8 +23,8 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 1;
-		int taskEnd = 8;
+		int taskStart = 28;
+		int taskEnd = 32;
 
 		int times = 21;
 
@@ -41,12 +41,14 @@ public class MOEAD_main {
 			String[] pf = new String[taskNum];
 			double[] ave = new double[taskNum];
 
-			System.out.println("taskNum = "+taskNum);
+			String pSName = problemSet.get(0).getName();
+			pSName = pSName.substring(0, pSName.length()-2);
+			System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
 
 			for (int tsk = 0; tsk < taskNum; tsk++){
 				ProblemSet pS = problemSet.getTask(tsk);
 
-				System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
+//				System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
 
 				pf[tsk] = "PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
 
@@ -84,7 +86,8 @@ public class MOEAD_main {
 					double igd =  indicator.getIGD(population);
 					ave[tsk] += igd;
 				}
-				System.out.println("Average IGD for " + problemSet.get(tsk).getName() + ": " + form.format(ave[tsk] / times));
+				System.out.println("T" + (tsk+1) + "\t" + form.format(ave[tsk] / times));
+//				System.out.println("Average IGD for " + problemSet.get(tsk).getName() + ": " + form.format(ave[tsk] / times));
 			}
 			System.out.println();
 			// for briefly summarization
