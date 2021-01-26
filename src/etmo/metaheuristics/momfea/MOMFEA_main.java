@@ -31,8 +31,8 @@ public class MOMFEA_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 1;
-		int taskEnd = 40;
+		int taskStart = 28;
+		int taskEnd = 32;
 
 		int times = 21;
 
@@ -44,18 +44,22 @@ public class MOMFEA_main {
 					.getMethod("getProblem")
 					.invoke(null, null);
 
-			int taskNumber = problemSet.size();
-			System.out.println("taskNumber = "+taskNumber);
+			int taskNum = problemSet.size();
+			double ave[] = new double[taskNum];
 
-			String[] pf = new String[taskNumber];
+			String[] pf = new String[taskNum];
 			for (int i = 0; i < pf.length; i++){
 				pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
 			}
 
+			String pSName = problemSet.get(0).getName();
+			pSName = pSName.substring(0, pSName.length()-2);
+			System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
+
 			algorithm = new MOMFEA(problemSet);
 
-			algorithm.setInputParameter("populationSize",100*taskNumber);
-			algorithm.setInputParameter("maxEvaluations",100*taskNumber * 1000);
+			algorithm.setInputParameter("populationSize",100*taskNum);
+			algorithm.setInputParameter("maxEvaluations",100*taskNum * 1000);
 			algorithm.setInputParameter("rmp", 0.9);
 
 			parameters = new HashMap();
@@ -80,14 +84,12 @@ public class MOMFEA_main {
 			algorithm.addOperator("mutation", mutation);
 			algorithm.addOperator("selection", selection);
 
-			System.out.println("RunID\t" + "IGD for "+problemSet.get(0).getName()+" to "+problemSet.get(taskNumber-1).getName());
-
-			double ave[] = new double[taskNumber];
 			for (int t = 1; t <= times; t++) {
+				System.out.println("time: " + t);
 				SolutionSet population = algorithm.execute();
 
-				SolutionSet[] resPopulation = new SolutionSet[taskNumber];
-				for (int i = 0; i < taskNumber; i++)
+				SolutionSet[] resPopulation = new SolutionSet[taskNum];
+				for (int i = 0; i < taskNum; i++)
 					resPopulation[i] = new SolutionSet();
 
 				for (int i = 0; i < population.size(); i++) {
@@ -107,25 +109,17 @@ public class MOMFEA_main {
 				}
 
 				double igd;
-				System.out.print(t + "\t");
-				for(int i = 0; i < taskNumber; i++){
+				for(int i = 0; i < taskNum; i++){
 					QualityIndicator indicator = new QualityIndicator(problemSet.get(i), pf[i]);
 					if(resPopulation[i].size()==0)
 						continue;
 					igd =  indicator.getIGD(resPopulation[i]);
-					System.out.print(form.format(igd) + "\t" );
 					ave[i] += igd;
 				}
-				System.out.println("");
 			}
-
+			for(int i=0;i<taskNum;i++)
+				System.out.println("T" + (i+1) + "\t" + form.format(ave[i] / times));
 			System.out.println();
-			for(int i=0;i<taskNumber;i++)
-				System.out.println("Average IGD for " + problemSet.get(i).getName()+ ": " + form.format(ave[i] / times));
-
 		}
-
-
-
 	}
 }
