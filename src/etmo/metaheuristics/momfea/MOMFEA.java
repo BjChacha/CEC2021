@@ -38,18 +38,18 @@ public class MOMFEA extends Algorithm {
 	@Override
 	public SolutionSet execute() throws JMException, ClassNotFoundException {
 		populationSize = ((Integer) getInputParameter("populationSize")).intValue();
-			maxEvaluations = ((Integer) getInputParameter("maxEvaluations")).intValue();
-			rmp =  ((Double) getInputParameter("rmp")).doubleValue();
+		maxEvaluations = ((Integer) getInputParameter("maxEvaluations")).intValue();
+		rmp =  ((Double) getInputParameter("rmp")).doubleValue();
 
-			crossover = operators_.get("crossover");
-			mutation = operators_.get("mutation");
-			selection = operators_.get("selection");
+		crossover = operators_.get("crossover");
+		mutation = operators_.get("mutation");
+		selection = operators_.get("selection");
 
-			evaluations = 0;
-			initPopulation();
-			while (evaluations < maxEvaluations) {
-				createOffspringPopulation();
-				getNextPopulation();
+		evaluations = 0;
+		initPopulation();
+		while (evaluations < maxEvaluations) {
+			createOffspringPopulation();
+			getNextPopulation();
 		}
 		
 		return population;
