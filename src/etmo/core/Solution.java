@@ -418,6 +418,28 @@ public class Solution implements Serializable {
 		return objective_[i];
 	} // getObjective
 
+	public double getObjectiveWeightedSum(){
+		double sum = 0;
+		for (int i = 0; i < getNumberOfObjectives(); i++)
+			sum += getObjective(i);
+		return sum;
+	}
+
+	public double getObjectiveWeightedSum(double[] w){
+		double sum = 0;
+		if (w.length != getNumberOfObjectives()){
+			System.out.println("Error: weighted vector length not match.");
+			System.exit(0);
+		}
+		else{
+			for (int i = 0; i < getNumberOfObjectives(); i++){
+				sum += w[i] * getObjective(i);
+			}
+		}
+		return sum;
+	}
+
+
 	/**
 	 * Returns the number of objectives.
 	 * 

@@ -497,6 +497,17 @@ public class SolutionSet implements Serializable {
 		return sum / solutionsList_.size();
 	}
 
+	public double[][] getMat() throws JMException {
+		int numVar = solutionsList_.get(0).numberOfVariables();
+		double[][] mat = new double[solutionsList_.size()][numVar];
+		for (int i = 0; i < solutionsList_.size(); i++){
+			for (int j = 0; j < numVar; j++){
+				mat[i][j] = solutionsList_.get(i).getDecisionVariablesOf(j);
+			}
+		}
+		return mat;
+	}
+
 
 	private boolean remove;
 	public boolean isRemove() {
