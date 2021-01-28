@@ -26,6 +26,7 @@ import etmo.util.JMException;
 import etmo.util.PseudoRandom;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
@@ -195,6 +196,10 @@ public class MOEAD extends Algorithm {
 
 				// STEP 2.5. Update of solutions
 				updateProblem(child, n, type);
+
+				if (evaluations_ % (problemSet_.size() * 100 * 20) == 0){
+					logPopulation(evaluations_);
+				}
 			} // for
 		} while (evaluations_ < maxEvaluations);
 
@@ -510,5 +515,14 @@ public class MOEAD extends Algorithm {
 		}
 		return fitness;
 	} // fitnessEvaluation
+
+	private void logPopulation(int eval){
+		File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\datas\\MOEAD");
+		if (!folder.exists() && !folder.isDirectory()) {
+			folder.mkdirs();
+		}
+		population_.printObjectivesToFile("MOEAD\\" + "MOEAD_"+problemSet_.get(0).getNumberOfObjectives()+"Obj_"+
+				problemSet_.get(0).getName()+ "_" + problemSet_.get(0).getNumberOfVariables() + "D" + eval + ".txt");
+	}
 } // MOEAD
 

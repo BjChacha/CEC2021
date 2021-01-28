@@ -46,10 +46,15 @@ public class MOMFEA extends Algorithm {
 		selection = operators_.get("selection");
 
 		evaluations = 0;
+
 		initPopulation();
+		logPopulation(evaluations);
 		while (evaluations < maxEvaluations) {
 			createOffspringPopulation();
 			getNextPopulation();
+			if (evaluations % (problemSet_.size() * 100 * 20) == 0){
+				logPopulation(evaluations);
+			}
 		}
 		
 		return population;
@@ -92,7 +97,6 @@ public class MOMFEA extends Algorithm {
 		offspringPopulation = new SolutionSet(populationSize);
 		Solution[] parents = new Solution[2];
 		for (int i = 0; i < (populationSize / 2); i++) {
-
 			parents[0] = (Solution) selection.execute(population);
 			parents[1] = (Solution) selection.execute(population);
 			
@@ -159,7 +163,7 @@ public class MOMFEA extends Algorithm {
 		int end = problemSet_.get(taskId).getEndObjPos();
 		
 		boolean selec[] = new boolean[problemSet_.getTotalNumberOfObjs()];
-		
+
 		for (int i = 0; i < selec.length; i++) {
 			if (i < start || i > end)
 				selec[i] = false;
@@ -185,5 +189,30 @@ public class MOMFEA extends Algorithm {
 		for (int i = 0; i < sol.getNumberOfObjectives(); i++)
 			sol.setObjective(i, Double.POSITIVE_INFINITY);
 	}
-	
+
+	private void logPopulation(int eval){
+		int taskNum = problemSet_.size();
+		SolutionSet[] resPopulation = new SolutionSet[taskNum];
+		for (int i = 0; i < taskNum; i++)
+			resPopulation[i] = new SolutionSet();
+
+		for (int i = 0; i < population.size(); i++) {
+			Solution sol = population.get(i);
+
+			int pid = sol.getSkillFactor();
+
+			int start = problemSet_.get(pid).getStartObjPos();
+			int end = problemSet_.get(pid).getEndObjPos();
+
+			Solution newSolution = new Solution(end - start + 1);
+
+			for (int k = start; k <= end; k++)
+				newSolution.setObjective(k - start, sol.getObjective(k));
+
+			resPopulation[pid].add(newSolution);
+		}
+		for (int k = 0; k < taskNum; k++)
+			resPopulation[k].printObjectivesToFile("MOMFEA\\" + "MOMFEA_"+problemSet_.get(k).getNumberOfObjectives()+"Obj_"+
+					problemSet_.get(k).getName()+ "_" + problemSet_.get(k).getNumberOfVariables() + "D" + eval + ".txt");
+	}
 }
