@@ -2,6 +2,7 @@ package etmo.metaheuristics.matde;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
+import etmo.operators.mutation.MutationFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 
@@ -13,12 +14,14 @@ public class MaTDE_main {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
-        Operator crossover;
+        Operator crossover1;
+        Operator crossover2;
+        Operator mutation;
 
         HashMap parameters;
 
         int problemStart = 25;
-        int problemEnd = 32;
+        int problemEnd = 31;
 
         int times = 21;
 
@@ -61,12 +64,23 @@ public class MaTDE_main {
 
             parameters = new HashMap();
             // 原论文：CR = (0.1, 0.9)
-            parameters.put("CR", 0.55);
+            parameters.put("CR", 1.0);
             // 原论文：F = (0.1, 2)
-            parameters.put("F", 1.0);
-            crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
+            parameters.put("F", 0.5);
+            crossover1 = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
+            algorithm.addOperator("crossover1", crossover1);
 
-            algorithm.addOperator("crossover", crossover);
+            parameters = new HashMap();
+            parameters.put("probability", 1.0);
+            parameters.put("distributionIndex", 30.0);
+            crossover2 = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+            algorithm.addOperator("crossover2", crossover2);
+
+            parameters = new HashMap();
+            parameters.put("probability", 1.0 / problemSet.getMaxDimension());
+            parameters.put("distributionIndex", 20.0);
+            mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+            algorithm.addOperator("mutation", mutation);
 
             for (int t = 0; t < times; t++){
                 long startTime = System.currentTimeMillis();

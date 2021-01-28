@@ -1,9 +1,11 @@
 package etmo.metaheuristics.matde;
 
 import etmo.core.*;
-import etmo.util.JMException;
-import etmo.util.PseudoRandom;
-import etmo.util.KLD;
+import etmo.util.*;
+import etmo.util.comparators.CrowdingComparator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MaTDE extends MtoAlgorithm {
     // Population Size per task
@@ -18,9 +20,12 @@ public class MaTDE extends MtoAlgorithm {
     int maxEvaluations;
 
     // 不迁移时用的差分交叉
-    Operator crossover;
+    Operator crossover1;
     // 迁移时用的SBX交叉
-//    Operator crossover2;
+    Operator crossover2;
+
+    Operator mutation;
+
 
     double alpha;
     double ro;
@@ -55,8 +60,9 @@ public class MaTDE extends MtoAlgorithm {
         probability = new double[problemSet_.size()][problemSet_.size()];
         reward = new double[problemSet_.size()][problemSet_.size()];
 
-        crossover = operators_.get("crossover");
-//        crossover2 = operators_.get("crossover2");
+        crossover1 = operators_.get("crossover1");
+        crossover2 = operators_.get("crossover2");
+        mutation = operators_.get("mutation");
 
         evaluations = 0;
 
@@ -106,9 +112,9 @@ public class MaTDE extends MtoAlgorithm {
 
     private void createOffspringPopulation() throws JMException, ClassNotFoundException {
         // 每个任务单独进行
-        int betterCount = 0;
         for (int k = 0; k < problemSet_.size(); k++){
             double p = PseudoRandom.randDouble();
+            List<Solution> offspringList = new ArrayList<Solution>();
             if (p > alpha){
                 // 不迁移。子种群内部进行交叉变异。
                 for (int i = 0; i < populationSize; i++){
@@ -117,22 +123,22 @@ public class MaTDE extends MtoAlgorithm {
                     while (r1 == i)
                         r1 = PseudoRandom.randInt(0, populationSize - 1);
 
-                    // 差分变异。这里按照原算法是不完全差分（仅用了两个父体）。
-                    // TODO 可以用完整版DE，或者写一个参数随机波动的差分进化。
+                    // 差分交叉
                     Solution[] parents = new Solution[3];
                     parents[0] = population[k].get(r1);
                     parents[1] = population[k].get(i);
                     parents[2] = population[k].get(i);
-                    // TODO 这里调试看一下有没有正常执行
-                    offSpring = (Solution) crossover.execute(
+                    offSpring = (Solution) crossover1.execute(
                             new Object[] {population[k].get(i), parents});
+
+                    // 新增：变异
+                    mutation.execute(offSpring);
 
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
                     // 由于原算法是单目标，这里多目标比较用支配关系。
-                    // TODO 这里可以用非支配排序，若只有一层PF，则随机选一个。
                     boolean dominated = true;
-                    for (int j = problemSet_.get(k).getStartObjPos(); j < problemSet_.get(k).getStartObjPos() + problemSet_.get(k).getNumberOfObjectives(); j++) {
+                    for (int j = problemSet_.get(k).getStartObjPos(); j <= problemSet_.get(k).getEndObjPos(); j++) {
                         if (offSpring.getObjective(j) > population[k].get(i).getObjective(j)) {
                             dominated = false;
                             break;
@@ -145,7 +151,9 @@ public class MaTDE extends MtoAlgorithm {
                     // 若子代比父代好，则直接替换掉父代。
                     if (dominated) {
                         population[k].replace(i, offSpring);
-                        betterCount ++;
+                    }
+                    else{
+                        offspringList.add(offSpring);
                     }
                 }
 //                System.out.println("No Transfer) Better count: "+betterCount);
@@ -165,28 +173,38 @@ public class MaTDE extends MtoAlgorithm {
                     int r1 = PseudoRandom.randInt(0, populationSize - 1);
                     // TODO 写一个均匀交叉。
                     // 手动均匀交叉。
-                    Variable[] offVar = population[k].get(i).getDecisionVariables();
-                    // 选择迁移个体基因的概率。
-                    double CR = PseudoRandom.randDouble(0.1, 0.9);
-                    // 确保至少有一个基因被选择。
-                    int l = PseudoRandom.randInt(0, offVar.length - 1);
-                    for (int j = 0; j < offVar.length; j++){
-                        if (j == l || PseudoRandom.randDouble() < CR) {
-                            offVar[j] = population[assist].get(r1).getDecisionVariables()[j];
-                        }
-                        else{
-                            offVar[j] = population[k].get(i).getDecisionVariables()[j];
-                        }
-                    }
-                    Solution offSpring = new Solution(problemSet_);
-                    offSpring.setDecisionVariables(offVar);
+//                    Variable[] offVar = population[k].get(i).getDecisionVariables();
+//                    // 选择迁移个体基因的概率。
+//                    double CR = PseudoRandom.randDouble(0.1, 0.9);
+//                    // 确保至少有一个基因被选择。
+//                    int l = PseudoRandom.randInt(0, offVar.length - 1);
+//                    for (int j = 0; j < offVar.length; j++){
+//                        if (j == l || PseudoRandom.randDouble() < CR) {
+//                            offVar[j] = population[assist].get(r1).getDecisionVariables()[j];
+//                        }
+//                        else{
+//                            offVar[j] = population[k].get(i).getDecisionVariables()[j];
+//                        }
+//                    }
+//                    Solution offSpring = new Solution(problemSet_);
+//                    offSpring.setDecisionVariables(offVar);
+
+                    Solution[] parents = new Solution[2];
+                    parents[0] = population[assist].get(r1);
+                    parents[1] = population[k].get(i);
+                    Solution[] offSprings = (Solution[]) crossover2.execute(parents);
+                    Solution offSpring = offSprings[PseudoRandom.randInt(0,1)];
+
+                    // 新增：变异
+                    mutation.execute(offSpring);
+
                     // 子代生成完毕。评价。
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
 
                     boolean dominated = true;
                     // 使用常规支配关系
-                    for (int j = problemSet_.get(k).getStartObjPos(); j < problemSet_.get(k).getStartObjPos() + problemSet_.get(k).getNumberOfObjectives(); j++) {
+                    for (int j = problemSet_.get(k).getStartObjPos(); j <= problemSet_.get(k).getEndObjPos(); j++) {
                         if (offSpring.getObjective(j) > population[k].get(i).getObjective(j)) {
                             dominated = false;
                             break;
@@ -199,7 +217,9 @@ public class MaTDE extends MtoAlgorithm {
                     // 若子代比父代好，则直接替换掉父代。
                     if (dominated) {
                         population[k].replace(i, offSpring);
-                        betterCount ++;
+                    }
+                    else{
+                        offspringList.add(offSpring);
                     }
                 }
 //                System.out.println("Transfer) Better count: "+betterCount);
@@ -227,6 +247,47 @@ public class MaTDE extends MtoAlgorithm {
                 else{
                     reward[k][assist] *= shrinkRate;
                 }
+            }
+
+            // 未淘汰父代的子种群
+            SolutionSet offspringPopulation = new SolutionSet(offspringList);
+            // 与原种群合并
+            SolutionSet union = population[k].union(offspringPopulation);
+
+            // 最终选择原种群大小那么多的个体
+            int remain = populationSize;
+            // pf层级
+            int idx = 0;
+            // 设置个体目标值掩码
+            boolean[] chosen = new boolean[problemSet_.getTotalNumberOfObjs()];
+            for (int i = problemSet_.get(k).getStartObjPos(); i <= problemSet_.get(k).getEndObjPos(); i++){
+                chosen[i] = true;
+            }
+            // 非支配排序
+            Ranking ranking = new Ranking(union);
+            SolutionSet front = null;
+            // 原种群清空，其个体已被保留到合并种群union中
+            population[k].clear();
+            Distance distance = new Distance();
+            while ((remain > 0)) {
+                // 计算拥挤度
+                front = ranking.getSubfront(idx);
+                if (remain >= front.size()) {
+                    distance.crowdingDistanceAssignment(front, problemSet_.get(k).getNumberOfObjectives(), chosen);
+                    for (int i = 0; i < front.size(); i++) {
+                        population[k].add(front.get(i));
+                    }
+                    remain -= front.size();
+                }
+                else {
+                    distance.crowdingDistanceAssignment(front, problemSet_.get(k).getNumberOfObjectives(), chosen);
+                    front.sort(new CrowdingComparator());
+                    for (int i = 0; i < remain; i++) {
+                        population[k].add(front.get(i));
+                    }
+                    break;
+                }
+                idx ++;
             }
         }
 //        System.out.println("Better Count: " + betterCount);
