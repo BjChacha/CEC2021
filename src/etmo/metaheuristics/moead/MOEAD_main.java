@@ -23,8 +23,8 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 28;
-		int taskEnd = 32;
+		int taskStart = 17;
+		int taskEnd = 24;
 
 		int times = 21;
 
@@ -56,7 +56,7 @@ public class MOEAD_main {
 					algorithm = new MOEAD(pS);
 
 					algorithm.setInputParameter("populationSize", 100);
-					algorithm.setInputParameter("maxEvaluations", 1000);
+					algorithm.setInputParameter("maxEvaluations", 1000 * 100);
 
 					algorithm.setInputParameter("dataDirectory", "D:\\_r\\EA\\ETMO\\MTO-cec2021-\\resources\\weightVectorFiles\\moead");
 

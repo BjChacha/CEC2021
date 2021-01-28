@@ -112,7 +112,6 @@ public class EMTET extends MtoAlgorithm {
 
             }
         }
-
     }
 
     private SolutionSet transferNeighbor(Variable[] x, int source, int target, int num) throws JMException {
@@ -201,7 +200,6 @@ public class EMTET extends MtoAlgorithm {
             assignFitness(population[i]);
         }
 
-
     }
 
     void assignFitness(SolutionSet pop) {
@@ -210,8 +208,6 @@ public class EMTET extends MtoAlgorithm {
         for (int i = 0; i < problemSet_.size(); i++)
             rankSolutionOnTask(pop, i);
     }
-
-
 
     private void rankSolutionOnTask(SolutionSet pop, int taskId) {
         int start = problemSet_.get(taskId).getStartObjPos();

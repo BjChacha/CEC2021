@@ -17,7 +17,10 @@ public class MaTDE extends MtoAlgorithm {
     int evaluations;
     int maxEvaluations;
 
+    // 不迁移时用的差分交叉
     Operator crossover;
+    // 迁移时用的SBX交叉
+//    Operator crossover2;
 
     double alpha;
     double ro;
@@ -53,20 +56,19 @@ public class MaTDE extends MtoAlgorithm {
         reward = new double[problemSet_.size()][problemSet_.size()];
 
         crossover = operators_.get("crossover");
+//        crossover2 = operators_.get("crossover2");
 
         evaluations = 0;
 
         initPopulation();
+        logPopulation(evaluations);
         while (evaluations < maxEvaluations){
-//            long startTime = System.currentTimeMillis();
             createOffspringPopulation();
-//            long endTime = System.currentTimeMillis();
-//            System.out.println("eval: " + evaluations + "\tcreateOffspringPopulation: " + (endTime-startTime) + " ms.");
-
-//            startTime = System.currentTimeMillis();
             updateArchives();
-//            long endTime = System.currentTimeMillis();
-//            System.out.println("eval: " + evaluations + "\ttime: " + (endTime - startTime) + " ms.");
+            // 一共1000代
+            if (evaluations % (problemSet_.size() * 100 * 20) == 0){
+                logPopulation(evaluations);
+            }
         }
         return population;
     }
@@ -104,11 +106,11 @@ public class MaTDE extends MtoAlgorithm {
 
     private void createOffspringPopulation() throws JMException, ClassNotFoundException {
         // 每个任务单独进行
+        int betterCount = 0;
         for (int k = 0; k < problemSet_.size(); k++){
             double p = PseudoRandom.randDouble();
             if (p > alpha){
                 // 不迁移。子种群内部进行交叉变异。
-                int betterCount = 0;
                 for (int i = 0; i < populationSize; i++){
                     Solution offSpring;
                     int r1 = i;
@@ -130,12 +132,16 @@ public class MaTDE extends MtoAlgorithm {
                     // 由于原算法是单目标，这里多目标比较用支配关系。
                     // TODO 这里可以用非支配排序，若只有一层PF，则随机选一个。
                     boolean dominated = true;
-                    for (int j = 0; j < problemSet_.get(k).getNumberOfObjectives(); j++) {
+                    for (int j = problemSet_.get(k).getStartObjPos(); j < problemSet_.get(k).getStartObjPos() + problemSet_.get(k).getNumberOfObjectives(); j++) {
                         if (offSpring.getObjective(j) > population[k].get(i).getObjective(j)) {
                             dominated = false;
                             break;
                         }
                     }
+                    // 使用目标值和的关系
+//                    if (offSpring.getObjectiveWeightedSum() > population[k].get(i).getObjectiveWeightedSum())
+//                        dominated = false;
+
                     // 若子代比父代好，则直接替换掉父代。
                     if (dominated) {
                         population[k].replace(i, offSpring);
@@ -147,7 +153,7 @@ public class MaTDE extends MtoAlgorithm {
             else{
                 // 迁移。找一个最合适的辅助种群迁移到目标种群。
                 int assist = findAssistTask(k);
-                int betterCount = 0;
+//                int betterCount = 0;
 
                 // 方案2：先记录迁移前的种群最优值。
                 double pBest = Double.MAX_VALUE;
@@ -157,7 +163,7 @@ public class MaTDE extends MtoAlgorithm {
 
                 for (int i = 0; i < populationSize; i++){
                     int r1 = PseudoRandom.randInt(0, populationSize - 1);
-                    // TODO 好像没有均匀交叉。
+                    // TODO 写一个均匀交叉。
                     // 手动均匀交叉。
                     Variable[] offVar = population[k].get(i).getDecisionVariables();
                     // 选择迁移个体基因的概率。
@@ -179,12 +185,16 @@ public class MaTDE extends MtoAlgorithm {
                     evaluations ++;
 
                     boolean dominated = true;
-                    for (int j = 0; j < problemSet_.get(k).getNumberOfObjectives(); j++) {
+                    // 使用常规支配关系
+                    for (int j = problemSet_.get(k).getStartObjPos(); j < problemSet_.get(k).getStartObjPos() + problemSet_.get(k).getNumberOfObjectives(); j++) {
                         if (offSpring.getObjective(j) > population[k].get(i).getObjective(j)) {
                             dominated = false;
                             break;
                         }
                     }
+                    // 使用目标值和的关系
+//                    if (offSpring.getObjectiveWeightedSum() > population[k].get(i).getObjectiveWeightedSum())
+//                        dominated = false;
                     // 每次生成子代都会更新种群
                     // 若子代比父代好，则直接替换掉父代。
                     if (dominated) {
@@ -219,6 +229,7 @@ public class MaTDE extends MtoAlgorithm {
                 }
             }
         }
+//        System.out.println("Better Count: " + betterCount);
     }
 
     private int findAssistTask(int task) throws JMException {
@@ -247,7 +258,6 @@ public class MaTDE extends MtoAlgorithm {
         return idx;
     }
 
-
     private void putArchive(int task, Solution p){
         if (archives[task].size() < archiveSize){
             archives[task].add(p);
@@ -255,6 +265,29 @@ public class MaTDE extends MtoAlgorithm {
         else{
             int replace = PseudoRandom.randInt(0, archiveSize - 1);
             archives[task].replace(replace, p);
+        }
+    }
+
+    private void logPopulation(int eval){
+        int taskNum = problemSet_.size();
+        SolutionSet resPopulation[] = new SolutionSet[taskNum];
+        for (int k = 0; k < taskNum; k++) {
+            resPopulation[k] = new SolutionSet();
+            for (int i = 0; i < population[k].size(); i++) {
+                Solution sol = population[k].get(i);
+
+                int start = problemSet_.get(k).getStartObjPos();
+                int end = problemSet_.get(k).getEndObjPos();
+
+                Solution newSolution = new Solution(end - start + 1);
+
+                for (int kk = start; kk <= end; kk++)
+                    newSolution.setObjective(kk - start, sol.getObjective(kk));
+
+                resPopulation[k].add(newSolution);
+            }
+            resPopulation[k].printObjectivesToFile("MaTDE\\" + "MaTDE_"+problemSet_.get(k).getNumberOfObjectives()+"Obj_"+
+                    problemSet_.get(k).getName()+ "_" + problemSet_.get(k).getNumberOfVariables() + "D" + eval + ".txt");
         }
     }
 }

@@ -93,6 +93,8 @@ public class MaTDE_main {
 
                         resPopulation[k].add(newSolution);
                     }
+                    resPopulation[k].printObjectivesToFile("MaTDE_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
+                            problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D_run_"+t+".txt");
                 }
                 double igd;
                 for (int k = 0; k < taskNum; k++){

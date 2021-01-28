@@ -15,6 +15,6 @@ public class Test_Random {
 //        for (int i = 0; i < 10; i++){
 //            System.out.println(PseudoRandom.randInt(1, 3));
 //        }
-
+        System.out.println(0 * Double.POSITIVE_INFINITY);
     }
 }

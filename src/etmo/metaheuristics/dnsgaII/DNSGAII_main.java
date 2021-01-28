@@ -34,7 +34,7 @@ public class DNSGAII_main {
 		int sc = 10;
 		int nc = 30;
 
-		problemSet1 = ETMOF34.getProblem(fc,sc);
+		problemSet1 = ETMOF39.getProblem(fc,sc);
 		int taskNumber = problemSet1.size();
 		System.out.println("taskNumber = "+taskNumber);
 		for (int tsk=0;tsk<taskNumber;tsk++) {
