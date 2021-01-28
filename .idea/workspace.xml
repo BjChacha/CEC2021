@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,6 +19,9 @@
         <option value="Class" />
       </list>
     </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="main" />
   </component>
   <component name="Git.Rebase.Settings">
     <option name="NEW_BASE" value="my_repo/master" />
@@ -72,7 +79,7 @@
       <recent name="etmo.metaheuristics.moead" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.EMTET_main">
+  <component name="RunManager" selected="Application.MaTDE_main">
     <configuration name="EMTET_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.emtet.EMTET_main" />
       <module name="MTO-cec2021-" />
@@ -87,8 +94,10 @@
       </method>
     </configuration>
     <configuration name="MOEAD_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="15" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.moead.MOEAD_main" />
-      <module name="etmo" />
+      <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="etmo.metaheuristics.moead.*" />
@@ -99,12 +108,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MOMFEA_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.momfea.MOMFEA_main" />
-      <module name="etmo" />
+    <configuration name="MaOEAC_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.maoeac.MaOEAC_main" />
+      <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.momfea.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.maoeac.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -127,33 +136,65 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test_Random" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.test.Test_Random" />
-      <module name="etmo" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="etmo.test.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="MTO-cec2021-" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="MTO-cec2021-" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <list>
       <item itemvalue="Application.MOEAD_main" />
-      <item itemvalue="Application.MOMFEA_main" />
       <item itemvalue="Application.MaTDE_main" />
-      <item itemvalue="Application.Test_Random" />
       <item itemvalue="Application.EMTET_main" />
+      <item itemvalue="Application.MaOEAC_main" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.EMTET_main" />
         <item itemvalue="Application.MaTDE_main" />
+        <item itemvalue="Application.MaOEAC_main" />
         <item itemvalue="Application.MOEAD_main" />
-        <item itemvalue="Application.Test_Random" />
-        <item itemvalue="Application.MOMFEA_main" />
+        <item itemvalue="Application.EMTET_main" />
       </list>
     </recent_temporary>
   </component>
@@ -462,6 +503,16 @@
           <url>file://$PROJECT_DIR$/src/etmo/qualityIndicator/util/MetricsUtil.java</url>
           <line>221</line>
           <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC.java</url>
+          <line>119</line>
+          <option name="timeStamp" value="50" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java</url>
+          <line>118</line>
+          <option name="timeStamp" value="51" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
