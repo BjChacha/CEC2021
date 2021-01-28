@@ -31,10 +31,10 @@ public class MOMFEA_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 28;
+		int taskStart = 26;
 		int taskEnd = 32;
 
-		int times = 21;
+		int times = 1;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -59,7 +59,7 @@ public class MOMFEA_main {
 			algorithm = new MOMFEA(problemSet);
 
 			algorithm.setInputParameter("populationSize",100*taskNum);
-			algorithm.setInputParameter("maxEvaluations",100*taskNum * 1000);
+			algorithm.setInputParameter("maxEvaluations",1000 * taskNum * 100);
 			algorithm.setInputParameter("rmp", 0.9);
 
 			parameters = new HashMap();
@@ -85,8 +85,12 @@ public class MOMFEA_main {
 			algorithm.addOperator("selection", selection);
 
 			for (int t = 1; t <= times; t++) {
-				System.out.println("time: " + t);
+				long startTime = System.currentTimeMillis();
+
 				SolutionSet population = algorithm.execute();
+
+				long endTime = System.currentTimeMillis();
+				System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime));
 
 				SolutionSet[] resPopulation = new SolutionSet[taskNum];
 				for (int i = 0; i < taskNum; i++)
