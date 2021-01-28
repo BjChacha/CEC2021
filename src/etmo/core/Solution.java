@@ -420,8 +420,10 @@ public class Solution implements Serializable {
 
 	public double getObjectiveWeightedSum(){
 		double sum = 0;
-		for (int i = 0; i < getNumberOfObjectives(); i++)
-			sum += getObjective(i);
+		for (int i = 0; i < getNumberOfObjectives(); i++){
+			if (Double.isFinite(getObjective(i)))
+				sum += getObjective(i);
+		}
 		return sum;
 	}
 
@@ -433,7 +435,8 @@ public class Solution implements Serializable {
 		}
 		else{
 			for (int i = 0; i < getNumberOfObjectives(); i++){
-				sum += w[i] * getObjective(i);
+				if (Double.isFinite(getObjective(i)))
+					sum += w[i] * getObjective(i);
 			}
 		}
 		return sum;
