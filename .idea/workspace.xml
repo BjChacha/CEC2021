@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="" />
+    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,6 +58,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/libs/commons-math3-3.6.1.jar" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
@@ -373,7 +376,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611836782774</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="my .idea">
+      <created>1611837242933</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1611837242933</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -390,7 +400,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="init: my code." />
     <MESSAGE value="test" />
     <MESSAGE value="test: pull multiple git." />
     <MESSAGE value="test: pull multiple git simultaneously." />
@@ -415,7 +424,8 @@
     <MESSAGE value="fixed: get sum of objectives." />
     <MESSAGE value="add .idea" />
     <MESSAGE value="merge" />
-    <option name="LAST_COMMIT_MESSAGE" value="merge" />
+    <MESSAGE value="my .idea" />
+    <option name="LAST_COMMIT_MESSAGE" value="my .idea" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
