@@ -82,8 +82,9 @@ public class MaTDE extends MtoAlgorithm {
     private void updateArchives() {
         for (int k = 0; k < problemSet_.size(); k++) {
             for (int i = 0; i < populationSize; i++){
-                if (PseudoRandom.randDouble() < replaceRate)
-                    putArchive(k, population[k].get(i));
+                // 改动。当Archive不满时无需满足replace rate。
+//                if (PseudoRandom.randDouble() < replaceRate)
+                putArchive(k, population[k].get(i));
             }
         }
     }
@@ -324,8 +325,10 @@ public class MaTDE extends MtoAlgorithm {
             archives[task].add(p);
         }
         else{
-            int replace = PseudoRandom.randInt(0, archiveSize - 1);
-            archives[task].replace(replace, p);
+            if (PseudoRandom.randDouble() < replaceRate) {
+                int replace = PseudoRandom.randInt(0, archiveSize - 1);
+                archives[task].replace(replace, p);
+            }
         }
     }
 
