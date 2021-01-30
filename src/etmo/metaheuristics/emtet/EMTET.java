@@ -71,7 +71,7 @@ public class EMTET extends MtoAlgorithm {
             SolutionSet survivalPopulation = new SolutionSet(G);
 
 //            目标任务中标记为1且位于0层的个体为存活个体
-            for (int j = 0; j < populationSize && population[i].get(j).getRank() == 0; j++){
+            for (int j = 0; j < G && population[i].get(j).getRank() == 0; j++){
                 Solution survival = population[i].get(j);
                 if(survival.getSkillFactor() == 1){
                     survivalPopulation.add(survival);
@@ -135,6 +135,8 @@ public class EMTET extends MtoAlgorithm {
             evaluations++;
             closestNeighbor.add(t);
             cnt++;
+            if (cnt >= closestNeighbor.size())
+                break;
         }
         return closestNeighbor;
     }
