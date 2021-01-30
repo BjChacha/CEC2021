@@ -6,7 +6,9 @@ import etmo.util.PseudoRandom;
 import etmo.util.comparators.SumValueComparator;
 import etmo.util.ranking.NondominatedRanking;
 import etmo.util.ranking.Ranking;
+import etmo.util.logging.LogPopulation;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +61,10 @@ public class MaOEAC extends Algorithm{
 		    environmentalSelection();
 
 		    generations_++;
+
+			if (generations_ % 20 == 0){
+				LogPopulation.LogPopulation("MaOEAC", population_, problemSet_, generations_*populationSize_, false);
+			}
 		}
 
 		Ranking ranking = new NondominatedRanking(population_);
@@ -460,81 +466,81 @@ public class MaOEAC extends Algorithm{
 
 		return sets;
 	 }
-   public void bestSolutionSelection(List<SolutionSet> list,int k){
-		double minClustering2Axis = 1.0e+30;
-		int minClustering2AxisID = -1;
-		for(int i=0;i<list.size();i++){
-			SolutionSet sols = list.get(i);
-			if(sols.size() == 0){
-				System.out.println("SolsSize1 = "+sols.size());
-				System.exit(0);
-			}
+   public void bestSolutionSelection(List<SolutionSet> list,int k) {
+	   double minClustering2Axis = 1.0e+30;
+	   int minClustering2AxisID = -1;
+	   for (int i = 0; i < list.size(); i++) {
+		   SolutionSet sols = list.get(i);
+		   if (sols.size() == 0) {
+			   System.out.println("SolsSize1 = " + sols.size());
+			   System.exit(0);
+		   }
 
-			double angle1 = Math.acos(Math.abs(sols.getCentroidVector().getNormalizedObjective(k)/sols.getCentroidVector().getDistanceToIdealPoint()));
-			// TODO: for now
-			if (angle1 == Double.NaN) {
-				angle1 = 0.0;
-				System.out.println("Warning: angle being Nan.");
-			}
+		   double angle1 = Math.acos(Math.abs(sols.getCentroidVector().getNormalizedObjective(k) / sols.getCentroidVector().getDistanceToIdealPoint()));
+		   // TODO: for now
+		   if (angle1 == Double.NaN) {
+			   angle1 = 0.0;
+			   System.out.println("Warning: angle being Nan.");
+		   }
 
-			if(angle1 < minClustering2Axis){
-				minClustering2Axis = angle1;
-				minClustering2AxisID = i;
-			}//if
-		}//for
-		double minSolution2Axis = 1.0e+30;
-		int minSolution2AxisID = -1;
-		for(int j=0;j<list.get(minClustering2AxisID).size();j++){
-			Solution sol = list.get(minClustering2AxisID).get(j);
-			double ang = Math.acos(list.get(minClustering2AxisID).get(j).getNormalizedObjective(k)/list.get(minClustering2AxisID).get(j).getDistanceToIdealPoint());
-			if(ang < minSolution2Axis){
-				minSolution2Axis = ang;
-				minSolution2AxisID = j;
-			}
-		}//for
-		population_.add(list.get(minClustering2AxisID).get(minSolution2AxisID));
-		list.remove(minClustering2AxisID);
+		   if (angle1 < minClustering2Axis) {
+			   minClustering2Axis = angle1;
+			   minClustering2AxisID = i;
+		   }//if
+	   }//for
+	   double minSolution2Axis = 1.0e+30;
+	   int minSolution2AxisID = -1;
+	   for (int j = 0; j < list.get(minClustering2AxisID).size(); j++) {
+		   Solution sol = list.get(minClustering2AxisID).get(j);
+		   double ang = Math.acos(list.get(minClustering2AxisID).get(j).getNormalizedObjective(k) / list.get(minClustering2AxisID).get(j).getDistanceToIdealPoint());
+		   if (ang < minSolution2Axis) {
+			   minSolution2Axis = ang;
+			   minSolution2AxisID = j;
+		   }
+	   }//for
+	   population_.add(list.get(minClustering2AxisID).get(minSolution2AxisID));
+	   list.remove(minClustering2AxisID);
 
-		double min2CenterLine = 1.0e+30;
-		int min2CenterLineId = -1;
-		for(int i=0;i<list.size();i++){
-			SolutionSet sols = list.get(i);
+	   double min2CenterLine = 1.0e+30;
+	   int min2CenterLineId = -1;
+	   for (int i = 0; i < list.size(); i++) {
+		   SolutionSet sols = list.get(i);
 			/*if(sols.size() != 0){
 				System.out.println("SolsSize1 = "+sols.size());
 				//System.exit(0);
 			}*/
-			double sumValue = 0.0;
-			for(int j=0;j<problemSet_.get(0).getNumberOfObjectives();j++){
-				sumValue += sols.getCentroidVector().getNormalizedObjective(j)*1.0;
-			}
-			//System.out.println("value = "+sumValue/(sols.getCentroidVector().getDistanceToIdealPoint()));
-			//norm2 = Math.sqrt(norm2);
-			double angle2 = Math.acos(sumValue/(sols.getCentroidVector().getDistanceToIdealPoint()*Math.sqrt(problemSet_.get(0).getNumberOfObjectives())));
-			//System.out.println(angle2);
-			if(angle2 < min2CenterLine){
-				min2CenterLine = angle2;
-				min2CenterLineId = i;
-			}
-		}
-		//System.out.println(min2CenterLineId);
-		double minS2CenterLine = 1.0e+30;
-		int minId = -1;
-		for(int i=0;i<list.get(min2CenterLineId).size();i++){
-			Solution sol = list.get(min2CenterLineId).get(i);
-			double sumValue = 0.0;
-			for(int j=0;j<problemSet_.get(0).getNumberOfObjectives();j++){
-				sumValue += sol.getNormalizedObjective(j);
-			}
-			double ang = Math.acos(Math.abs(sumValue/(sol.getDistanceToIdealPoint()*Math.sqrt(problemSet_.get(0).getNumberOfObjectives()))));
-			if(ang < minS2CenterLine){
-				minS2CenterLine = ang;
-				minId = i;
-			}
-		}
-		if(PseudoRandom.randDouble() < 0.5){
-			population_.add(list.get(min2CenterLineId).get(minId));
-			list.remove(min2CenterLineId);
-		}
+		   double sumValue = 0.0;
+		   for (int j = 0; j < problemSet_.get(0).getNumberOfObjectives(); j++) {
+			   sumValue += sols.getCentroidVector().getNormalizedObjective(j) * 1.0;
+		   }
+		   //System.out.println("value = "+sumValue/(sols.getCentroidVector().getDistanceToIdealPoint()));
+		   //norm2 = Math.sqrt(norm2);
+		   double angle2 = Math.acos(sumValue / (sols.getCentroidVector().getDistanceToIdealPoint() * Math.sqrt(problemSet_.get(0).getNumberOfObjectives())));
+		   //System.out.println(angle2);
+		   if (angle2 < min2CenterLine) {
+			   min2CenterLine = angle2;
+			   min2CenterLineId = i;
+		   }
+	   }
+	   //System.out.println(min2CenterLineId);
+	   double minS2CenterLine = 1.0e+30;
+	   int minId = -1;
+	   for (int i = 0; i < list.get(min2CenterLineId).size(); i++) {
+		   Solution sol = list.get(min2CenterLineId).get(i);
+		   double sumValue = 0.0;
+		   for (int j = 0; j < problemSet_.get(0).getNumberOfObjectives(); j++) {
+			   sumValue += sol.getNormalizedObjective(j);
+		   }
+		   double ang = Math.acos(Math.abs(sumValue / (sol.getDistanceToIdealPoint() * Math.sqrt(problemSet_.get(0).getNumberOfObjectives()))));
+		   if (ang < minS2CenterLine) {
+			   minS2CenterLine = ang;
+			   minId = i;
+		   }
+	   }
+	   if (PseudoRandom.randDouble() < 0.5) {
+		   population_.add(list.get(min2CenterLineId).get(minId));
+		   list.remove(min2CenterLineId);
+	   }
 
 
 
@@ -542,63 +548,62 @@ public class MaOEAC extends Algorithm{
 			System.out.println("ListSize3 = "+list.size());
 			System.exit(0);
 		}*/
-		double delta_ = 1.0;
-		Iterator<SolutionSet> it = list.iterator();
-		while(it.hasNext()){
-			int type = -1;
-			double rnd = PseudoRandom.randDouble();
-			if (rnd < delta_)
-			{
-				type = 1;
-			} else {
-				type = 2;
-			}
-			SolutionSet sols = it.next();
-			if(sols.size() == 0){
-				System.out.println("SolsSize2 = "+sols.size());
-				System.exit(0);
-			}
-			double minFitness = 1.0e+30;
-			int minFitnessID = -1;
-			if(sols.size() == 0){
-				System.out.println("size = 0!");
-				System.exit(0);
-			}
-			Solution sol1 = sols.getCentroidVector();
-			for(int j=0;j<sols.size();j++){
-				Solution sol2 = sols.get(j);
-				if(type == 1){
-					//double fitness = sol2.getDistanceToIdealPoint();
-					double fitness = sol2.getSumValue();
-					//double fitness = computeDistance(sol2);
-					//double fitness = computeASFFitness(sol1,sol2);
-					//double fitness = weightSumValue(sol1,sol2);
-					//double fitness = computeChebyshev(sol1,sol2);
-					//double fitness = computePBIFitness(sol1,sol2);
-					if(minFitness > fitness){
-						minFitness = fitness;
-						minFitnessID = j;
-					}
-				}else{
-					double fitness = sol2.getSumValue();
-					//double fitness = weightSumValue(k,sol2);
-					//double fitness = computePBIFitness(sol1,sol2);
-					//double fitness = computeAngle(sol1,sol2);
-					//double fitness = computeChebyshev(sol1,sol2);
-					//double fitness = computeASFFitness(sol1,sol2);
-					//System.out.println(fitness);
-					if(minFitness > fitness){
-						minFitness = fitness;
-						minFitnessID = j;
-					}
-				}
-			}//for
-			population_.add(sols.get(minFitnessID));
-			it.remove();
-		}//while
-		if(list.size() != 0){
-			System.out.println("ListSize2 = "+list.size());
-			System.exit(0);
-		}
+	   double delta_ = 1.0;
+	   Iterator<SolutionSet> it = list.iterator();
+	   while (it.hasNext()) {
+		   int type = -1;
+		   double rnd = PseudoRandom.randDouble();
+		   if (rnd < delta_) {
+			   type = 1;
+		   } else {
+			   type = 2;
+		   }
+		   SolutionSet sols = it.next();
+		   if (sols.size() == 0) {
+			   System.out.println("SolsSize2 = " + sols.size());
+			   System.exit(0);
+		   }
+		   double minFitness = 1.0e+30;
+		   int minFitnessID = -1;
+		   if (sols.size() == 0) {
+			   System.out.println("size = 0!");
+			   System.exit(0);
+		   }
+		   Solution sol1 = sols.getCentroidVector();
+		   for (int j = 0; j < sols.size(); j++) {
+			   Solution sol2 = sols.get(j);
+			   if (type == 1) {
+				   //double fitness = sol2.getDistanceToIdealPoint();
+				   double fitness = sol2.getSumValue();
+				   //double fitness = computeDistance(sol2);
+				   //double fitness = computeASFFitness(sol1,sol2);
+				   //double fitness = weightSumValue(sol1,sol2);
+				   //double fitness = computeChebyshev(sol1,sol2);
+				   //double fitness = computePBIFitness(sol1,sol2);
+				   if (minFitness > fitness) {
+					   minFitness = fitness;
+					   minFitnessID = j;
+				   }
+			   } else {
+				   double fitness = sol2.getSumValue();
+				   //double fitness = weightSumValue(k,sol2);
+				   //double fitness = computePBIFitness(sol1,sol2);
+				   //double fitness = computeAngle(sol1,sol2);
+				   //double fitness = computeChebyshev(sol1,sol2);
+				   //double fitness = computeASFFitness(sol1,sol2);
+				   //System.out.println(fitness);
+				   if (minFitness > fitness) {
+					   minFitness = fitness;
+					   minFitnessID = j;
+				   }
+			   }
+		   }//for
+		   population_.add(sols.get(minFitnessID));
+		   it.remove();
+	   }//while
+	   if (list.size() != 0) {
+		   System.out.println("ListSize2 = " + list.size());
+		   System.exit(0);
+	   }
    }
 }
