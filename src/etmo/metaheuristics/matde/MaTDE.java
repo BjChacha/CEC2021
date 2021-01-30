@@ -72,7 +72,7 @@ public class MaTDE extends MtoAlgorithm {
             createOffspringPopulation();
             updateArchives();
             // 一共1000代
-            if (evaluations % (problemSet_.size() * 100 * 20) == 0){
+            if (evaluations % (problemSet_.size() * populationSize * 20) == 0){
                 logPopulation(evaluations);
             }
         }
