@@ -31,12 +31,14 @@ public class MOMFEA_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 26;
+		int taskStart = 32;
 		int taskEnd = 32;
 
 		int times = 1;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
+
+		System.out.println("Algo: MOMFEA.");
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++ ){
 			problemSet = (ProblemSet) Class
@@ -90,8 +92,7 @@ public class MOMFEA_main {
 				SolutionSet population = algorithm.execute();
 
 				long endTime = System.currentTimeMillis();
-				System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime));
-
+				System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
 				SolutionSet[] resPopulation = new SolutionSet[taskNum];
 				for (int i = 0; i < taskNum; i++)
 					resPopulation[i] = new SolutionSet();

@@ -11,6 +11,7 @@ import etmo.util.PORanking;
 import etmo.util.PseudoRandom;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.LocationComparator;
+import etmo.util.logging.LogPopulation;
 
 public class MOMFEA extends Algorithm {
 
@@ -48,12 +49,12 @@ public class MOMFEA extends Algorithm {
 		evaluations = 0;
 
 		initPopulation();
-		logPopulation(evaluations);
+		LogPopulation.LogPopulation("MOMFEA", population, problemSet_, evaluations, true);
 		while (evaluations < maxEvaluations) {
 			createOffspringPopulation();
 			getNextPopulation();
-			if (evaluations % (problemSet_.size() * 100 * 20) == 0){
-				logPopulation(evaluations);
+			if (evaluations % (populationSize * 20) == 0){
+				LogPopulation.LogPopulation("MOMFEA", population, problemSet_, evaluations, true);
 			}
 		}
 		
@@ -190,29 +191,29 @@ public class MOMFEA extends Algorithm {
 			sol.setObjective(i, Double.POSITIVE_INFINITY);
 	}
 
-	private void logPopulation(int eval){
-		int taskNum = problemSet_.size();
-		SolutionSet[] resPopulation = new SolutionSet[taskNum];
-		for (int i = 0; i < taskNum; i++)
-			resPopulation[i] = new SolutionSet();
-
-		for (int i = 0; i < population.size(); i++) {
-			Solution sol = population.get(i);
-
-			int pid = sol.getSkillFactor();
-
-			int start = problemSet_.get(pid).getStartObjPos();
-			int end = problemSet_.get(pid).getEndObjPos();
-
-			Solution newSolution = new Solution(end - start + 1);
-
-			for (int k = start; k <= end; k++)
-				newSolution.setObjective(k - start, sol.getObjective(k));
-
-			resPopulation[pid].add(newSolution);
-		}
-		for (int k = 0; k < taskNum; k++)
-			resPopulation[k].printObjectivesToFile("MOMFEA\\" + "MOMFEA_"+problemSet_.get(k).getNumberOfObjectives()+"Obj_"+
-					problemSet_.get(k).getName()+ "_" + problemSet_.get(k).getNumberOfVariables() + "D" + eval + ".txt");
-	}
+//	private void logPopulation(int eval){
+//		int taskNum = problemSet_.size();
+//		SolutionSet[] resPopulation = new SolutionSet[taskNum];
+//		for (int i = 0; i < taskNum; i++)
+//			resPopulation[i] = new SolutionSet();
+//
+//		for (int i = 0; i < population.size(); i++) {
+//			Solution sol = population.get(i);
+//
+//			int pid = sol.getSkillFactor();
+//
+//			int start = problemSet_.get(pid).getStartObjPos();
+//			int end = problemSet_.get(pid).getEndObjPos();
+//
+//			Solution newSolution = new Solution(end - start + 1);
+//
+//			for (int k = start; k <= end; k++)
+//				newSolution.setObjective(k - start, sol.getObjective(k));
+//
+//			resPopulation[pid].add(newSolution);
+//		}
+//		for (int k = 0; k < taskNum; k++)
+//			resPopulation[k].printObjectivesToFile("MOMFEA\\" + "MOMFEA_"+problemSet_.get(k).getNumberOfObjectives()+"Obj_"+
+//					problemSet_.get(k).getName()+ "_" + problemSet_.get(k).getNumberOfVariables() + "D" + eval + ".txt");
+//	}
 }
