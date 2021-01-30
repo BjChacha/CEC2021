@@ -1,13 +1,12 @@
 package etmo.metaheuristics.emtet;
 
-import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import etmo.core.*;
 import etmo.util.comparators.LocationComparator;
-import etmo.problems.benchmarks_ETMO.*;
 
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
@@ -17,8 +16,7 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 
 public class EMTET_main {
-    public static void main(
-            String args[]) throws IOException, JMException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         ProblemSet problemSet; // The problem to solve
         MtoAlgorithm algorithm; // The algorithm to use
         Operator crossover; // Crossover operator
@@ -27,95 +25,100 @@ public class EMTET_main {
 
         HashMap parameters; // Operator parameters
 
-        problemSet = ETMOF1.getProblem();
-        int taskNumber = problemSet.size();
-        System.out.println("taskNumber = "+taskNumber);
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        String[] pf = new String[problemSet.size()];
-        for (int i = 0; i < pf.length; i++){
-            pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
-        }
-
-        algorithm = new EMTET(problemSet);
-
-        algorithm.setInputParameter("populationSize",100);
-        algorithm.setInputParameter("maxEvaluations",100*taskNumber * 1000);
-        algorithm.setInputParameter("transferNum",8);
-
-        parameters = new HashMap();
-        parameters.put("probability", 0.9);
-        parameters.put("distributionIndex", 20.0);
-        crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
-
-        // Mutation operator
-        parameters = new HashMap();
-        parameters.put("probability", 1.0 / problemSet.getMaxDimension());
-        parameters.put("distributionIndex", 20.0);
-        mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
-
-        // Selection Operator
-        parameters = new HashMap() ;
-        parameters.put("comparator", new LocationComparator());
-        selection = SelectionFactory.getSelectionOperator("BinaryTournament",
-                parameters);
-
-        // Add the operators to the algorithm
-        algorithm.addOperator("crossover", crossover);
-        algorithm.addOperator("mutation", mutation);
-        algorithm.addOperator("selection", selection);
+        int times = 1;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
-        System.out.println("RunID\t" + "IGD for "+problemSet.get(0).getName()+" to "+problemSet.get(taskNumber-1).getName());
+        System.out.println("Algo: MaTDE.");
 
-        int times = 21;
+        for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
+            problemSet = (ProblemSet) Class
+                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                    .getMethod("getProblem")
+                    .invoke(null, null);
+            int taskNum = problemSet.size();
+            double[] ave = new double[taskNum];
 
-        double ave[] = new double[taskNumber];
-        for (int t = 1; t <= times; t++) {
-            SolutionSet[] res = algorithm.execute();
-            SolutionSet[] resPopulation = new SolutionSet[problemSet.size()];
-            for (int i = 0; i < problemSet.size(); i++)
-                resPopulation[i] = new SolutionSet();
+            String[] pf = new String[taskNum];
+            for (int i = 0; i < pf.length; i++) {
+                pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
+            }
 
-            for(int i = 0; i < res.length; i++){
-                for (int j = 0; j < res[i].size(); j++) {
-                    Solution sol = res[i].get(j);
+            String pSName = problemSet.get(0).getName();
+            pSName = pSName.substring(0, pSName.length() - 2);
+            System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
 
-                    int start = problemSet.get(i).getStartObjPos();
-                    int end = problemSet.get(i).getEndObjPos();
+            algorithm = new EMTET(problemSet);
 
-                    Solution newSolution = new Solution(end - start + 1);
+            algorithm.setInputParameter("populationSize", 100);
+            algorithm.setInputParameter("maxEvaluations", 100 * taskNum * 1000);
+            algorithm.setInputParameter("transferNum", 8);
 
-                    for (int k = start; k <= end; k++)
-                        newSolution.setObjective(k - start, sol.getObjective(k));
+            parameters = new HashMap();
+            parameters.put("probability", 0.9);
+            parameters.put("distributionIndex", 20.0);
+            crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
 
-                    resPopulation[i].add(newSolution);
+            // Mutation operator
+            parameters = new HashMap();
+            parameters.put("probability", 1.0 / problemSet.getMaxDimension());
+            parameters.put("distributionIndex", 20.0);
+            mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+
+            // Selection Operator
+            parameters = new HashMap();
+            parameters.put("comparator", new LocationComparator());
+            selection = SelectionFactory.getSelectionOperator("BinaryTournament",
+                    parameters);
+
+            // Add the operators to the algorithm
+            algorithm.addOperator("crossover", crossover);
+            algorithm.addOperator("mutation", mutation);
+            algorithm.addOperator("selection", selection);
+
+            for (int t = 1; t <= times; t++) {
+                long startTime = System.currentTimeMillis();
+
+                SolutionSet[] res = algorithm.execute();
+
+                long endTime = System.currentTimeMillis();
+                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
+
+                SolutionSet[] resPopulation = new SolutionSet[taskNum];
+                for (int k = 0; k < taskNum; k++){
+                    resPopulation[k] = new SolutionSet();
+                    for (int i = 0; i < res[k].size(); i++) {
+                        Solution sol = res[k].get(i);
+
+                        int start = problemSet.get(k).getStartObjPos();
+                        int end = problemSet.get(k).getEndObjPos();
+
+                        Solution newSolution = new Solution(end - start + 1);
+
+                        for (int kk = start; kk <= end; kk++)
+                            newSolution.setObjective(kk - start, sol.getObjective(kk));
+
+                        resPopulation[k].add(newSolution);
+                    }
+                    resPopulation[k].printObjectivesToFile("EMTET_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
+                            problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D_run_"+t+".txt");
                 }
+                double igd;
+                for (int k = 0; k < taskNum; k++) {
+                    QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
+                    if (resPopulation[k].size() == 0)
+                        continue;
 
+                    igd = indicator.getIGD(resPopulation[k]);
+                    ave[k] += igd;
+                }
             }
-
-            double igd;
-            System.out.print(t + "\t");
-            for(int i = 0; i < taskNumber; i++){
-                QualityIndicator indicator = new QualityIndicator(problemSet.get(i), pf[i]);
-                if(resPopulation[i].size()==0)
-                    continue;
-//				getTask中用到add影响problem起始和结束值
-//				resPopulation[i].printObjectivesToFile("MOMFEA_"+problemSet.getTask(i).get(0).getNumberOfObjectives()+"Obj_"+
-//						problemSet.getTask(i).get(0).getName()+ "_" + problemSet.getTask(i).get(0).getNumberOfVariables() + "D_run"+t+".txt");
-                resPopulation[i].printObjectivesToFile("ETMET_"+problemSet.get(i).getNumberOfObjectives()+"Obj_"+
-                        problemSet.get(i).getName()+ "_" + problemSet.get(i).getNumberOfVariables() + "D_run"+t+".txt");
-
-                igd =  indicator.getIGD(resPopulation[i]);
-                System.out.print(form.format(igd) + "\t" );
-                ave[i] += igd;
-            }
-            System.out.println("");
+            for (int i = 0; i < taskNum; i++)
+                System.out.println("Average IGD for " + problemSet.get(i).getName() + ": " + form.format(ave[i] / times));
+            System.out.println();
         }
-
-        System.out.println();
-        for(int i=0;i<taskNumber;i++)
-            System.out.println("Average IGD for " + problemSet.get(i).getName()+ ": " + form.format(ave[i] / times));
-
     }
 }
