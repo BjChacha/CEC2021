@@ -47,6 +47,8 @@ public class CrossoverFactory {
 			return new TwoPointsCrossover(parameters);
 		else if (name.equalsIgnoreCase("DifferentialEvolutionCrossover"))
 			return new DifferentialEvolutionCrossover(parameters);
+		else if (name.equalsIgnoreCase("RandomDECrossover"))
+			return new RandomDECrossover(parameters);
 		else {
 			Configuration.logger_
 					.severe("CrossoverFactory.getCrossoverOperator. " + "Operator '" + name + "' not found ");
