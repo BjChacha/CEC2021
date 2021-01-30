@@ -27,6 +27,7 @@ import etmo.util.Distance;
 import etmo.util.JMException;
 import etmo.util.Ranking;
 import etmo.util.comparators.CrowdingComparator;
+import etmo.util.logging.LogPopulation;
 
 /**
  * Implementation of NSGA-II. This implementation of NSGA-II makes use of a
@@ -117,6 +118,10 @@ public class NSGAII extends Algorithm {
 					offspringPopulation.add(offSpring[0]);
 					offspringPopulation.add(offSpring[1]);
 					evaluations += 2;
+
+					if (evaluations % (populationSize * 20) == 0){
+						LogPopulation.LogPopulation("NSGAII", population, problemSet_, evaluations, false);
+					}
 				} // if
 			} // for
 
