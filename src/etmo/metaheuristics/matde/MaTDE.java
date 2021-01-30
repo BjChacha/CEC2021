@@ -71,6 +71,9 @@ public class MaTDE extends MtoAlgorithm {
         while (evaluations < maxEvaluations){
             createOffspringPopulation();
             updateArchives();
+
+//            for (int k = 0; k < problemSet_.size(); k++)
+//                System.out.println("Archive " + k + ": " + archives[k].size());
             // 一共1000代
             if (evaluations % (problemSet_.size() * populationSize * 20) == 0){
                 logPopulation(evaluations);
@@ -82,9 +85,8 @@ public class MaTDE extends MtoAlgorithm {
     private void updateArchives() {
         for (int k = 0; k < problemSet_.size(); k++) {
             for (int i = 0; i < populationSize; i++){
-                // 改动。当Archive不满时无需满足replace rate。
-//                if (PseudoRandom.randDouble() < replaceRate)
-                putArchive(k, population[k].get(i));
+                if (PseudoRandom.randDouble() < replaceRate)
+                    putArchive(k, population[k].get(i));
             }
         }
     }
@@ -325,10 +327,10 @@ public class MaTDE extends MtoAlgorithm {
             archives[task].add(p);
         }
         else{
-            if (PseudoRandom.randDouble() < replaceRate) {
-                int replace = PseudoRandom.randInt(0, archiveSize - 1);
-                archives[task].replace(replace, p);
-            }
+//            if (PseudoRandom.randDouble() < replaceRate) {
+            int replace = PseudoRandom.randInt(0, archiveSize - 1);
+            archives[task].replace(replace, p);
+//            }
         }
     }
 

@@ -20,10 +20,10 @@ public class MaTDE_main {
 
         HashMap parameters;
 
-        int problemStart = 25;
-        int problemEnd = 31;
+        int problemStart = 26;
+        int problemEnd = 26;
 
-        int times = 21;
+        int times = 1;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -59,15 +59,17 @@ public class MaTDE_main {
             algorithm.setInputParameter("ro", 0.8);
             // 衰减速率
             algorithm.setInputParameter("shrinkRate", 0.8);
-            // 子代个体加入到Archive中的概率
+            // Archive更新概率
             algorithm.setInputParameter("replaceRate", 0.2);
 
             parameters = new HashMap();
             // 原论文：CR = (0.1, 0.9)
-            parameters.put("CR", 1.0);
+            parameters.put("CR_LB", 0.1);
+            parameters.put("CR_UB", 0.9);
             // 原论文：F = (0.1, 2)
-            parameters.put("F", 0.5);
-            crossover1 = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
+            parameters.put("F_LB", 0.1);
+            parameters.put("F_UB", 2.0);
+            crossover1 = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
             algorithm.addOperator("crossover1", crossover1);
 
             parameters = new HashMap();
@@ -83,12 +85,10 @@ public class MaTDE_main {
             algorithm.addOperator("mutation", mutation);
 
             for (int t = 0; t < times; t++){
-                long startTime = System.currentTimeMillis();
-
+//                long startTime = System.currentTimeMillis();
                 SolutionSet population[] = algorithm.execute();
-
-                long endTime = System.currentTimeMillis();
-                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
+//                long endTime = System.currentTimeMillis();
+//                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
 
                 // 各个任务的目标数不一，所以评价时需要根据任务来重新设置种群规模。
                 SolutionSet resPopulation[] = new SolutionSet[taskNum];
@@ -113,7 +113,6 @@ public class MaTDE_main {
                 double igd;
                 for (int k = 0; k < taskNum; k++){
                     QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
-
                     if (population[k].size() == 0)
                         continue;
 
