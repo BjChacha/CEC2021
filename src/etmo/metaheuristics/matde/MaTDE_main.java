@@ -20,10 +20,10 @@ public class MaTDE_main {
 
         HashMap parameters;
 
-        int problemStart = 26;
-        int problemEnd = 26;
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        int times = 1;
+        int times = 21;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -73,9 +73,9 @@ public class MaTDE_main {
             algorithm.addOperator("crossover1", crossover1);
 
             parameters = new HashMap();
-            parameters.put("probability", 1.0);
-            parameters.put("distributionIndex", 30.0);
-            crossover2 = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+            parameters.put("CR_LB", 0.1);
+            parameters.put("CR_UB", 0.9);
+            crossover2 = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
             algorithm.addOperator("crossover2", crossover2);
 
             parameters = new HashMap();
@@ -121,7 +121,7 @@ public class MaTDE_main {
                 }
             }
             for(int i=0;i<taskNum;i++)
-                System.out.println("T" + (i+1) + "\t" + form.format(ave[i] / times));
+                System.out.println(form.format(ave[i] / times));
             System.out.println();
         }
     }

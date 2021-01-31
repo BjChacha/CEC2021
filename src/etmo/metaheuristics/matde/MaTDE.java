@@ -3,8 +3,10 @@ package etmo.metaheuristics.matde;
 import etmo.core.*;
 import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
+import etmo.util.logging.LogPopulation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MaTDE extends MtoAlgorithm {
@@ -67,17 +69,23 @@ public class MaTDE extends MtoAlgorithm {
         evaluations = 0;
 
         initPopulation();
-        logPopulation(evaluations);
+        LogPopulation.LogPopulation("MaTDE",population, problemSet_,evaluations);
         while (evaluations < maxEvaluations){
             createOffspringPopulation();
             updateArchives();
-
 //            for (int k = 0; k < problemSet_.size(); k++)
 //                System.out.println("Archive " + k + ": " + archives[k].size());
             // 一共1000代
             if (evaluations % (problemSet_.size() * populationSize * 20) == 0){
-                logPopulation(evaluations);
+                LogPopulation.LogPopulation("MaTDE",population, problemSet_,evaluations);
             }
+//            if (evaluations % (problemSet_.size() * populationSize * 50) == 0){
+//                System.out.println("eval: "+evaluations);
+//                for (int i = 0; i < probability.length; i++){
+//                    System.out.println(Arrays.toString(probability[i]));
+//                }
+//                System.out.println();
+//            }
         }
         return population;
     }
@@ -118,7 +126,7 @@ public class MaTDE extends MtoAlgorithm {
         for (int k = 0; k < problemSet_.size(); k++){
             double p = PseudoRandom.randDouble();
             List<Solution> offspringList = new ArrayList<Solution>();
-            if (p > alpha){
+            if (p > alpha || evaluations <= Math.floor(maxEvaluations * 0.25)){
                 // 不迁移。子种群内部进行交叉变异。
                 for (int i = 0; i < populationSize; i++){
                     Solution offSpring;
@@ -135,7 +143,7 @@ public class MaTDE extends MtoAlgorithm {
                             new Object[] {population[k].get(i), parents});
 
                     // 新增：变异
-                    mutation.execute(offSpring);
+//                    mutation.execute(offSpring);
 
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
@@ -167,31 +175,16 @@ public class MaTDE extends MtoAlgorithm {
 //                int betterCount = 0;
 
                 // 方案2：先记录迁移前的种群最优值。
-                double pBest = Double.MAX_VALUE;
-                for (int i = 0; i < populationSize; i++){
-                    pBest = Math.min(pBest, population[k].get(i).getObjectiveWeightedSum());
+                double[] pBest = new double[problemSet_.get(k).getNumberOfObjectives()];
+                for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
+                    pBest[j] = Double.MAX_VALUE;
+                    for (int i = 0; i < populationSize; i++) {
+                        pBest[j] = Math.min(pBest[j], population[k].get(i).getObjective(problemSet_.get(k).getStartObjPos()+j));
+                    }
                 }
 
                 for (int i = 0; i < populationSize; i++){
                     int r1 = PseudoRandom.randInt(0, populationSize - 1);
-                    // TODO 写一个均匀交叉。
-                    // 手动均匀交叉。
-//                    Variable[] offVar = population[k].get(i).getDecisionVariables();
-//                    // 选择迁移个体基因的概率。
-//                    double CR = PseudoRandom.randDouble(0.1, 0.9);
-//                    // 确保至少有一个基因被选择。
-//                    int l = PseudoRandom.randInt(0, offVar.length - 1);
-//                    for (int j = 0; j < offVar.length; j++){
-//                        if (j == l || PseudoRandom.randDouble() < CR) {
-//                            offVar[j] = population[assist].get(r1).getDecisionVariables()[j];
-//                        }
-//                        else{
-//                            offVar[j] = population[k].get(i).getDecisionVariables()[j];
-//                        }
-//                    }
-//                    Solution offSpring = new Solution(problemSet_);
-//                    offSpring.setDecisionVariables(offVar);
-
                     Solution[] parents = new Solution[2];
                     parents[0] = population[assist].get(r1);
                     parents[1] = population[k].get(i);
@@ -199,7 +192,7 @@ public class MaTDE extends MtoAlgorithm {
                     Solution offSpring = offSprings[PseudoRandom.randInt(0,1)];
 
                     // 新增：变异
-                    mutation.execute(offSpring);
+//                    mutation.execute(offSpring);
 
                     // 子代生成完毕。评价。
                     problemSet_.get(k).evaluate(offSpring);
@@ -213,9 +206,7 @@ public class MaTDE extends MtoAlgorithm {
                             break;
                         }
                     }
-                    // 使用目标值和的关系
-//                    if (offSpring.getObjectiveWeightedSum() > population[k].get(i).getObjectiveWeightedSum())
-//                        dominated = false;
+
                     // 每次生成子代都会更新种群
                     // 若子代比父代好，则直接替换掉父代。
                     if (dominated) {
@@ -239,12 +230,23 @@ public class MaTDE extends MtoAlgorithm {
 //                }
 
                 // 方案2：用目标函数总和来判断。
-                double pBestAfter = Double.MAX_VALUE;
-                for (int i = 0; i < populationSize; i++){
-                    pBestAfter = Math.min(pBest, population[k].get(i).getObjectiveWeightedSum());
+                double[] pBestAfter = new double[problemSet_.get(k).getNumberOfObjectives()];
+                for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
+                    pBestAfter[j] = Double.MAX_VALUE;
+                    for (int i = 0; i < populationSize; i++) {
+                        pBestAfter[j] = Math.min(pBestAfter[j], population[k].get(i).getObjective(problemSet_.get(k).getStartObjPos()+j));
+                    }
                 }
 
-                if (pBestAfter < pBest){
+                boolean isBetter = false;
+                for (int i = 0; i < problemSet_.get(k).getNumberOfObjectives(); i++){
+                    if (pBestAfter[i] < pBest[i]){
+                        isBetter = true;
+                        break;
+                    }
+                }
+
+                if (isBetter){
                     reward[k][assist] /= shrinkRate;
                 }
                 else{
@@ -327,33 +329,8 @@ public class MaTDE extends MtoAlgorithm {
             archives[task].add(p);
         }
         else{
-//            if (PseudoRandom.randDouble() < replaceRate) {
-            int replace = PseudoRandom.randInt(0, archiveSize - 1);
-            archives[task].replace(replace, p);
-//            }
-        }
-    }
-
-    private void logPopulation(int eval){
-        int taskNum = problemSet_.size();
-        SolutionSet resPopulation[] = new SolutionSet[taskNum];
-        for (int k = 0; k < taskNum; k++) {
-            resPopulation[k] = new SolutionSet();
-            for (int i = 0; i < population[k].size(); i++) {
-                Solution sol = population[k].get(i);
-
-                int start = problemSet_.get(k).getStartObjPos();
-                int end = problemSet_.get(k).getEndObjPos();
-
-                Solution newSolution = new Solution(end - start + 1);
-
-                for (int kk = start; kk <= end; kk++)
-                    newSolution.setObjective(kk - start, sol.getObjective(kk));
-
-                resPopulation[k].add(newSolution);
-            }
-            resPopulation[k].printObjectivesToFile("MaTDE\\" + "MaTDE_"+problemSet_.get(k).getNumberOfObjectives()+"Obj_"+
-                    problemSet_.get(k).getName()+ "_" + problemSet_.get(k).getNumberOfVariables() + "D" + eval + ".txt");
+            int idx = PseudoRandom.randInt(0, archiveSize - 1);
+            archives[task].replace(idx, p);
         }
     }
 }
