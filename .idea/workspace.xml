@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="reformed code struct for workflow.">
-      <change afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="fixed: PATH bug.">
+      <change afterPath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomUniformCrossover.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PF.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/core/Solution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/Solution.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/operators/crossover/CrossoverFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/operators/crossover/CrossoverFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomDECrossover.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomDECrossover.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,20 +86,7 @@
       <recent name="etmo.metaheuristics.moead" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.MaOEAC_main">
-    <configuration name="EMTET_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.emtet.EMTET_main" />
-      <module name="MTO-cec2021-" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.emtet.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="Application.MaTDE_main">
     <configuration name="MOEAD_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="15" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -135,6 +128,19 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="MaTDE_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.matde.MaTDE_main" />
+      <module name="MTO-cec2021-" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="etmo.metaheuristics.matde.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="NSGAII_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.nsgaII.NSGAII_main" />
       <module name="MTO-cec2021-" />
@@ -150,18 +156,18 @@
     </configuration>
     <list>
       <item itemvalue="Application.MOEAD_main" />
-      <item itemvalue="Application.EMTET_main" />
       <item itemvalue="Application.MaOEAC_main" />
       <item itemvalue="Application.MOMFEA_main" />
       <item itemvalue="Application.NSGAII_main" />
+      <item itemvalue="Application.MaTDE_main" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.MaTDE_main" />
         <item itemvalue="Application.MaOEAC_main" />
         <item itemvalue="Application.MOEAD_main" />
         <item itemvalue="Application.MOMFEA_main" />
         <item itemvalue="Application.NSGAII_main" />
-        <item itemvalue="Application.EMTET_main" />
       </list>
     </recent_temporary>
   </component>
@@ -475,7 +481,42 @@
       <option name="project" value="LOCAL" />
       <updated>1612008327156</updated>
     </task>
-    <option name="localTasksCounter" value="44" />
+    <task id="LOCAL-00044" summary="add PF gifs maker.">
+      <created>1612008817169</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1612008817169</updated>
+    </task>
+    <task id="LOCAL-00045" summary="update .idea config.">
+      <created>1612008867275</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1612008867275</updated>
+    </task>
+    <task id="LOCAL-00046" summary="add new operator: random DE crossover.">
+      <created>1612015677546</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1612015677546</updated>
+    </task>
+    <task id="LOCAL-00047" summary="modified algo MaTDE: use randomly parameters DE crossover.">
+      <created>1612015704871</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1612015704871</updated>
+    </task>
+    <task id="LOCAL-00048" summary="fixed: PATH bug.">
+      <created>1612016197741</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1612016197741</updated>
+    </task>
+    <option name="localTasksCounter" value="49" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -492,11 +533,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Fixed: wrong output file name. I'm stupid." />
-    <MESSAGE value="fixed: try to avoid computing angle to NaN" />
-    <MESSAGE value="add test main." />
-    <MESSAGE value="begin writing new algo: MaTDE." />
-    <MESSAGE value="remove unnecessary indent." />
     <MESSAGE value="modified println info." />
     <MESSAGE value="add functions" />
     <MESSAGE value="put .jar files into /libs." />
@@ -517,7 +553,12 @@
     <MESSAGE value="add log population function in utils." />
     <MESSAGE value="fixed: population full warning." />
     <MESSAGE value="reformed code struct for workflow." />
-    <option name="LAST_COMMIT_MESSAGE" value="reformed code struct for workflow." />
+    <MESSAGE value="add PF gifs maker." />
+    <MESSAGE value="update .idea config." />
+    <MESSAGE value="add new operator: random DE crossover." />
+    <MESSAGE value="modified algo MaTDE: use randomly parameters DE crossover." />
+    <MESSAGE value="fixed: PATH bug." />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed: PATH bug." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -561,14 +602,14 @@
           <option name="timeStamp" value="50" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java</url>
-          <line>119</line>
-          <option name="timeStamp" value="51" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/etmo/core/SolutionSet.java</url>
           <line>77</line>
           <option name="timeStamp" value="52" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java</url>
+          <line>173</line>
+          <option name="timeStamp" value="69" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -576,6 +617,10 @@
       <configuration name="Application">
         <watch expression="population" />
         <watch expression="problemSet_" />
+        <watch expression="pBestAfter" />
+        <watch expression="reward" language="JAVA" />
+        <watch expression="probability" />
+        <watch expression="population[3].solutionsList_" />
       </configuration>
     </watches-manager>
   </component>
