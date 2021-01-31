@@ -80,7 +80,7 @@ public class RandomDECrossover extends Crossover{
     /**
      * Constructor
      */
-    // public DifferentialEvolutionCrossover(Properties properties) {
+    // public RandomDECrossover(Properties properties) {
     // this();
     // CR_ = (new Double((String)properties.getProperty("CR_")));
     // F_ = (new Double((String)properties.getProperty("F_")));
@@ -109,7 +109,7 @@ public class RandomDECrossover extends Crossover{
                 && VALID_TYPES.contains(parent[1].getType().getClass())
                 && VALID_TYPES.contains(parent[2].getType().getClass()))) {
 
-            Configuration.logger_.severe("DifferentialEvolutionCrossover.execute: " + " the solutions "
+            Configuration.logger_.severe("RandomDECrossover.execute: " + " the solutions "
                     + "are not of the right type. The type should be 'Real' or 'ArrayReal', but " + parent[0].getType()
                     + " and " + parent[1].getType() + " and " + parent[2].getType() + " are obtained");
 
@@ -239,7 +239,7 @@ public class RandomDECrossover extends Crossover{
         } // if
         else {
             Configuration.logger_
-                    .severe("DifferentialEvolutionCrossover.execute: " + " unknown DE variant (" + DE_Variant_ + ")");
+                    .severe("RandomDECrossover.execute: " + " unknown DE variant (" + DE_Variant_ + ")");
             Class<String> cls = java.lang.String.class;
             String name = cls.getName();
             throw new JMException("Exception in " + name + ".execute()");
