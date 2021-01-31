@@ -3,10 +3,12 @@ package etmo.metaheuristics.matde;
 import etmo.core.*;
 import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
+import etmo.util.comparators.DominanceComparator;
 import etmo.util.logging.LogPopulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class MaTDE extends MtoAlgorithm {
@@ -18,15 +20,16 @@ public class MaTDE extends MtoAlgorithm {
     private SolutionSet[] population;
     private SolutionSet[] archives;
 
-    int evaluations;
-    int maxEvaluations;
+    private int evaluations;
+    private int maxEvaluations;
 
     // 不迁移时用的差分交叉
     Operator crossover1;
     // 迁移时用的SBX交叉
     Operator crossover2;
-
     Operator mutation;
+    Operator selector;
+    Comparator dominance;
 
 
     double alpha;
@@ -65,6 +68,8 @@ public class MaTDE extends MtoAlgorithm {
         crossover1 = operators_.get("crossover1");
         crossover2 = operators_.get("crossover2");
         mutation = operators_.get("mutation");
+        selector = operators_.get("operator");
+        dominance = new DominanceComparator();
 
         evaluations = 0;
 
@@ -79,13 +84,6 @@ public class MaTDE extends MtoAlgorithm {
             if (evaluations % (problemSet_.size() * populationSize * 20) == 0){
                 LogPopulation.LogPopulation("MaTDE",population, problemSet_,evaluations);
             }
-//            if (evaluations % (problemSet_.size() * populationSize * 50) == 0){
-//                System.out.println("eval: "+evaluations);
-//                for (int i = 0; i < probability.length; i++){
-//                    System.out.println(Arrays.toString(probability[i]));
-//                }
-//                System.out.println();
-//            }
         }
         return population;
     }
@@ -144,26 +142,14 @@ public class MaTDE extends MtoAlgorithm {
 
                     // 新增：变异
 //                    mutation.execute(offSpring);
-
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
                     // 由于原算法是单目标，这里多目标比较用支配关系。
-                    boolean dominated = true;
-                    for (int j = problemSet_.get(k).getStartObjPos(); j <= problemSet_.get(k).getEndObjPos(); j++) {
-                        if (offSpring.getObjective(j) > population[k].get(i).getObjective(j)) {
-                            dominated = false;
-                            break;
-                        }
-                    }
-                    // 使用目标值和的关系
-//                    if (offSpring.getObjectiveWeightedSum() > population[k].get(i).getObjectiveWeightedSum())
-//                        dominated = false;
-
-                    // 若子代比父代好，则直接替换掉父代。
-                    if (dominated) {
+                    int flag = dominance.compare(offSpring, population[k].get(i));
+                    if (flag == -1) {
                         population[k].replace(i, offSpring);
                     }
-                    else{
+                    else if (flag == 0){
                         offspringList.add(offSpring);
                     }
                 }
@@ -198,21 +184,11 @@ public class MaTDE extends MtoAlgorithm {
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
 
-                    boolean dominated = true;
-                    // 使用常规支配关系
-                    for (int j = problemSet_.get(k).getStartObjPos(); j <= problemSet_.get(k).getEndObjPos(); j++) {
-                        if (offSpring.getObjective(j) > population[k].get(i).getObjective(j)) {
-                            dominated = false;
-                            break;
-                        }
-                    }
-
-                    // 每次生成子代都会更新种群
-                    // 若子代比父代好，则直接替换掉父代。
-                    if (dominated) {
+                    int flag = dominance.compare(offSpring, population[k].get(i));
+                    if (flag == -1) {
                         population[k].replace(i, offSpring);
                     }
-                    else{
+                    else if (flag == 0){
                         offspringList.add(offSpring);
                     }
                 }

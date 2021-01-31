@@ -98,6 +98,9 @@ public class DominanceComparator implements Comparator {
 		for (int i = 0; i < solution1.getNumberOfObjectives(); i++) {
 			value1 = solution1.getObjective(i);
 			value2 = solution2.getObjective(i);
+			if (Double.isInfinite(value1) && Double.isInfinite(value2))
+				continue;
+
 			if (value1 < value2) {
 				flag = -1;
 			} else if (value1 > value2) {

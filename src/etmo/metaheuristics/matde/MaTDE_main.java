@@ -3,6 +3,7 @@ package etmo.metaheuristics.matde;
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
+import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 
@@ -17,7 +18,7 @@ public class MaTDE_main {
         Operator crossover1;
         Operator crossover2;
         Operator mutation;
-
+        Operator selector;
         HashMap parameters;
 
         int problemStart = 25;
@@ -83,6 +84,10 @@ public class MaTDE_main {
             parameters.put("distributionIndex", 20.0);
             mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
             algorithm.addOperator("mutation", mutation);
+
+            parameters = null;
+            selector = SelectionFactory.getSelectionOperator("BinaryTournament2", parameters);
+            algorithm.addOperator("operator", selector);
 
             for (int t = 0; t < times; t++){
 //                long startTime = System.currentTimeMillis();
