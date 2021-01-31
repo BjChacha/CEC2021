@@ -487,7 +487,7 @@ public class Solution implements Serializable {
 		return variable_;
 	} // getDecisionVariables
 
-	public double getDecisionVariablesOf(int idx) throws JMException {
+	public double getDecisionVariables(int idx) throws JMException {
 		return variable_[idx].getValue();
 	}
 
@@ -500,6 +500,10 @@ public class Solution implements Serializable {
 	 */
 	public void setDecisionVariables(Variable[] variables) {
 		variable_ = variables;
+	} // setDecisionVariables
+
+	public void setDecisionVariables(int idx, double value) throws JMException {
+		variable_[idx].setValue(value);
 	} // setDecisionVariables
 
 	public ProblemSet getProblemSet() {

@@ -497,7 +497,7 @@ public class SolutionSet implements Serializable {
     public double getMeanOfIdx(int idx) throws JMException {
 		double sum = 0;
 		for (int i = 0; i < solutionsList_.size(); i++){
-			sum += solutionsList_.get(i).getDecisionVariablesOf(idx);
+			sum += solutionsList_.get(i).getDecisionVariables(idx);
 		}
 		return sum / solutionsList_.size();
 	}
@@ -507,7 +507,7 @@ public class SolutionSet implements Serializable {
 		double[][] mat = new double[solutionsList_.size()][numVar];
 		for (int i = 0; i < solutionsList_.size(); i++){
 			for (int j = 0; j < numVar; j++){
-				mat[i][j] = solutionsList_.get(i).getDecisionVariablesOf(j);
+				mat[i][j] = solutionsList_.get(i).getDecisionVariables(j);
 			}
 		}
 		return mat;
