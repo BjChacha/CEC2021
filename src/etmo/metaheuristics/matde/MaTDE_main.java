@@ -22,9 +22,9 @@ public class MaTDE_main {
         HashMap parameters;
 
         int problemStart = 25;
-        int problemEnd = 32;
+        int problemEnd = 26;
 
-        int times = 21;
+        int times = 3;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -62,6 +62,8 @@ public class MaTDE_main {
             algorithm.setInputParameter("shrinkRate", 0.8);
             // Archive更新概率
             algorithm.setInputParameter("replaceRate", 0.2);
+            // 迁移起始系数
+            algorithm.setInputParameter("transferThreshold", 0.0);
 
             parameters = new HashMap();
             // 原论文：CR = (0.1, 0.9)
