@@ -7,7 +7,6 @@ import etmo.util.comparators.DominanceComparator;
 import etmo.util.logging.LogPopulation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -31,11 +30,12 @@ public class MaTDE extends MtoAlgorithm {
     Operator selector;
     Comparator dominance;
 
-
     double alpha;
     double ro;
     double shrinkRate;
     double replaceRate;
+
+    double transferThreshold;
 
     double[][] probability;
     double[][] reward;
@@ -61,6 +61,8 @@ public class MaTDE extends MtoAlgorithm {
         ro = (Double) getInputParameter("ro");
         shrinkRate = (Double) getInputParameter("shrinkRate");
         replaceRate = (Double) getInputParameter("replaceRate");
+
+        transferThreshold = (Double) getInputParameter("transferThreshold");
 
         probability = new double[problemSet_.size()][problemSet_.size()];
         reward = new double[problemSet_.size()][problemSet_.size()];
@@ -122,9 +124,10 @@ public class MaTDE extends MtoAlgorithm {
     private void createOffspringPopulation() throws JMException, ClassNotFoundException {
         // 每个任务单独进行
         for (int k = 0; k < problemSet_.size(); k++){
-            double p = PseudoRandom.randDouble();
             List<Solution> offspringList = new ArrayList<Solution>();
-            if (p > alpha || evaluations <= Math.floor(maxEvaluations * 0.25)){
+            double p = PseudoRandom.randDouble();
+            int betterCount = 0;
+            if (p > alpha || evaluations <= Math.floor(maxEvaluations * transferThreshold)){
                 // 不迁移。子种群内部进行交叉变异。
                 for (int i = 0; i < populationSize; i++){
                     Solution offSpring;
@@ -134,9 +137,9 @@ public class MaTDE extends MtoAlgorithm {
 
                     // 差分交叉
                     Solution[] parents = new Solution[3];
-                    parents[0] = population[k].get(r1);
-                    parents[1] = population[k].get(i);
-                    parents[2] = population[k].get(i);
+                    parents[0] = new Solution(population[k].get(r1));
+                    parents[1] = new Solution(population[k].get(i));
+                    parents[2] = new Solution(population[k].get(i));
                     offSpring = (Solution) crossover1.execute(
                             new Object[] {population[k].get(i), parents});
 
@@ -172,8 +175,8 @@ public class MaTDE extends MtoAlgorithm {
                 for (int i = 0; i < populationSize; i++){
                     int r1 = PseudoRandom.randInt(0, populationSize - 1);
                     Solution[] parents = new Solution[2];
-                    parents[0] = population[assist].get(r1);
-                    parents[1] = population[k].get(i);
+                    parents[0] = new Solution(population[assist].get(r1));
+                    parents[1] = new Solution(population[k].get(i));
                     Solution[] offSprings = (Solution[]) crossover2.execute(parents);
                     Solution offSpring = offSprings[PseudoRandom.randInt(0,1)];
 
@@ -186,13 +189,17 @@ public class MaTDE extends MtoAlgorithm {
 
                     int flag = dominance.compare(offSpring, population[k].get(i));
                     if (flag == -1) {
+//                        betterCount ++;
+                        if (k == 0){
+                            Solution tmp = population[k].get(i);
+                        }
                         population[k].replace(i, offSpring);
                     }
                     else if (flag == 0){
                         offspringList.add(offSpring);
                     }
                 }
-//                System.out.println("Transfer) Better count: "+betterCount);
+//                System.out.println("Task "+k+": transfer Better count: "+betterCount);
                 // 原算法：若pBest更新，则奖励增加。
                 // 这里是多目标，不好判断pBest是否更新。
 
