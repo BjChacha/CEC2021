@@ -26,10 +26,10 @@ public class MaOEAC_main {
 
         HashMap parameters;
 
-        int taskStart = 30;
-        int taskEnd = 32;
+        int taskStart = 25;
+        int taskEnd = 26;
 
-        int times = 21;
+        int times = 1;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 

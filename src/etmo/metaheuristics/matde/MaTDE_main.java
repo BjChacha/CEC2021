@@ -22,7 +22,7 @@ public class MaTDE_main {
         HashMap parameters;
 
         int problemStart = 25;
-        int problemEnd = 26;
+        int problemEnd = 25;
 
         int times = 3;
 

@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="fixed: PATH bug.">
-      <change afterPath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomUniformCrossover.java" afterDir="false" />
+    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PF.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/core/Solution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/Solution.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/operators/crossover/CrossoverFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/operators/crossover/CrossoverFactory.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomDECrossover.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomDECrossover.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,7 +71,7 @@
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="preferences.editor" />
+    <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.github.ui.GithubSettingsConfigurable" />
     <property name="two.files.diff.last.used.folder" value="$PROJECT_DIR$/../etmo-my/etmo" />
   </component>
   <component name="RecentsManager">
@@ -179,83 +172,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1611191764309</updated>
-    </task>
-    <task id="LOCAL-00001" summary="init: my code.">
-      <created>1611193944876</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1611193944876</updated>
-    </task>
-    <task id="LOCAL-00002" summary="test">
-      <created>1611195506267</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1611195506267</updated>
-    </task>
-    <task id="LOCAL-00003" summary="test: pull multiple git.">
-      <created>1611195898536</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1611195898536</updated>
-    </task>
-    <task id="LOCAL-00004" summary="test: pull multiple git simultaneously.">
-      <created>1611196363760</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1611196363760</updated>
-    </task>
-    <task id="LOCAL-00005" summary="modified: MOMFEA">
-      <created>1611201889806</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1611201889806</updated>
-    </task>
-    <task id="LOCAL-00006" summary="fixed: wrong parameter setting on MOEAD and MaOEAC. (maxEvaluations)">
-      <created>1611201961047</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1611201961047</updated>
-    </task>
-    <task id="LOCAL-00007" summary="fixed: wrong H_ setting in MOEAD.">
-      <created>1611208841038</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1611208841038</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fixed: init algo in each repeat run.">
-      <created>1611208877269</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1611208877269</updated>
-    </task>
-    <task id="LOCAL-00009" summary="fixed: calculate populationSize to meet the require of PCM. Haven't figured if it do right thing according to the algo yet.">
-      <created>1611213129152</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1611213129152</updated>
-    </task>
-    <task id="LOCAL-00010" summary="Fixed: wrong output file name. I'm stupid.">
-      <created>1611218040866</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1611218040866</updated>
-    </task>
-    <task id="LOCAL-00011" summary="fixed: try to avoid computing angle to NaN">
-      <created>1611466646244</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1611466646244</updated>
     </task>
     <task id="LOCAL-00012" summary="add test main.">
       <created>1611583655692</created>
@@ -516,7 +432,91 @@
       <option name="project" value="LOCAL" />
       <updated>1612016197741</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="add new operator: RandomUniformCrossover.">
+      <created>1612094460070</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1612094460070</updated>
+    </task>
+    <task id="LOCAL-00050" summary="fixed log info error.">
+      <created>1612094491658</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1612094491658</updated>
+    </task>
+    <task id="LOCAL-00051" summary="improve tools flexibility.">
+      <created>1612094508348</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1612094508348</updated>
+    </task>
+    <task id="LOCAL-00052" summary="rename function and add set variables function.">
+      <created>1612094553603</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1612094553603</updated>
+    </task>
+    <task id="LOCAL-00053" summary="use the paper operators; fixed transfer bug; add converge firstly strategy.">
+      <created>1612094623418</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1612094623418</updated>
+    </task>
+    <task id="LOCAL-00054" summary="compatible with sub-population mode.">
+      <created>1612094675262</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1612094675262</updated>
+    </task>
+    <task id="LOCAL-00055" summary="update .idea setting.">
+      <created>1612094697765</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1612094697765</updated>
+    </task>
+    <task id="LOCAL-00056" summary="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
+      <created>1612099341010</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1612099341010</updated>
+    </task>
+    <task id="LOCAL-00057" summary="improve my tools: plot final PF.">
+      <created>1612181334570</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1612181334570</updated>
+    </task>
+    <task id="LOCAL-00058" summary="fixed comparator bug.">
+      <created>1612181358804</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1612181358804</updated>
+    </task>
+    <task id="LOCAL-00059" summary="fixed crossover bug (weird that bug only occurs in every task 1)">
+      <created>1612181412435</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1612181412435</updated>
+    </task>
+    <task id="LOCAL-00060" summary="add new parameter: transfer threshold.">
+      <created>1612181441064</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1612181441064</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -533,18 +533,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="modified println info." />
-    <MESSAGE value="add functions" />
-    <MESSAGE value="put .jar files into /libs." />
-    <MESSAGE value="add algo: MaTDE. No bug anymore hopefully. I'm tired :(" />
-    <MESSAGE value="add ignore filetype: .class" />
-    <MESSAGE value="update gitignore" />
-    <MESSAGE value="add logPopulation function." />
-    <MESSAGE value="add a timer." />
-    <MESSAGE value="fixed: get sum of objectives." />
-    <MESSAGE value="add .idea" />
-    <MESSAGE value="merge" />
-    <MESSAGE value="my .idea" />
     <MESSAGE value="update .idea setting" />
     <MESSAGE value="update algo MaTDE: &#10;add SBX crossover;&#10;add NS+CD; &#10;add mutation." />
     <MESSAGE value="Modified algo MaTDE: replaceRate is valid only when archive is full." />
@@ -558,7 +546,19 @@
     <MESSAGE value="add new operator: random DE crossover." />
     <MESSAGE value="modified algo MaTDE: use randomly parameters DE crossover." />
     <MESSAGE value="fixed: PATH bug." />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed: PATH bug." />
+    <MESSAGE value="add new operator: RandomUniformCrossover." />
+    <MESSAGE value="fixed log info error." />
+    <MESSAGE value="improve tools flexibility." />
+    <MESSAGE value="rename function and add set variables function." />
+    <MESSAGE value="use the paper operators; fixed transfer bug; add converge firstly strategy." />
+    <MESSAGE value="compatible with sub-population mode." />
+    <MESSAGE value="update .idea setting." />
+    <MESSAGE value="modified algo MaTDE: add BinaryTournament selector; use dominance comparator." />
+    <MESSAGE value="improve my tools: plot final PF." />
+    <MESSAGE value="fixed comparator bug." />
+    <MESSAGE value="fixed crossover bug (weird that bug only occurs in every task 1)" />
+    <MESSAGE value="add new parameter: transfer threshold." />
+    <option name="LAST_COMMIT_MESSAGE" value="add new parameter: transfer threshold." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -608,8 +608,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java</url>
-          <line>173</line>
-          <option name="timeStamp" value="69" />
+          <line>193</line>
+          <option name="timeStamp" value="78" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java</url>
+          <line>195</line>
+          <option name="timeStamp" value="79" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
