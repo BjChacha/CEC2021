@@ -2,11 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/MTO-cec2021-.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MTO-cec2021-.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PF.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +53,9 @@
       </set>
     </option>
   </component>
+  <component name="ProblemsViewState">
+    <option name="showPreview" value="true" />
+  </component>
   <component name="ProjectId" id="1nMEsC0Y8FLVHXyluRYQvQLT6DJ" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -79,15 +86,26 @@
       <recent name="etmo.metaheuristics.moead" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.MaTDE_main">
-    <configuration name="MOEAD_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="ALTERNATIVE_JRE_PATH" value="15" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.moead.MOEAD_main" />
+  <component name="RunManager" selected="Application.MOMFEAII_main">
+    <configuration name="EMTET_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.emtet.EMTET_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.moead.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.emtet.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MOMFEAII_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.momfeaii.MOMFEAII_main" />
+      <module name="MTO-cec2021-" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="etmo.metaheuristics.momfeaii.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -134,33 +152,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="NSGAII_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.nsgaII.NSGAII_main" />
-      <module name="MTO-cec2021-" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.nsgaII.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <list>
-      <item itemvalue="Application.MOEAD_main" />
       <item itemvalue="Application.MaOEAC_main" />
       <item itemvalue="Application.MOMFEA_main" />
-      <item itemvalue="Application.NSGAII_main" />
       <item itemvalue="Application.MaTDE_main" />
+      <item itemvalue="Application.EMTET_main" />
+      <item itemvalue="Application.MOMFEAII_main" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.MOMFEAII_main" />
+        <item itemvalue="Application.EMTET_main" />
+        <item itemvalue="Application.MOMFEA_main" />
         <item itemvalue="Application.MaTDE_main" />
         <item itemvalue="Application.MaOEAC_main" />
-        <item itemvalue="Application.MOEAD_main" />
-        <item itemvalue="Application.MOMFEA_main" />
-        <item itemvalue="Application.NSGAII_main" />
       </list>
     </recent_temporary>
   </component>
@@ -172,27 +177,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1611191764309</updated>
-    </task>
-    <task id="LOCAL-00012" summary="add test main.">
-      <created>1611583655692</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1611583655692</updated>
-    </task>
-    <task id="LOCAL-00013" summary="begin writing new algo: MaTDE.">
-      <created>1611583691741</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1611583691741</updated>
-    </task>
-    <task id="LOCAL-00014" summary="begin writing new algo: MaTDE.">
-      <created>1611583709107</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1611583709107</updated>
     </task>
     <task id="LOCAL-00015" summary="modified println info.">
       <created>1611621236974</created>
@@ -516,7 +500,28 @@
       <option name="project" value="LOCAL" />
       <updated>1612181441064</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="nothing.">
+      <created>1612234108003</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1612234108003</updated>
+    </task>
+    <task id="LOCAL-00062" summary="add algo: MOMFEAII">
+      <created>1612400007172</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1612400007172</updated>
+    </task>
+    <task id="LOCAL-00063" summary="reformed code struct for workflow.">
+      <created>1612410151828</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1612410151828</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -533,14 +538,11 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="update .idea setting" />
-    <MESSAGE value="update algo MaTDE: &#10;add SBX crossover;&#10;add NS+CD; &#10;add mutation." />
     <MESSAGE value="Modified algo MaTDE: replaceRate is valid only when archive is full." />
     <MESSAGE value="fixed: trivial." />
     <MESSAGE value="add log population." />
     <MESSAGE value="add log population function in utils." />
     <MESSAGE value="fixed: population full warning." />
-    <MESSAGE value="reformed code struct for workflow." />
     <MESSAGE value="add PF gifs maker." />
     <MESSAGE value="update .idea config." />
     <MESSAGE value="add new operator: random DE crossover." />
@@ -558,7 +560,10 @@
     <MESSAGE value="fixed comparator bug." />
     <MESSAGE value="fixed crossover bug (weird that bug only occurs in every task 1)" />
     <MESSAGE value="add new parameter: transfer threshold." />
-    <option name="LAST_COMMIT_MESSAGE" value="add new parameter: transfer threshold." />
+    <MESSAGE value="nothing." />
+    <MESSAGE value="add algo: MOMFEAII" />
+    <MESSAGE value="reformed code struct for workflow." />
+    <option name="LAST_COMMIT_MESSAGE" value="reformed code struct for workflow." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -605,16 +610,6 @@
           <url>file://$PROJECT_DIR$/src/etmo/core/SolutionSet.java</url>
           <line>77</line>
           <option name="timeStamp" value="52" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java</url>
-          <line>193</line>
-          <option name="timeStamp" value="78" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java</url>
-          <line>195</line>
-          <option name="timeStamp" value="79" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
