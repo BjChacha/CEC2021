@@ -2,15 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/MTO-cec2021-.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/MTO-cec2021-.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PF.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +86,7 @@
       <recent name="etmo.metaheuristics.moead" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.MOMFEAII_main">
+  <component name="RunManager" selected="Application.MaTMY_main">
     <configuration name="EMTET_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.emtet.EMTET_main" />
       <module name="MTO-cec2021-" />
@@ -126,19 +126,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MaOEAC_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.maoeac.MaOEAC_main" />
-      <module name="MTO-cec2021-" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.maoeac.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="MaTDE_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.matde.MaTDE_main" />
       <module name="MTO-cec2021-" />
@@ -152,20 +139,33 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="MaTMY_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.matmy.MaTMY_main" />
+      <module name="MTO-cec2021-" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="etmo.metaheuristics.matmy.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <list>
-      <item itemvalue="Application.MaOEAC_main" />
       <item itemvalue="Application.MOMFEA_main" />
       <item itemvalue="Application.MaTDE_main" />
       <item itemvalue="Application.EMTET_main" />
       <item itemvalue="Application.MOMFEAII_main" />
+      <item itemvalue="Application.MaTMY_main" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.MaTMY_main" />
         <item itemvalue="Application.MOMFEAII_main" />
         <item itemvalue="Application.EMTET_main" />
         <item itemvalue="Application.MOMFEA_main" />
         <item itemvalue="Application.MaTDE_main" />
-        <item itemvalue="Application.MaOEAC_main" />
       </list>
     </recent_temporary>
   </component>
@@ -177,13 +177,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1611191764309</updated>
-    </task>
-    <task id="LOCAL-00015" summary="modified println info.">
-      <created>1611621236974</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1611621236974</updated>
     </task>
     <task id="LOCAL-00016" summary="modified println info.">
       <created>1611621252949</created>
@@ -521,7 +514,14 @@
       <option name="project" value="LOCAL" />
       <updated>1612410151828</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="update .idea setting.">
+      <created>1612410508496</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1612410508496</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -554,7 +554,6 @@
     <MESSAGE value="rename function and add set variables function." />
     <MESSAGE value="use the paper operators; fixed transfer bug; add converge firstly strategy." />
     <MESSAGE value="compatible with sub-population mode." />
-    <MESSAGE value="update .idea setting." />
     <MESSAGE value="modified algo MaTDE: add BinaryTournament selector; use dominance comparator." />
     <MESSAGE value="improve my tools: plot final PF." />
     <MESSAGE value="fixed comparator bug." />
@@ -563,7 +562,8 @@
     <MESSAGE value="nothing." />
     <MESSAGE value="add algo: MOMFEAII" />
     <MESSAGE value="reformed code struct for workflow." />
-    <option name="LAST_COMMIT_MESSAGE" value="reformed code struct for workflow." />
+    <MESSAGE value="update .idea setting." />
+    <option name="LAST_COMMIT_MESSAGE" value="update .idea setting." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
