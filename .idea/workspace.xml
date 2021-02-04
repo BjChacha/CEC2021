@@ -2,15 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PF.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -177,20 +175,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1611191764309</updated>
-    </task>
-    <task id="LOCAL-00016" summary="modified println info.">
-      <created>1611621252949</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1611621252949</updated>
-    </task>
-    <task id="LOCAL-00017" summary="remove unnecessary indent.">
-      <created>1611621426169</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1611621426169</updated>
     </task>
     <task id="LOCAL-00018" summary="modified println info.">
       <created>1611621465976</created>
@@ -521,7 +505,21 @@
       <option name="project" value="LOCAL" />
       <updated>1612410508496</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="fixed bug">
+      <created>1612447828486</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1612447828486</updated>
+    </task>
+    <task id="LOCAL-00066" summary="add new algo: MaTMY">
+      <created>1612447847307</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1612447847307</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -538,8 +536,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="Modified algo MaTDE: replaceRate is valid only when archive is full." />
-    <MESSAGE value="fixed: trivial." />
     <MESSAGE value="add log population." />
     <MESSAGE value="add log population function in utils." />
     <MESSAGE value="fixed: population full warning." />
@@ -563,7 +559,9 @@
     <MESSAGE value="add algo: MOMFEAII" />
     <MESSAGE value="reformed code struct for workflow." />
     <MESSAGE value="update .idea setting." />
-    <option name="LAST_COMMIT_MESSAGE" value="update .idea setting." />
+    <MESSAGE value="fixed bug" />
+    <MESSAGE value="add new algo: MaTMY" />
+    <option name="LAST_COMMIT_MESSAGE" value="add new algo: MaTMY" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

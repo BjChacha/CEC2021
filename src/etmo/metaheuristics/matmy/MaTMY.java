@@ -66,7 +66,10 @@ public class MaTMY extends MtoAlgorithm {
                 if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
                     LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
             }
+
             tentativeTransfer();           // evaluations: T x N x 1
+            if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
+                LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
 
             for (int t = 0; t < 10; t++) {
                 selectiveTransfer();       // evaluations: T x N x times
