@@ -11,31 +11,22 @@ import java.util.Comparator;
 import java.util.List;
 
 public class MaTDE extends MtoAlgorithm {
-    // Population Size per task
     private int populationSize;
-    // Archive Size per task
     private int archiveSize;
-    // Population
     private SolutionSet[] population;
     private SolutionSet[] archives;
 
     private int evaluations;
     private int maxEvaluations;
 
-    // 不迁移时用的差分交叉
     Operator crossover1;
-    // 迁移时用的SBX交叉
     Operator crossover2;
-    Operator mutation;
-    Operator selector;
     Comparator dominance;
 
     double alpha;
     double ro;
     double shrinkRate;
     double replaceRate;
-
-    double transferThreshold;
 
     double[][] probability;
     double[][] reward;
@@ -62,15 +53,11 @@ public class MaTDE extends MtoAlgorithm {
         shrinkRate = (Double) getInputParameter("shrinkRate");
         replaceRate = (Double) getInputParameter("replaceRate");
 
-        transferThreshold = (Double) getInputParameter("transferThreshold");
-
         probability = new double[problemSet_.size()][problemSet_.size()];
         reward = new double[problemSet_.size()][problemSet_.size()];
 
         crossover1 = operators_.get("crossover1");
         crossover2 = operators_.get("crossover2");
-        mutation = operators_.get("mutation");
-        selector = operators_.get("operator");
         dominance = new DominanceComparator();
 
         evaluations = 0;
@@ -80,9 +67,6 @@ public class MaTDE extends MtoAlgorithm {
         while (evaluations < maxEvaluations){
             createOffspringPopulation();
             updateArchives();
-//            for (int k = 0; k < problemSet_.size(); k++)
-//                System.out.println("Archive " + k + ": " + archives[k].size());
-            // 一共1000代
             if (evaluations % (problemSet_.size() * populationSize * 20) == 0){
                 LogPopulation.LogPopulation("MaTDE",population, problemSet_,evaluations);
             }
@@ -121,49 +105,38 @@ public class MaTDE extends MtoAlgorithm {
         }
     }
 
-    private void createOffspringPopulation() throws JMException, ClassNotFoundException {
-        // 每个任务单独进行
+    private void createOffspringPopulation() throws JMException {
         for (int k = 0; k < problemSet_.size(); k++){
-            List<Solution> offspringList = new ArrayList<Solution>();
+            List<Solution> offspringList = new ArrayList<>();
             double p = PseudoRandom.randDouble();
-            int betterCount = 0;
-            if (p > alpha || evaluations <= Math.floor(maxEvaluations * transferThreshold)){
-                // 不迁移。子种群内部进行交叉变异。
+            if (p > alpha){
                 for (int i = 0; i < populationSize; i++){
                     Solution offSpring;
                     int r1 = i;
                     while (r1 == i)
                         r1 = PseudoRandom.randInt(0, populationSize - 1);
 
-                    // 差分交叉
                     Solution[] parents = new Solution[3];
                     parents[0] = new Solution(population[k].get(r1));
                     parents[1] = new Solution(population[k].get(i));
                     parents[2] = new Solution(population[k].get(i));
-                    offSpring = (Solution) crossover1.execute(
-                            new Object[] {population[k].get(i), parents});
+                    offSpring = (Solution) crossover1.execute(new Object[] {population[k].get(i), parents});
 
-                    // 新增：变异
-//                    mutation.execute(offSpring);
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
-                    // 由于原算法是单目标，这里多目标比较用支配关系。
+
                     int flag = dominance.compare(offSpring, population[k].get(i));
-                    if (flag == -1) {
+                    if (flag < 0) {
                         population[k].replace(i, offSpring);
                     }
                     else if (flag == 0){
                         offspringList.add(offSpring);
                     }
                 }
-//                System.out.println("No Transfer) Better count: "+betterCount);
             }
             else{
-                // 迁移。找一个最合适的辅助种群迁移到目标种群。
                 int assist = findAssistTask(k);
-//                int betterCount = 0;
 
-                // 方案2：先记录迁移前的种群最优值。
                 double[] pBest = new double[problemSet_.get(k).getNumberOfObjectives()];
                 for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
                     pBest[j] = Double.MAX_VALUE;
@@ -180,39 +153,18 @@ public class MaTDE extends MtoAlgorithm {
                     Solution[] offSprings = (Solution[]) crossover2.execute(parents);
                     Solution offSpring = offSprings[PseudoRandom.randInt(0,1)];
 
-                    // 新增：变异
-//                    mutation.execute(offSpring);
-
-                    // 子代生成完毕。评价。
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
 
                     int flag = dominance.compare(offSpring, population[k].get(i));
-                    if (flag == -1) {
-//                        betterCount ++;
-                        if (k == 0){
-                            Solution tmp = population[k].get(i);
-                        }
+                    if (flag < 0) {
                         population[k].replace(i, offSpring);
                     }
                     else if (flag == 0){
                         offspringList.add(offSpring);
                     }
                 }
-//                System.out.println("Task "+k+": transfer Better count: "+betterCount);
-                // 原算法：若pBest更新，则奖励增加。
-                // 这里是多目标，不好判断pBest是否更新。
 
-                // 方案1：用子代淘汰父代次数来代替。
-                // 这里可以做自适应：与不迁移时的淘汰频率比较，等。
-//                if (betterCount >= Math.round(0.35 * populationSize)){
-//                    reward[k][assist] /= shrink_rate;
-//                }
-//                else{
-//                    reward[k][assist] += shrink_rate;
-//                }
-
-                // 方案2：用目标函数总和来判断。
                 double[] pBestAfter = new double[problemSet_.get(k).getNumberOfObjectives()];
                 for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
                     pBestAfter[j] = Double.MAX_VALUE;
@@ -253,7 +205,7 @@ public class MaTDE extends MtoAlgorithm {
             }
             // 非支配排序
             Ranking ranking = new Ranking(union);
-            SolutionSet front = null;
+            SolutionSet front;
             // 原种群清空，其个体已被保留到合并种群union中
             population[k].clear();
             Distance distance = new Distance();
@@ -278,7 +230,6 @@ public class MaTDE extends MtoAlgorithm {
                 idx ++;
             }
         }
-//        System.out.println("Better Count: " + betterCount);
     }
 
     private int findAssistTask(int task) throws JMException {
@@ -293,7 +244,7 @@ public class MaTDE extends MtoAlgorithm {
         }
         double s = 0;
         double p = PseudoRandom.randDouble();
-        int idx = 0;
+        int idx;
         // 轮盘赌算法
         for (idx = 0; idx < problemSet_.size(); idx++) {
             if (idx == task)

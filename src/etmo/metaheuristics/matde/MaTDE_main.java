@@ -2,8 +2,6 @@ package etmo.metaheuristics.matde;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
-import etmo.operators.mutation.MutationFactory;
-import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 
@@ -17,14 +15,13 @@ public class MaTDE_main {
         MtoAlgorithm algorithm;
         Operator crossover1;
         Operator crossover2;
-        Operator mutation;
-        Operator selector;
+
         HashMap parameters;
 
         int problemStart = 25;
-        int problemEnd = 25;
+        int problemEnd = 32;
 
-        int times = 3;
+        int times = 21;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -62,8 +59,6 @@ public class MaTDE_main {
             algorithm.setInputParameter("shrinkRate", 0.8);
             // Archive更新概率
             algorithm.setInputParameter("replaceRate", 0.2);
-            // 迁移起始系数
-            algorithm.setInputParameter("transferThreshold", 0.0);
 
             parameters = new HashMap();
             // 原论文：CR = (0.1, 0.9)
@@ -81,24 +76,14 @@ public class MaTDE_main {
             crossover2 = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
             algorithm.addOperator("crossover2", crossover2);
 
-            parameters = new HashMap();
-            parameters.put("probability", 1.0 / problemSet.getMaxDimension());
-            parameters.put("distributionIndex", 20.0);
-            mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
-            algorithm.addOperator("mutation", mutation);
-
-            parameters = null;
-            selector = SelectionFactory.getSelectionOperator("BinaryTournament2", parameters);
-            algorithm.addOperator("operator", selector);
-
             for (int t = 0; t < times; t++){
 //                long startTime = System.currentTimeMillis();
-                SolutionSet population[] = algorithm.execute();
+                SolutionSet[] population = algorithm.execute();
 //                long endTime = System.currentTimeMillis();
 //                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
 
                 // 各个任务的目标数不一，所以评价时需要根据任务来重新设置种群规模。
-                SolutionSet resPopulation[] = new SolutionSet[taskNum];
+                SolutionSet[] resPopulation = new SolutionSet[taskNum];
                 for (int k = 0; k < taskNum; k++) {
                     resPopulation[k] = new SolutionSet();
                     for (int i = 0; i < population[k].size(); i++) {
