@@ -31,10 +31,10 @@ public class MOMFEA_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 32;
+		int taskStart = 30;
 		int taskEnd = 32;
 
-		int times = 1;
+		int times = 5;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 

@@ -5,10 +5,11 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PF.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/emtet/EMTET_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matde/MaTDE_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomUniformCrossover.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/operators/crossover/RandomUniformCrossover.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,12 +99,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MOMFEAII_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.momfeaii.MOMFEAII_main" />
+    <configuration name="MOEAD_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.moead.MOEAD_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.momfeaii.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.moead.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -111,12 +112,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MOMFEA_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.momfea.MOMFEA_main" />
+    <configuration name="MOMFEAII_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.momfeaii.MOMFEAII_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.momfea.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.momfeaii.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -151,19 +152,19 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.MOMFEA_main" />
-      <item itemvalue="Application.MaTDE_main" />
       <item itemvalue="Application.EMTET_main" />
       <item itemvalue="Application.MOMFEAII_main" />
       <item itemvalue="Application.MaTMY_main" />
+      <item itemvalue="Application.MOEAD_main" />
+      <item itemvalue="Application.MaTDE_main" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.MaTMY_main" />
+        <item itemvalue="Application.MaTDE_main" />
+        <item itemvalue="Application.MOEAD_main" />
         <item itemvalue="Application.MOMFEAII_main" />
         <item itemvalue="Application.EMTET_main" />
-        <item itemvalue="Application.MOMFEA_main" />
-        <item itemvalue="Application.MaTDE_main" />
       </list>
     </recent_temporary>
   </component>
@@ -175,34 +176,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1611191764309</updated>
-    </task>
-    <task id="LOCAL-00018" summary="modified println info.">
-      <created>1611621465976</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1611621465976</updated>
-    </task>
-    <task id="LOCAL-00019" summary="add functions">
-      <created>1611670213442</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1611670213442</updated>
-    </task>
-    <task id="LOCAL-00020" summary="put .jar files into /libs.">
-      <created>1611754428607</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1611754428607</updated>
-    </task>
-    <task id="LOCAL-00021" summary="put .jar files into /libs.">
-      <created>1611754524292</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1611754524292</updated>
     </task>
     <task id="LOCAL-00022" summary="add algo: MaTDE. No bug anymore hopefully. I'm tired :(">
       <created>1611754553388</created>
@@ -519,7 +492,35 @@
       <option name="project" value="LOCAL" />
       <updated>1612447847307</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="add new algo: MaTMY">
+      <created>1612447890712</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1612447890712</updated>
+    </task>
+    <task id="LOCAL-00068" summary="recover to original algo.">
+      <created>1612447931296</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1612447931296</updated>
+    </task>
+    <task id="LOCAL-00069" summary="support new algo: MaTMY and MOMFEAII">
+      <created>1612448120973</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1612448120973</updated>
+    </task>
+    <task id="LOCAL-00070" summary="add a function">
+      <created>1612516986686</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1612516986686</updated>
+    </task>
+    <option name="localTasksCounter" value="71" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -536,9 +537,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add log population." />
-    <MESSAGE value="add log population function in utils." />
-    <MESSAGE value="fixed: population full warning." />
     <MESSAGE value="add PF gifs maker." />
     <MESSAGE value="update .idea config." />
     <MESSAGE value="add new operator: random DE crossover." />
@@ -561,7 +559,10 @@
     <MESSAGE value="update .idea setting." />
     <MESSAGE value="fixed bug" />
     <MESSAGE value="add new algo: MaTMY" />
-    <option name="LAST_COMMIT_MESSAGE" value="add new algo: MaTMY" />
+    <MESSAGE value="recover to original algo." />
+    <MESSAGE value="support new algo: MaTMY and MOMFEAII" />
+    <MESSAGE value="add a function" />
+    <option name="LAST_COMMIT_MESSAGE" value="add a function" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -609,6 +610,11 @@
           <line>77</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD.java</url>
+          <line>142</line>
+          <option name="timeStamp" value="90" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -619,7 +625,12 @@
         <watch expression="reward" language="JAVA" />
         <watch expression="probability" />
         <watch expression="population[3].solutionsList_" />
+        <watch expression="transferSource" />
+        <watch expression="evaluations" />
       </configuration>
+      <inline-watch fileUrl="file://$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" line="135">
+        <watch expression="offspringList" language="JAVA" />
+      </inline-watch>
     </watches-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">

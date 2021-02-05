@@ -28,11 +28,11 @@ public class EMTET_main {
         int problemStart = 25;
         int problemEnd = 32;
 
-        int times = 1;
+        int times = 5;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
-        System.out.println("Algo: MaTDE.");
+        System.out.println("Algo: EMTET.");
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
             problemSet = (ProblemSet) Class

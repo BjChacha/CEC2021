@@ -37,6 +37,8 @@ public class MaTMY extends MtoAlgorithm {
     double replaceRate;
     double transferThreshold;
 
+    double globalBest;
+
     double[][] probability;
     double[][] reward;
     // 计算收敛幅度
@@ -61,23 +63,15 @@ public class MaTMY extends MtoAlgorithm {
         LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
 
         while (evaluations < maxEvaluations){
-            for (int t = 0; t < 10; t++) {
+            for (int t = 0; t < 100; t++) {
                 soloConverge();            // evaluations: T x N x times
-                if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
-                    LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
             }
 
             tentativeTransfer();           // evaluations: T x N x 1
-            if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
-                LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
 
-            for (int t = 0; t < 10; t++) {
+            for (int t = 0; t < 4; t++) {
                 selectiveTransfer();       // evaluations: T x N x times
-                if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
-                    LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
             }
-//            if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
-//                LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
         }
         return population;
     }
@@ -107,6 +101,7 @@ public class MaTMY extends MtoAlgorithm {
     private void soloConverge() throws JMException {
         for (int k = 0; k < problemSet_.size(); k++) {
             List<Solution> offspringList = new ArrayList<Solution>();
+            double[] pBest = population[k].getBestObjectiveVector(k);
             for (int i = 0; i < populationSize; i++) {
                 Solution offSpring;
                 int r1, r2;
@@ -115,6 +110,10 @@ public class MaTMY extends MtoAlgorithm {
                     r1 = PseudoRandom.randInt(0, populationSize - 1);
                     r2 = PseudoRandom.randInt(0, populationSize - 1);
                 }
+
+                if (evaluations <= 0.75 * maxEvaluations && evaluations % (2 * problemSet_.size() * populationSize) >= (problemSet_.size() * populationSize))
+                    r2 = i;
+
                 // 差分交叉
                 Solution[] parents = new Solution[3];
                 parents[0] = new Solution(population[k].get(r1));
@@ -135,28 +134,30 @@ public class MaTMY extends MtoAlgorithm {
             }
             // 更新种群
             EliteSelect(k, offspringList);
+            double[] pBestAfter = population[k].getBestObjectiveVector(k);
+
+            if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
+                LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
         }
     }
 
     private void tentativeTransfer() throws JMException {
+        for (int i = 0; i < transferSource.length; i ++)
+            transferSource[i] = -1;
+
         updateArchives();
         for (int k = 0; k < problemSet_.size(); k++) {
             List<Solution> offspringList = new ArrayList<Solution>();
 
             int assistK = findAssistTask(k);
 
-            double[] pBest = new double[problemSet_.get(k).getNumberOfObjectives()];
-            for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
-                pBest[j] = Double.MAX_VALUE;
-                for (int i = 0; i < populationSize; i++)
-                    pBest[j] = Math.min(pBest[j], population[k].get(i).getObjective(problemSet_.get(k).getStartObjPos() + j));
-            }
+            double[] pBest = population[k].getBestObjectiveVector(k);
 
             for (int i = 0; i < populationSize; i++) {
                 int r1 = PseudoRandom.randInt(0, populationSize - 1);
                 Solution[] parents = new Solution[2];
-                parents[0] = new Solution(population[assistK].get(r1));
-                parents[1] = new Solution((Solution) selector.execute(population[k]));
+                parents[0] = new Solution((Solution) selector.execute(population[assistK]));
+                parents[1] = new Solution(population[k].get(i));
                 Solution[] offSprings = (Solution[]) crossover2.execute(parents);
                 Solution offSpring = offSprings[PseudoRandom.randInt(0, 1)];
 
@@ -171,12 +172,7 @@ public class MaTMY extends MtoAlgorithm {
             }
             EliteSelect(k, offspringList);
 
-            double[] pBestAfter = new double[problemSet_.get(k).getNumberOfObjectives()];
-            for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
-                pBestAfter[j] = Double.MAX_VALUE;
-                for (int i = 0; i < populationSize; i++)
-                    pBestAfter[j] = Math.min(pBestAfter[j], population[k].get(i).getObjective(problemSet_.get(k).getStartObjPos() + j));
-            }
+            double[] pBestAfter = population[k].getBestObjectiveVector(k);
 
             boolean isBetter = false;
             for (int i = 0; i < problemSet_.get(k).getNumberOfObjectives(); i++) {
@@ -193,6 +189,9 @@ public class MaTMY extends MtoAlgorithm {
             else
                 reward[k][assistK] = 0;
 
+
+            if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
+                LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
         }
     }
 
@@ -205,18 +204,13 @@ public class MaTMY extends MtoAlgorithm {
 
             int assistK = transferSource[k];
 
-            double[] pBest = new double[problemSet_.get(k).getNumberOfObjectives()];
-            for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
-                pBest[j] = Double.MAX_VALUE;
-                for (int i = 0; i < populationSize; i++)
-                    pBest[j] = Math.min(pBest[j], population[k].get(i).getObjective(problemSet_.get(k).getStartObjPos() + j));
-            }
+            double[] pBest = population[k].getBestObjectiveVector(k);
 
             for (int i = 0; i < populationSize; i++) {
                 int r1 = PseudoRandom.randInt(0, populationSize - 1);
                 Solution[] parents = new Solution[2];
-                parents[0] = new Solution(population[assistK].get(r1));
-                parents[1] = new Solution((Solution) selector.execute(population[k]));
+                parents[0] = new Solution((Solution) selector.execute(population[assistK]));
+                parents[1] = new Solution(population[k].get(i));
                 Solution[] offSprings = (Solution[]) crossover2.execute(parents);
                 Solution offSpring = offSprings[PseudoRandom.randInt(0, 1)];
 
@@ -233,12 +227,7 @@ public class MaTMY extends MtoAlgorithm {
 
             EliteSelect(k, offspringList);
 
-            double[] pBestAfter = new double[problemSet_.get(k).getNumberOfObjectives()];
-            for (int j = 0; j <= problemSet_.get(k).getEndObjPos() - problemSet_.get(k).getStartObjPos(); j++) {
-                pBestAfter[j] = Double.MAX_VALUE;
-                for (int i = 0; i < populationSize; i++)
-                    pBestAfter[j] = Math.min(pBestAfter[j], population[k].get(i).getObjective(problemSet_.get(k).getStartObjPos() + j));
-            }
+            double[] pBestAfter = population[k].getBestObjectiveVector(k);
 
             boolean isBetter = false;
             for (int i = 0; i < problemSet_.get(k).getNumberOfObjectives(); i++) {
@@ -253,6 +242,8 @@ public class MaTMY extends MtoAlgorithm {
             else
                 reward[k][assistK] *= shrinkRate;
 
+            if (evaluations % (problemSet_.size() * populationSize * 20) == 0)
+                LogPopulation.LogPopulation("MaTMY",population, problemSet_,evaluations);
         }
 
     }
