@@ -513,6 +513,16 @@ public class SolutionSet implements Serializable {
 		return mat;
 	}
 
+	public double[] getBestObjectiveVector(int task){
+		ProblemSet problemSet = solutionsList_.get(0).getProblemSet();
+		double[] pBest = new double[problemSet.get(task).getNumberOfObjectives()];
+		for (int j = 0; j <= problemSet.get(task).getEndObjPos() - problemSet.get(task).getStartObjPos(); j++) {
+			pBest[j] = Double.MAX_VALUE;
+			for (int i = 0; i < solutionsList_.size(); i++)
+				pBest[j] = Math.min(pBest[j], solutionsList_.get(i).getObjective(problemSet.get(task).getStartObjPos() + j));
+		}
+		return pBest;
+	}
 
 	private boolean remove;
 	public boolean isRemove() {
