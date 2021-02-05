@@ -6,6 +6,7 @@ import etmo.encodings.solutionType.RealSolutionType;
 import etmo.util.Configuration;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
+import etmo.util.wrapper.XReal;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -91,17 +92,27 @@ public class RandomUniformCrossover extends Crossover{
 
         offSpring[0] = new Solution(parent1);
         offSpring[1] = new Solution(parent2);
-        int maxVar = offSpring[0].numberOfVariables();
+        XReal x1 = new XReal(parent1);
+        XReal x2 = new XReal(parent2);
+        XReal offs1 = new XReal(offSpring[0]);
+        XReal offs2 = new XReal(offSpring[1]);
+
+        double valueX1, valueX2;
+
+        int maxVar = x1.getNumberOfDecisionVariables();
 
         int k = PseudoRandom.randInt(0, maxVar - 1);
 
         for (int i = 0; i < maxVar; i++) {
+            valueX1 = x1.getValue(i);
+            valueX2 = x2.getValue(i);
             if (i == k || PseudoRandom.randDouble() < probability){
-                double tmp1, tmp2;
-                tmp1 = offSpring[0].getDecisionVariables(i);
-                tmp2 = offSpring[1].getDecisionVariables(i);
-                offSpring[0].setDecisionVariables(i, tmp2);
-                offSpring[1].setDecisionVariables(i, tmp1);
+                offs1.setValue(i, valueX2);
+                offs2.setValue(i, valueX1);
+            }
+            else{
+                offs1.setValue(i, valueX1);
+                offs2.setValue(i, valueX2);
             }
         }
         return offSpring;
