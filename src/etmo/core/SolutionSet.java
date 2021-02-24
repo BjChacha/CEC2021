@@ -524,6 +524,10 @@ public class SolutionSet implements Serializable {
 		return pBest;
 	}
 
+	public boolean isFull(){
+		return solutionsList_.size() == capacity_;
+	}
+
 	private boolean remove;
 	public boolean isRemove() {
 		return remove;

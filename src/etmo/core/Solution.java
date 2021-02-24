@@ -177,8 +177,6 @@ public class Solution implements Serializable {
 		crowdingDistance_ = 0.0;
 		skillFactor_ = -1;
 
-
-
 		variable_ = type_.createVariables();
 
 //		add from moeac
@@ -847,6 +845,10 @@ public class Solution implements Serializable {
 
 	} // Solution
 
+	public void setProblemSet_(ProblemSet problemSet){
+		problemSet_ = problemSet;
+	}
+
 	static public Solution getNewSolution(Problem problem)
 			throws ClassNotFoundException {
 		return new Solution(problem);
@@ -894,9 +896,6 @@ public class Solution implements Serializable {
 	 * @param solution
 	 *            Solution to copy.
 	 */
-
-
-
 
 	private boolean marked_;
 	public boolean isMarked_() {
