@@ -22,6 +22,9 @@
 package etmo.metaheuristics.matmy2;
 
 import etmo.metaheuristics.matmy2.libs.MaTAlgorithm;
+import etmo.util.PseudoRandom;
+
+import java.util.Arrays;
 
 public class Utils {
     public static double distVector(double[] vector1, double[] vector2) {
@@ -130,5 +133,56 @@ public class Utils {
             QuickSort(array, idx, from, i);
             QuickSort(array, idx, i + 1, to);
         }
+    }
+
+    public static double[] softMaxOnlyPositive(double[] arr){
+        double[] res = new double[arr.length];
+        double sum = 0;
+        double max = 0;
+        for (int i = 0; i < arr.length; i++) {
+            if (max < arr[i])
+                max = arr[i];
+        }
+        for (int i = 0; i < res.length; i++){
+            if (arr[i] > 0){
+                res[i] = Math.exp(arr[i] / max);
+                sum += res[i];
+            }
+            else{
+                res[i] = 0;
+            }
+        }
+
+        for (int i = 0; i < res.length; i++) {
+            res[i] /= sum;
+        }
+        return res;
+    }
+
+    public static int roulette(double[] arr){
+        double s = 0;
+        double p = PseudoRandom.randDouble();
+        int idx;
+        // 轮盘赌算法
+        for (idx = 0; idx < arr.length; idx++) {
+            s += arr[idx];
+            if (s >= p)
+                break;
+        }
+        if (idx >= arr.length)
+            idx = arr.length - 1;
+        return idx;
+    }
+
+    public static double[] vectorMinus(double[] vec1, double[] vec2){
+        if (vec1.length != vec2.length){
+            System.out.println("Error: only can minus vectors with identical length.");
+            return vec1;
+        }
+
+        double[] res = new double[vec1.length];
+        for (int i = 0; i < res.length; i++)
+            res[i] = vec1[i] - vec2[i];
+        return res;
     }
 }

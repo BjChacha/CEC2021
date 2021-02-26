@@ -92,7 +92,7 @@ public class MaOEAC extends MaTAlgorithm{
 	 * step1: Basic Setting of this Algorithm
 	 */
 	public void initState(){
-		generations_ = 0;
+		generations_ = 1;
 		maxGenerations_ = ((Integer) this.getInputParameter("maxGenerations")).intValue();
 		populationSize_ = ((Integer) this.getInputParameter("populationSize")).intValue();
 		mutation_  = operators_.get("mutation");

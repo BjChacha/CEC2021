@@ -845,8 +845,10 @@ public class Solution implements Serializable {
 
 	} // Solution
 
-	public void setProblemSet_(ProblemSet problemSet){
+	public void setProblemSet_(ProblemSet problemSet) throws JMException {
 		problemSet_ = problemSet;
+		type_ = problemSet.getSolutionType();
+		problemSet.get(0).evaluate(this);
 	}
 
 	static public Solution getNewSolution(Problem problem)

@@ -333,12 +333,12 @@ public class MOEAD extends MaTAlgorithm {
 	} // initUniformWeight*/
 
 	public void initState() throws JMException, ClassNotFoundException {
-		evaluations_ = 0;
 		maxEvaluations_ = ((Integer) this.getInputParameter("maxEvaluations")).intValue();
 		if (population_ == null) {
 			population_ = new SolutionSet(populationSize_);
 			populationSize_ = ((Integer) this.getInputParameter("populationSize")).intValue();
 		}
+		evaluations_ = populationSize_;
 
 		dataDirectory_ = this.getInputParameter("dataDirectory").toString();
 		//System.out.println("POPSIZE: " + populationSize_);

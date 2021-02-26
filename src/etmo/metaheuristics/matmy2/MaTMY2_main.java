@@ -16,10 +16,10 @@ public class MaTMY2_main {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
 
-        int problemStart = 30;
-        int problemEnd = 30;
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        int times = 1;
+        int times = 32;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -48,7 +48,11 @@ public class MaTMY2_main {
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
             algorithm.setInputParameter("transferVolume", 10);
-            algorithm.setInputParameter("algoName", "MOEAD");
+            algorithm.setInputParameter("baseRunTime", 3);
+            algorithm.setInputParameter("scoreIncrement", 1.0);
+            algorithm.setInputParameter("scoreDecreaseRate", 0.2);
+            algorithm.setInputParameter("isDRA", true);
+            algorithm.setInputParameter("algoName", "moead");
 
             for (int t = 0; t < times; t++){
 //                long startTime = System.currentTimeMillis();

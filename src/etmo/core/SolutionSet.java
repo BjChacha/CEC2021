@@ -513,15 +513,44 @@ public class SolutionSet implements Serializable {
 		return mat;
 	}
 
+	public double[] getBestObjectiveVector(){
+		return getBestObjectiveVector(0);
+	}
+
 	public double[] getBestObjectiveVector(int task){
-		ProblemSet problemSet = solutionsList_.get(0).getProblemSet();
-		double[] pBest = new double[problemSet.get(task).getNumberOfObjectives()];
-		for (int j = 0; j <= problemSet.get(task).getEndObjPos() - problemSet.get(task).getStartObjPos(); j++) {
-			pBest[j] = Double.MAX_VALUE;
+		Problem problem = solutionsList_.get(0).getProblemSet().get(task);
+		double[] vector = new double[problem.getNumberOfObjectives()];
+		for (int j = 0; j <= problem.getEndObjPos() - problem.getStartObjPos(); j++) {
+			vector[j] = Double.MAX_VALUE;
 			for (int i = 0; i < solutionsList_.size(); i++)
-				pBest[j] = Math.min(pBest[j], solutionsList_.get(i).getObjective(problemSet.get(task).getStartObjPos() + j));
+				vector[j] = Math.min(vector[j], solutionsList_.get(i).getObjective(problem.getStartObjPos() + j));
 		}
-		return pBest;
+		return vector;
+	}
+
+	public double[] getAverageObjectiveVector(){
+		return getAverageObjectiveVector(0);
+	}
+
+	public double[] getAverageObjectiveVector(int task){
+		Problem problem = solutionsList_.get(0).getProblemSet().get(task);
+		double[] vector = new double[problem.getNumberOfObjectives()];
+		for (int j = 0; j <= problem.getEndObjPos() - problem.getStartObjPos(); j++) {
+			double sum = 0;
+			for (int i = 0; i < solutionsList_.size(); i++)
+				sum += solutionsList_.get(i).getObjective(problem.getStartObjPos() + j);
+			vector[j] = sum / solutionsList_.size();
+		}
+		return vector;
+	}
+
+	public SolutionSet copy(){
+		SolutionSet res = new SolutionSet(solutionsList_.size());
+		for (int i = 0; i < solutionsList_.size(); i++){
+			Solution individual = new Solution(solutionsList_.get(i));
+			res.add(individual);
+		}
+		return res;
 	}
 
 	public boolean isFull(){

@@ -169,7 +169,6 @@ public class NSGAII extends MaTAlgorithm {
 
 	public void initState(){
 		distance = new Distance();
-		evaluations = 0;
 
 		populationSize = ((Integer) getInputParameter("populationSize")).intValue();
 		maxEvaluations = ((Integer) getInputParameter("maxEvaluations")).intValue();
@@ -177,6 +176,8 @@ public class NSGAII extends MaTAlgorithm {
 		mutationOperator = operators_.get("mutation");
 		crossoverOperator = operators_.get("crossover");
 		selectionOperator = operators_.get("selection");
+		// 种群初始化在外部实现，故起始评价次数为种群初始化以后（即种群大小）
+		evaluations = populationSize;
 	}
 
 	public boolean step() throws JMException {
