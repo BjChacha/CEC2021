@@ -3,6 +3,7 @@ package etmo.util.logging;
 import etmo.core.ProblemSet;
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
+import etmo.util.JMException;
 
 import java.io.File;
 
@@ -46,7 +47,7 @@ public class LogPopulation {
     }
 
     // Sub-population
-    public static void LogPopulation(String algoName, SolutionSet[] population, ProblemSet problemSet, int eval){
+    public static void LogPopulation(String algoName, SolutionSet[] population, ProblemSet problemSet, int eval) throws JMException {
         File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\datas\\" + algoName);
         if (!folder.exists() && !folder.isDirectory()) {
             folder.mkdirs();
@@ -66,6 +67,8 @@ public class LogPopulation {
                 for (int kk = start; kk <= end; kk++)
                     newSolution.setObjective(kk - start, sol.getObjective(kk));
 
+                newSolution.setDecisionVariables(population[k].get(i).getDecisionVariables());
+                problemSet.get(k).evaluate(newSolution);
                 resPopulation[k].add(newSolution);
             }
             resPopulation[k].printObjectivesToFile(algoName + "\\" + algoName + "_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
