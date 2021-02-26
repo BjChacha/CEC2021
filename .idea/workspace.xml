@@ -2,28 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2_main.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/Utils.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/HierarchicalClustering1.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/MOEAD.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/MaOEAC.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/MaTAlgorithm.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/NSGAII.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/PartitionalSolutionSet.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/PF.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/PF.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/core/Solution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/Solution.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/SolutionSet.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/maoeac/MaOEAC_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/MOEAD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/MOEAD.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/MaOEAC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/MaOEAC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/NSGAII.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/libs/NSGAII.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/moead/MOEAD_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/momfea/MOMFEA_main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/momfeaii/MOMFEAII_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/momfeaii/MOMFEAII_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/util/logging/LogPopulation.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -98,7 +101,7 @@
       <recent name="etmo.metaheuristics.moead" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.MOEAD_main">
+  <component name="RunManager" selected="Application.MaTMY2_main">
     <configuration name="MOEAD_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.moead.MOEAD_main" />
       <module name="MTO-cec2021-" />
@@ -125,12 +128,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MaOEAC_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.maoeac.MaOEAC_main" />
+    <configuration name="MOMFEA_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.momfea.MOMFEA_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.maoeac.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.momfea.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -138,12 +141,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MaTDE_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.matde.MaTDE_main" />
+    <configuration name="MaOEAC_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.maoeac.MaOEAC_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.matde.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.maoeac.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -165,19 +168,19 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.MOMFEAII_main" />
       <item itemvalue="Application.MOEAD_main" />
-      <item itemvalue="Application.MaTDE_main" />
       <item itemvalue="Application.MaTMY2_main" />
       <item itemvalue="Application.MaOEAC_main" />
+      <item itemvalue="Application.MOMFEA_main" />
+      <item itemvalue="Application.MOMFEAII_main" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.MaTMY2_main" />
+        <item itemvalue="Application.MOMFEAII_main" />
+        <item itemvalue="Application.MOMFEA_main" />
         <item itemvalue="Application.MOEAD_main" />
         <item itemvalue="Application.MaOEAC_main" />
-        <item itemvalue="Application.MaTMY2_main" />
-        <item itemvalue="Application.MaTDE_main" />
-        <item itemvalue="Application.MOMFEAII_main" />
       </list>
     </recent_temporary>
   </component>
@@ -189,34 +192,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1611191764309</updated>
-    </task>
-    <task id="LOCAL-00024" summary="update gitignore">
-      <created>1611833429065</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1611833429065</updated>
-    </task>
-    <task id="LOCAL-00025" summary="add logPopulation function.">
-      <created>1611833545769</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1611833545769</updated>
-    </task>
-    <task id="LOCAL-00026" summary="add a timer.">
-      <created>1611833573912</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1611833573912</updated>
-    </task>
-    <task id="LOCAL-00027" summary="fixed: get sum of objectives.">
-      <created>1611833599972</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1611833599972</updated>
     </task>
     <task id="LOCAL-00028" summary="add .idea">
       <created>1611834699757</created>
@@ -533,7 +508,35 @@
       <option name="project" value="LOCAL" />
       <updated>1612517153423</updated>
     </task>
-    <option name="localTasksCounter" value="73" />
+    <task id="LOCAL-00073" summary="add new algo(framework): MaTMY2(not think about the name yet)">
+      <created>1614132434138</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1614132434138</updated>
+    </task>
+    <task id="LOCAL-00074" summary="add new algo(framework): MaTMY2(not think about the name yet)">
+      <created>1614132597592</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1614132597592</updated>
+    </task>
+    <task id="LOCAL-00075" summary="update PF_anim tools.">
+      <created>1614132625116</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1614132625116</updated>
+    </task>
+    <task id="LOCAL-00076" summary="update idea workspace">
+      <created>1614132642367</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1614132642367</updated>
+    </task>
+    <option name="localTasksCounter" value="77" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -550,9 +553,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="add new operator: random DE crossover." />
-    <MESSAGE value="modified algo MaTDE: use randomly parameters DE crossover." />
-    <MESSAGE value="fixed: PATH bug." />
     <MESSAGE value="add new operator: RandomUniformCrossover." />
     <MESSAGE value="fixed log info error." />
     <MESSAGE value="improve tools flexibility." />
@@ -575,7 +575,10 @@
     <MESSAGE value="add a function" />
     <MESSAGE value="update implement." />
     <MESSAGE value="update project." />
-    <option name="LAST_COMMIT_MESSAGE" value="update project." />
+    <MESSAGE value="add new algo(framework): MaTMY2(not think about the name yet)" />
+    <MESSAGE value="update PF_anim tools." />
+    <MESSAGE value="update idea workspace" />
+    <option name="LAST_COMMIT_MESSAGE" value="update idea workspace" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -603,16 +606,6 @@
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/etmo/qualityIndicator/QualityIndicator.java</url>
-          <line>80</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/etmo/qualityIndicator/InvertedGenerationalDistance.java</url>
-          <line>82</line>
-          <option name="timeStamp" value="48" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/etmo/qualityIndicator/util/MetricsUtil.java</url>
           <line>221</line>
           <option name="timeStamp" value="49" />
@@ -629,25 +622,20 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2.java</url>
-          <line>177</line>
-          <option name="timeStamp" value="115" />
+          <line>281</line>
+          <option name="timeStamp" value="161" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="Application">
-        <watch expression="population" />
         <watch expression="problemSet_" />
-        <watch expression="pBestAfter" />
-        <watch expression="reward" language="JAVA" />
-        <watch expression="probability" />
-        <watch expression="population[3].solutionsList_" />
-        <watch expression="transferSource" />
         <watch expression="evaluations" />
         <watch expression="populations" language="JAVA" />
         <watch expression="optimizers" />
-        <watch expression="population_" />
-        <watch expression="subPop" />
+        <watch expression="problemSet" language="JAVA" />
+        <watch expression="transferSourceIndexes" />
+        <watch expression="softmax" language="JAVA" />
       </configuration>
       <inline-watch fileUrl="file://$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" line="135">
         <watch expression="offspringList" language="JAVA" />
