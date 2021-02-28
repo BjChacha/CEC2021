@@ -16,10 +16,10 @@ public class MaTMY2_main {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
 
-        int problemStart = 25;
-        int problemEnd = 32;
+        int problemStart = 27;
+        int problemEnd = 27;
 
-        int times = 32;
+        int times = 5;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -52,7 +52,7 @@ public class MaTMY2_main {
             algorithm.setInputParameter("scoreIncrement", 1.0);
             algorithm.setInputParameter("scoreDecreaseRate", 0.2);
             algorithm.setInputParameter("isDRA", true);
-            algorithm.setInputParameter("algoName", "moead");
+            algorithm.setInputParameter("algoName", "MOEAD");
 
             for (int t = 0; t < times; t++){
 //                long startTime = System.currentTimeMillis();

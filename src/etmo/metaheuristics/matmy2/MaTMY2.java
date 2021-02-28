@@ -243,14 +243,16 @@ public class MaTMY2 extends MtoAlgorithm {
 
         double[][] firstBestVectors = new double[taskNum][];
         for (int k = 0; k < taskNum; k++){
-            firstBestVectors[k] = populations[k].getAverageObjectiveVector();
+            firstBestVectors[k] = populations[k].getBestObjectiveVector();
+//            firstBestVectors[k] = populations[k].getAverageObjectiveVector();
         }
 
         Converge(1);
 
         double[][] secondBestVectors = new double[taskNum][];
         for (int k = 0; k < taskNum; k++){
-            secondBestVectors[k] = populations[k].getAverageObjectiveVector();
+            secondBestVectors[k] = populations[k].getBestObjectiveVector();
+//            secondBestVectors[k] = populations[k].getAverageObjectiveVector();
         }
 
         processConvergeImprovement(firstBestVectors, secondBestVectors);
@@ -394,13 +396,16 @@ public class MaTMY2 extends MtoAlgorithm {
         initState();
         initOptimizers();
 //        Converge(1);
-        while (evaluations < maxEvaluations * 0.9) {
-            tentativeTransfer();
-            selectiveTransfer(runTimes);
+        while (evaluations < maxEvaluations) {
+            if (evaluations < maxEvaluations * 0.9) {
+                tentativeTransfer();
+                selectiveTransfer(runTimes);
+            } else{
+                Converge(1);
+            }
+//            System.out.println(evaluations + "/" + maxEvaluations);
         }
-        while (evaluations < maxEvaluations){
-            Converge(1);
-        }
+
         return populations;
     }
 }
