@@ -104,13 +104,13 @@ public class learnRMP {
 						probMatrixs[1][p][1] = probMatrixs[1][p][1]*normpdf(data[j][p][d], means[j][d], stdevs[j][d]);
 					}
 				}
-			    double[] testNumbs = new double[101];
-			    for(int t=0;t<=100;t++) {
-			    	testNumbs[t] = t*(1.0/100);
+			    double[] testNumbs = new double[51];
+			    for(int t=0;t<=50;t++) {
+			    	testNumbs[t] = t*(1.0/50);
 			    }
-			    double minTest = loglik(testNumbs[0], probMatrixs, dim, numTasks);
-			    for(int t=1;t<=100;t++) {
-			    	double value = loglik(testNumbs[t], probMatrixs, dim, numTasks);
+			    double minTest = loglik(testNumbs[0], probMatrixs, numTasks);
+			    for(int t=1;t<=50;t++) {
+			    	double value = loglik(testNumbs[t], probMatrixs, numTasks);
 			    	if(minTest > value) {
 			    		minTest = value;
 			    	}
@@ -141,33 +141,34 @@ public class learnRMP {
 		return rnd;
 	}
 	
-	public double loglik(double rmp, double[][][] probMatrix, int dim, int numTasks) {
+	public double loglik(double rmp, double[][][] probMatrix, int numTasks) {
 		double y = 0.0;
-		double[][][] matrixs = new double [2][dim][2];
+		double[][][] matrixs = new double [2][][];
 		for(int i=0;i<2;i++) {
-			for(int d=0;d<dim;d++) {
+			int len = probMatrix[i].length;
+			matrixs[i] = new double[len][2];
+			for(int d=0;d<len;d++) {
 				for(int j=0;j<2;j++) {
 					matrixs[i][d][j] = probMatrix[i][d][j];
 				}
 			}
 		}
 		for(int i=0;i<2;i++) {
-			
+			int len = probMatrix[i].length;
 			for(int j=0;j<2;j++) {
-				
 				if(i == j) {
-					for(int d=0;d<dim;d++) {
+					for(int d=0;d<len;d++) {
 						matrixs[i][d][j] = matrixs[i][d][j]*(1-(0.5*(numTasks-1)*rmp/numTasks));
 					}
 				}else {
-					for(int d=0;d<dim;d++) {
+					for(int d=0;d<len;d++) {
 						matrixs[i][d][j] = matrixs[i][d][j]*0.5*(numTasks-1)*rmp/numTasks;
 					}
 				}
 				
 			}
-			double[] sumx = new double[dim];
-			for(int d=0;d<dim;d++) {
+			double[] sumx = new double[len];
+			for(int d=0;d<len;d++) {
 				sumx[d] = 0.0;
 				for(int j=0;j<2;j++) {
 					sumx[d] += matrixs[i][d][j];

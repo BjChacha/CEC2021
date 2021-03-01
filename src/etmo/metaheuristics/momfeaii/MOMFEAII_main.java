@@ -30,7 +30,7 @@ public class MOMFEAII_main {
 		HashMap parameters; // Operator parameters
 
 		int taskStart = 25;
-		int taskEnd = 25;
+		int taskEnd = 32;
 
 		int times = 1;
 

@@ -97,13 +97,8 @@ public class MOMFEAII extends Algorithm {
 		rmpMatrix = new learnRMP(parentSets, numVars).learning();
 		Solution[] parents = new Solution[2];
 		for (int i = 0; i < (populationSize / 2); i++) {
-			int rnd1 = PseudoRandom.randInt(0, populationSize-1);
-			int rnd2 = PseudoRandom.randInt(0, populationSize-1);
-			while(rnd1 == rnd2) {
-				rnd2 = PseudoRandom.randInt(0, populationSize-1);
-			}
-			parents[0] = parentsPool.get(rnd1);
-			parents[1] = parentsPool.get(rnd2);
+			parents[0] = parentsPool.get(i);
+			parents[1] = parentsPool.get(i + populationSize / 2);
 			
 			int[] sfs = new int[2];
 			sfs[0] = parents[0].getSkillFactor();
@@ -144,7 +139,7 @@ public class MOMFEAII extends Algorithm {
 				offSpring = new Solution[2];
 				if(parentSets[sfs[0]].size() > 0) {
 					int rd1 = PseudoRandom.randInt(0, parentSets[sfs[0]].size()-1);
-					parents[0] = parentsPool.get(rnd1);
+					parents[0] = parentsPool.get(i);
 					parents[1] = parentSets[sfs[0]].get(rd1);
 					Solution[] child = (Solution[]) crossover.execute(parents);
 					mutation.execute(child[0]);
@@ -165,7 +160,7 @@ public class MOMFEAII extends Algorithm {
 				
 				if(parentSets[sfs[1]].size() > 0) {
 					int rd2 = PseudoRandom.randInt(0, parentSets[sfs[1]].size()-1);
-					parents[0] = parentsPool.get(rnd2);
+					parents[0] = parentsPool.get(i);
 					parents[1] = parentSets[sfs[1]].get(rd2);
 					Solution[] child = (Solution[]) crossover.execute(parents);
 					mutation.execute(child[0]);
@@ -184,10 +179,8 @@ public class MOMFEAII extends Algorithm {
 					evaluations += 1;		
 				}
 			}
-
 			offspringPopulation.add(offSpring[0]);
 			offspringPopulation.add(offSpring[1]);
-
 		} // for
 	}
 	
