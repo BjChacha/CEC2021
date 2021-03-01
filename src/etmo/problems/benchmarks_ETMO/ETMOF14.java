@@ -1,13 +1,11 @@
 package etmo.problems.benchmarks_ETMO;
 
-import java.io.IOException;
-
 import etmo.core.Problem;
 import etmo.core.ProblemSet;
 import etmo.problems.base.staticBase.IO;
 import etmo.problems.base.staticBase.MMDTLZ;
-import etmo.problems.base.staticBase.MMIDTLZ;
-import etmo.problems.base.staticBase.MMLZ;
+
+import java.io.IOException;
 
 public class ETMOF14 {
 	

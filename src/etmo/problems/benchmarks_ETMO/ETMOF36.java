@@ -1,13 +1,10 @@
 package etmo.problems.benchmarks_ETMO;
 
-import java.io.IOException;
-
 import etmo.core.Problem;
 import etmo.core.ProblemSet;
-//import etmo.problems.base.*;
 import etmo.problems.base.dynamicBase.DMLZ;
-import etmo.problems.base.dynamicBase.DMZDT;
-import etmo.problems.base.staticBase.IO;
+
+import java.io.IOException;
 
 public class ETMOF36 {
 	
