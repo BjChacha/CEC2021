@@ -903,4 +903,42 @@ public class Solution implements Serializable {
 	public boolean isMarked_() {
 		return this.marked_;
 	} // isMarked
+
+	/*Defined in the paper entiled "Towards Adaptive Knowledge Transfer in Multifactorial Evolutionary Computation"*/
+	private int isTran_;
+	private int cxFactor_;
+	private Solution parent_;
+	private double cObj_;
+
+	public int getIsTran() {
+		return isTran_;
+	}
+
+	public void setIsTran(int isTran) {
+		this.isTran_ = isTran;
+	}
+
+	public double getcObj() {
+		return cObj_;
+	}
+
+	public void setcObj(double cObj) {
+		this.cObj_ = cObj;
+	}
+
+	public int getCxFactor() {
+		return cxFactor_;
+	}
+
+	public void setCxFactor(int cxFactor) {
+		this.cxFactor_ = cxFactor;
+	}
+
+	public Solution getParent() {
+		return parent_;
+	}
+
+	public void setParent(Solution parent) {
+		this.parent_ = parent;
+	}
 } // Solution
