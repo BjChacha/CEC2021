@@ -68,7 +68,7 @@ public class LogPopulation {
                     newSolution.setObjective(kk - start, sol.getObjective(kk));
 
                 newSolution.setDecisionVariables(population[k].get(i).getDecisionVariables());
-                problemSet.get(k).evaluate(newSolution);
+//                problemSet.get(k).evaluate(newSolution);
                 resPopulation[k].add(newSolution);
             }
             resPopulation[k].printObjectivesToFile(algoName + "\\" + algoName + "_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
