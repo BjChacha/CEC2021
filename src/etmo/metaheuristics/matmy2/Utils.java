@@ -185,4 +185,30 @@ public class Utils {
             res[i] = vec1[i] - vec2[i];
         return res;
     }
+
+    public static double calVectorAngle(double[] vec1, double[] vec2){
+        if (vec1.length != vec2.length){
+            System.out.println("Error: only can minus vectors with identical length.");
+            return 1;
+        }
+
+        double v1 = 0;
+        double v2 = 0;
+        double dotP = 0;
+        for (int i = 0; i < vec1.length; i++){
+            v1 += vec1[i] * vec1[i];
+            v2 += vec2[i] * vec2[i];
+            dotP += vec1[i] * vec2[i];
+        }
+        v1 = Math.sqrt(v1);
+        v2 = Math.sqrt(v2);
+
+        double res = Math.abs(dotP / (v1 * v2));
+        res = Math.acos(res);
+
+        if (Double.isNaN(res) && v1 == 0)
+            res = Double.MAX_VALUE;
+
+        return res;
+    }
 }

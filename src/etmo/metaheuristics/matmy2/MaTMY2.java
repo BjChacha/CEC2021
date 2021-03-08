@@ -6,14 +6,20 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.util.JMException;
 import etmo.metaheuristics.matmy2.libs.*;
+import etmo.util.PseudoRandom;
 import etmo.util.logging.LogPopulation;
+import jdk.jshell.execution.Util;
 
+import javax.management.openmbean.OpenMBeanParameterInfo;
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class MaTMY2 extends MtoAlgorithm {
     MaTAlgorithm[] optimizers;
     SolutionSet[] populations;
+
+    Operator crossover;
+    Operator selection;
 
     private int populationSize;
     private int maxEvaluations;
@@ -33,13 +39,19 @@ public class MaTMY2 extends MtoAlgorithm {
     double scoreIncrement;
     double scoreDecreaseRate;
 
+    double[][] convergeDirections;
+    double[][] populationCenterPositions;
+
+    double forceTransferRate;
+
     boolean isDRA;
 
     private String algoName;
 
     // TODO: DEBUG
     int[] debugRunTimes;
-
+    int goodTransferCnt = 0;
+    int badTransferCnt = 0;
 
     public MaTMY2(ProblemSet problemSet) {
         super(problemSet);
@@ -55,9 +67,14 @@ public class MaTMY2 extends MtoAlgorithm {
         scoreIncrement = (Double) getInputParameter("scoreIncrement");
         scoreDecreaseRate = (Double) getInputParameter("scoreDecreaseRate");
 
+        forceTransferRate = (Double) getInputParameter("forceTransferRate");
+
         isDRA = (Boolean) getInputParameter("isDRA");
 
         algoName = (String) getInputParameter("algoName");
+
+        crossover = operators_.get("crossover");
+        selection = operators_.get("selection");
 
         taskNum = problemSet_.size();
         transferSourceIndexes = new int[taskNum];
@@ -74,6 +91,16 @@ public class MaTMY2 extends MtoAlgorithm {
         for (int k = 0; k < taskNum; k++){
             Arrays.fill(scores[k], 1);
             scores[k][k] = 0;
+        }
+
+        convergeDirections = new double[taskNum][];
+        for (int k = 0; k < taskNum; k++){
+            convergeDirections[k] = new double[problemSet_.get(k).getNumberOfVariables()];
+        }
+
+        populationCenterPositions = new double[taskNum][];
+        for (int k = 0; k < taskNum; k++){
+            populationCenterPositions[k] = new double[problemSet_.get(k).getNumberOfVariables()];
         }
 
         // TODO: DEBUG
@@ -237,6 +264,18 @@ public class MaTMY2 extends MtoAlgorithm {
         }
     }
 
+    private void calculativeConverge() throws JMException, ClassNotFoundException {
+        for (int k = 0; k < taskNum; k++){
+            populationCenterPositions[k] = populations[k].getAverageDecisionVector();
+        }
+        Converge(3);
+        for (int k = 0; k < taskNum; k++){
+            double[] newPosition = populations[k].getAverageDecisionVector();
+            convergeDirections[k] = Utils.vectorMinus(newPosition, populationCenterPositions[k]);
+            populationCenterPositions[k] = newPosition;
+        }
+    }
+
     private void tentativeTransfer() throws JMException, ClassNotFoundException {
         transferSourceIndexes = getTransferSourceIndexes();
         transferIndividuals();
@@ -277,30 +316,97 @@ public class MaTMY2 extends MtoAlgorithm {
 //                srcTask[k] = -1;
 //        }
 
-        // 根据scores轮盘赌
-        for (int k = 0; k < taskNum; k++) {
-            if (inProgress[k]) {
-                double[] softmax = Utils.softMaxOnlyPositive(scores[k]);
-                srcTask[k] = Utils.roulette(softmax);
-            } else {
-                srcTask[k] = -1;
+//        // 根据scores轮盘赌
+//        for (int k = 0; k < taskNum; k++) {
+//            if (inProgress[k]) {
+//                double[] softmax = Utils.softMaxOnlyPositive(scores[k]);
+//                srcTask[k] = Utils.roulette(softmax);
+//            } else {
+//                srcTask[k] = -1;
+//            }
+//        }
+
+        // 根据收敛方向
+        for (int k = 0; k < taskNum; k++){
+            int zeroCnt = 0;
+            for (int i = 0; i < convergeDirections[k].length; i++){
+                if (convergeDirections[k][i] == 0.0)
+                    zeroCnt ++;
+            }
+            if (zeroCnt == convergeDirections[k].length){
+                if (PseudoRandom.randDouble() < forceTransferRate) {
+                    int tmp = k;
+                    while (tmp == k)
+                        tmp = PseudoRandom.randInt(0, taskNum-1);
+                    srcTask[k] = tmp;
+                }else{
+                    srcTask[k] = -1;
+                }
+                continue;
+            }
+
+            double[] finalScore = new double[taskNum];
+            double minAngle = Double.MAX_VALUE;
+            int minIdx = -1;
+            double[] angles = new double[taskNum];
+            for (int kk = 0; kk < taskNum; kk++){
+                if (k == kk) {
+                    finalScore[kk] = 0;
+                    continue;
+                }
+
+                double[] directionBetweenPops = Utils.vectorMinus(populationCenterPositions[kk], populationCenterPositions[k]);
+                angles[kk] = Utils.calVectorAngle(convergeDirections[k], directionBetweenPops);
+
+                if (angles[kk] < minAngle){
+                    minAngle = angles[kk];
+                    minIdx = kk;
+                }
+
+                if (angles[kk] > 1.57){
+                    finalScore[kk] = 0;
+                }else{
+                    finalScore[kk] = 1.57 - angles[kk];
+                    finalScore[kk] = (finalScore[kk] + scores[k][kk]) / finalScore[kk];
+                }
+            }
+
+            if (PseudoRandom.randDouble() < forceTransferRate) {
+                double[] softmax = Utils.softMaxOnlyPositive(finalScore);
+                int tmp = k;
+                while (tmp == k)
+                    tmp = Utils.roulette(softmax);
+                srcTask[k] = tmp;
+            }else{
+                srcTask[k] = minIdx;
             }
         }
         return srcTask;
     }
 
-    private SolutionSet[] prepareTransferIndividuals() {
+    private SolutionSet[] prepareTransferIndividuals() throws JMException {
         SolutionSet[] subPop = new SolutionSet[taskNum];
-        for (int k = 0; k < taskNum; k++){
-            int[] permutation = new int[transferVolume];
-            Utils.randomPermutation(permutation, transferVolume, populations[k].size());
+//        // 随机挑选个体
+//        for (int k = 0; k < taskNum; k++){
+//            int[] permutation = new int[transferVolume];
+//            Utils.randomPermutation(permutation, transferVolume, populations[k].size());
+//
+//            subPop[k] = new SolutionSet(transferVolume);
+//            for (int i = 0; i < transferVolume; i++){
+//                Solution indiv = new Solution(populations[k].get(permutation[i]));
+//                subPop[k].add(indiv);
+//            }
+//        }
 
+        // 使用2-联赛选择算子
+        for (int k = 0; k < taskNum; k++){
             subPop[k] = new SolutionSet(transferVolume);
             for (int i = 0; i < transferVolume; i++){
-                Solution indiv = new Solution(populations[k].get(permutation[i]));
+                Solution indiv = new Solution((Solution) selection.execute(populations[k]));
                 subPop[k].add(indiv);
             }
         }
+
         return subPop;
     }
 
@@ -312,8 +418,19 @@ public class MaTMY2 extends MtoAlgorithm {
                 int[] permutation = new int[transferVolume];
                 Utils.randomPermutation(permutation, transferVolume, populations[k].size());
 
-                for (int i = 0; i < transferVolume; i++) {
-                    Solution newIndiv = new Solution(subPop[transferSourceIndexes[k]].get(i));
+//                // 直接替换
+//                for (int i = 0; i < transferVolume; i++) {
+//                    Solution newIndiv = new Solution(subPop[transferSourceIndexes[k]].get(i));
+//                    newIndiv.setProblemSet_(problemSet_.getTask(k));
+//                    populations[k].replace(permutation[i], newIndiv);
+//                }
+                // 先交叉再替换
+                for (int i = 0; i < transferVolume; i++){
+                    Solution[] parents = new Solution[2];
+                    parents[0] = subPop[transferSourceIndexes[k]].get(i);
+                    parents[1] = populations[k].get(permutation[i]);
+                    Solution[] children = (Solution[]) crossover.execute(parents);
+                    Solution newIndiv = new Solution(children[0]);
                     newIndiv.setProblemSet_(problemSet_.getTask(k));
                     populations[k].replace(permutation[i], newIndiv);
                 }
@@ -323,6 +440,7 @@ public class MaTMY2 extends MtoAlgorithm {
 
     private void processConvergeImprovement(double[][] firstBestVectors, double[][] secondBestVectors){
         double[] improveModulus = new double[taskNum];
+        Arrays.fill(improveModulus, 0);
         int betterCount = inProgressTaskNum;
         for (int k = 0; k < taskNum; k++) {
             double[] difference = Utils.vectorMinus(secondBestVectors[k], firstBestVectors[k]);
@@ -355,9 +473,21 @@ public class MaTMY2 extends MtoAlgorithm {
                     scores[k][transferSourceIndexes[k]] *= scoreDecreaseRate;
                 transferSourceIndexes[k] = -1;
                 betterCount --;
+
+
             }else{
-                scores[k][transferSourceIndexes[k]] += scoreIncrement;
+                if (transferSourceIndexes[k] >= 0)
+                    scores[k][transferSourceIndexes[k]] += scoreIncrement;
             }
+
+            // TODO:DEBUG
+            if (transferSourceIndexes[k] >= 0) {
+                if (isBetter)
+                    goodTransferCnt ++;
+                else
+                    badTransferCnt ++;
+            }
+
         }
         if (isDRA)
             dynamicResourceAllocating(improveModulus, betterCount);
@@ -397,15 +527,18 @@ public class MaTMY2 extends MtoAlgorithm {
         initOptimizers();
 //        Converge(1);
         while (evaluations < maxEvaluations) {
-            if (evaluations < maxEvaluations * 0.9) {
-                tentativeTransfer();
-                selectiveTransfer(runTimes);
-            } else{
-                Converge(1);
-            }
+//            if (evaluations < maxEvaluations * 0.9) {
+//                tentativeTransfer();
+//                selectiveTransfer(runTimes);
+//            } else{
+//                Converge(1);
+//            }
+            calculativeConverge();
+            tentativeTransfer();
+            selectiveTransfer(runTimes);
 //            System.out.println(evaluations + "/" + maxEvaluations);
         }
-
+//        System.out.println("Good transfer rate: " + (double)goodTransferCnt / (goodTransferCnt + badTransferCnt));
         return populations;
     }
 }

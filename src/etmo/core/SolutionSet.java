@@ -544,6 +544,18 @@ public class SolutionSet implements Serializable {
 		return vector;
 	}
 
+	public double[] getAverageDecisionVector() throws JMException {
+		double[] vector = new double[solutionsList_.get(0).numberOfVariables()];
+		for (int i = 0; i < vector.length; i++){
+			double sum = 0;
+			for (int j = 0; j < solutionsList_.size(); j++){
+				sum += solutionsList_.get(j).getDecisionVariables(i);
+			}
+			vector[i] = sum / solutionsList_.size();
+		}
+		return vector;
+	}
+
 	public SolutionSet copy(){
 		SolutionSet res = new SolutionSet(solutionsList_.size());
 		for (int i = 0; i < solutionsList_.size(); i++){

@@ -15,11 +15,13 @@ public class MaTMY2_main {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
+        Operator crossover;
+        Operator selection;
 
-        int problemStart = 27;
-        int problemEnd = 27;
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        int times = 5;
+        int times = 3;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -49,10 +51,26 @@ public class MaTMY2_main {
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
             algorithm.setInputParameter("transferVolume", 10);
             algorithm.setInputParameter("baseRunTime", 3);
+
+            algorithm.setInputParameter("forceTransferRate", 0.6);
+
             algorithm.setInputParameter("scoreIncrement", 1.0);
             algorithm.setInputParameter("scoreDecreaseRate", 0.2);
-            algorithm.setInputParameter("isDRA", true);
+            algorithm.setInputParameter("isDRA", false);
             algorithm.setInputParameter("algoName", "MOEAD");
+
+            HashMap parameters;
+
+            parameters = new HashMap();
+            parameters.put("probability", 0.9);
+            parameters.put("distributionIndex", 20.0);
+            crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+
+            parameters = null;
+            selection = SelectionFactory.getSelectionOperator("BinaryTournament2", parameters);
+
+            algorithm.addOperator("crossover",crossover);
+            algorithm.addOperator("selection", selection);
 
             for (int t = 0; t < times; t++){
 //                long startTime = System.currentTimeMillis();
