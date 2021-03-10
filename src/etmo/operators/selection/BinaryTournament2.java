@@ -78,6 +78,8 @@ public class BinaryTournament2 extends Selection {
 		solution2 = population.get(a_[index_ + 1]);
 
 		index_ = (index_ + 2) % population.size();
+		if (index_ + 1 >= population.size())
+			index_ --;
 
 		int flag = dominance_.compare(solution1, solution2);
 		if (flag == -1)
