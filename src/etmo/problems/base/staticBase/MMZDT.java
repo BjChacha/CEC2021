@@ -107,7 +107,7 @@ public class MMZDT extends Problem {
 	}
 
 	double evalG(double[] xII) throws JMException {
-		if(gType_.equalsIgnoreCase("F1"))
+		if(gType_.equalsIgnoreCase("F1") || gType_.equalsIgnoreCase("sphere"))
 			return GFunctions.getF1(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("F2"))
 			return GFunctions.getF2(xII, shiftValues_, rotationMatrix_);
@@ -115,15 +115,15 @@ public class MMZDT extends Problem {
 			return GFunctions.getF3(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("F4"))
 			return GFunctions.getF4(xII, shiftValues_, rotationMatrix_);
-		else if (gType_.equalsIgnoreCase("F5"))
+		else if (gType_.equalsIgnoreCase("F5") || gType_.equalsIgnoreCase("rosenbrock"))
 			return GFunctions.getF5(xII, shiftValues_, rotationMatrix_);
-		else if (gType_.equalsIgnoreCase("F6"))
+		else if (gType_.equalsIgnoreCase("F6") || gType_.equalsIgnoreCase("ackley"))
 			return GFunctions.getF6(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("F7"))
 			return GFunctions.getF7(xII, shiftValues_, rotationMatrix_);
-		else if (gType_.equalsIgnoreCase("F8"))
+		else if (gType_.equalsIgnoreCase("F8") || gType_.equalsIgnoreCase("griewank"))
 			return GFunctions.getF8(xII, shiftValues_, rotationMatrix_);
-		else if (gType_.equalsIgnoreCase("F9"))
+		else if (gType_.equalsIgnoreCase("F9") || gType_.equalsIgnoreCase("rastrigin"))
 			return GFunctions.getF9(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("F10"))
 			return GFunctions.getF10(xII, shiftValues_, rotationMatrix_);
@@ -133,6 +133,8 @@ public class MMZDT extends Problem {
 			return GFunctions.getF12(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("F13"))
 			return GFunctions.getF13(xII, shiftValues_, rotationMatrix_);
+		else if (gType_.equalsIgnoreCase("mean"))
+			return GFunctions.getMean(xII);
 		else if (gType_.equalsIgnoreCase("HF1"))
 			return GFunctions.getHF1(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("HF2"))

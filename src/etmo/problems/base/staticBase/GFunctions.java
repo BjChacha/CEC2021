@@ -152,6 +152,16 @@ public class GFunctions {
 		}
 		return g;
 	}
+
+	public static double getMean(double x[]){
+		double mean = 0;
+		for (int i = 0; i < x.length; i++)
+			mean += Math.abs(x[i]);
+
+		mean /= x.length;
+
+		return 9 * mean;
+	}
 	
 	/*F15: GFunction Used in*/
 	public static double[] getF15(double[] xI, double xIII[][], int[][] index, int D) {
