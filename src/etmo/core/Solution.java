@@ -52,7 +52,7 @@ public class Solution implements Serializable {
 	/**
 	 * Stores the objectives values of the solution.
 	 */
-	private final double[] objective_;
+	private double[] objective_;
 
 	/**
 	 * Stores the number of objective values of the solution
@@ -108,10 +108,13 @@ public class Solution implements Serializable {
 	 */
 	private double distanceToSolutionSet_;
 	
-	
-	
 	private double gFunValue_;
 
+
+	// Label, for classification training.
+	private int label_;
+
+	int LABEL_DEFAULT_VALUE = -1;
 
 //	add from moeac
 	private double[] normalizedObjective_;
@@ -130,6 +133,7 @@ public class Solution implements Serializable {
 		variable_ = null;
 		objective_ = null;
 
+		label_ = LABEL_DEFAULT_VALUE;
 	} // Solution
 
 	/**
@@ -153,6 +157,8 @@ public class Solution implements Serializable {
 //		lamda_ = this;
 		rank1 = -1;
 		isMarked = false;
+
+		label_ = LABEL_DEFAULT_VALUE;
 	}
 
 	/**
@@ -197,7 +203,7 @@ public class Solution implements Serializable {
 		rank1 = -1;
 		isMarked = false;
 
-
+		label_ = LABEL_DEFAULT_VALUE;
 	} // Solution
 
 	static public Solution getNewSolution(ProblemSet problemSet) throws ClassNotFoundException {
@@ -231,6 +237,8 @@ public class Solution implements Serializable {
 		// <-
 
 		variable_ = variables;
+
+		label_ = LABEL_DEFAULT_VALUE;
 	} // Constructor
 
 	/**
@@ -302,6 +310,7 @@ public class Solution implements Serializable {
 		rank1 = solution.getRank1();
 		isMarked = solution.getRank2();
 
+		label_ = solution.getLabel();
 	} // Solution
 
 	/**
@@ -489,6 +498,14 @@ public class Solution implements Serializable {
 		return variable_[idx].getValue();
 	}
 
+	public double[] getDecisionVariablesInDouble() throws JMException {
+		double[] res = new double[variable_.length];
+		for (int i = 0; i < variable_.length; i++){
+			res[i] = variable_[i].getValue();
+		}
+		return res;
+	}
+
 	/**
 	 * Sets the decision variables for the solution.
 	 * 
@@ -499,6 +516,16 @@ public class Solution implements Serializable {
 	public void setDecisionVariables(Variable[] variables) {
 		variable_ = variables;
 	} // setDecisionVariables
+
+	public void setDecisionVariables(double[] variables) throws JMException {
+		if (variable_.length != variables.length) {
+			System.out.println("Error, length not equal");
+			return;
+		}
+		for (int i = 0; i < variable_.length; i++){
+			variable_[i].setValue(variables[i]);
+		}
+	}
 
 	public void setDecisionVariables(int idx, double value) throws JMException {
 		variable_[idx].setValue(value);
@@ -765,6 +792,14 @@ public class Solution implements Serializable {
 		this.isMarked = id2;
 	}
 
+	public void setLabel(int target){
+		this.label_ = target;
+	}
+
+	public int getLabel(){
+		return this.label_;
+	}
+
 	/**
 	 * Constructor
 	 *
@@ -848,6 +883,23 @@ public class Solution implements Serializable {
 	public void setProblemSet_(ProblemSet problemSet) throws JMException {
 		problemSet_ = problemSet;
 		type_ = problemSet.getSolutionType();
+		if (numberOfObjectives_ < problemSet_.getNumberOfObjs(0)){
+			double[] newObjective = new double[problemSet_.getNumberOfObjs(0)];
+			double[] newNormalizedObjective = new double[problemSet_.getNumberOfObjs(0)];
+			double[] newUnitHyperplaneObjective = new double[problemSet_.getNumberOfObjs(0)];
+
+			for (int i = 0; i < numberOfObjectives_; i++){
+				newObjective[i] = objective_[i];
+				newNormalizedObjective[i] = normalizedObjective_[i];
+				newUnitHyperplaneObjective[i] = unitHyperplaneObjective_[i];
+			}
+			objective_ = newObjective;
+			normalizedObjective_ = newNormalizedObjective;
+			unitHyperplaneObjective_ = newUnitHyperplaneObjective;
+
+			numberOfObjectives_ = problemSet_.getNumberOfObjs(0);
+
+		}
 		problemSet.get(0).evaluate(this);
 	}
 

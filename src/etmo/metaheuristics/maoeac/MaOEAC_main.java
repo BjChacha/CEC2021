@@ -26,8 +26,8 @@ public class MaOEAC_main {
 
         HashMap parameters;
 
-        int taskStart = 25;
-        int taskEnd = 26;
+        int taskStart = 30;
+        int taskEnd = 30;
 
         int times = 1;
 

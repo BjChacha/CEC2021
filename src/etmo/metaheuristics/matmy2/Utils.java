@@ -21,10 +21,44 @@
 
 package etmo.metaheuristics.matmy2;
 
-import etmo.metaheuristics.matmy2.libs.MaTAlgorithm;
+import etmo.encodings.variable.Real;
 import etmo.util.PseudoRandom;
+import etmo.util.sorting.SortingIdx;
 
+import org.apache.commons.math3.linear.*;
+import org.apache.commons.math3.stat.correlation.Covariance;
+import org.deeplearning4j.datasets.iterator.DataSetIteratorSplitter;
+import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
+import org.deeplearning4j.datasets.iterator.loader.DataSetLoaderIterator;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.GradientNormalization;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.inputs.InputType;
+import org.deeplearning4j.nn.conf.layers.DenseLayer;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.optimize.listeners.PerformanceListener;
+import org.nd4j.linalg.activations.Activation;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.rng.distribution.Distribution;
+import org.nd4j.linalg.api.rng.distribution.impl.NormalDistribution;
+import org.nd4j.linalg.cpu.nativecpu.NDArray;
+import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.dimensionalityreduction.PCA;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.learning.config.AdaGrad;
+import org.nd4j.linalg.learning.config.Adam;
+import org.nd4j.linalg.learning.config.IUpdater;
+import org.nd4j.linalg.learning.config.Sgd;
+import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.nd4j.nativeblas.Nd4jCpu;
+
+import javax.swing.*;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Supplier;
+
 
 public class Utils {
     public static double distVector(double[] vector1, double[] vector2) {
@@ -209,6 +243,346 @@ public class Utils {
         if (Double.isNaN(res) && v1 == 0)
             res = Double.MAX_VALUE;
 
+        return res;
+    }
+
+    // PCA
+    public static RealMatrix PCAGetBaseVectors(double[][] mat){
+        // 归一化+缩放，使均值为零，且最大最小值之差为1.
+        MatNormalize(mat);
+        // 获得协方差矩阵
+        RealMatrix covarianceMatrix = new Covariance(MatrixUtils.createRealMatrix(mat)).getCovarianceMatrix();
+
+        // 奇异值分解
+        SingularValueDecomposition svd = new SingularValueDecomposition(covarianceMatrix);
+        // 取前95%信息的奇异值数量
+        double[] singleValues = svd.getSingularValues();
+        double sum = 0;
+        for (double value: singleValues)
+            sum += value;
+        int d = 0;
+        double curSum = 0;
+        for (double value: singleValues){
+            curSum += value;
+            d ++;
+            if (curSum >= sum * 0.95)
+                break;
+        }
+
+        RealMatrix U = svd.getU();
+        RealMatrix baseVectors = U.getSubMatrix(0,U.getRowDimension() - 1,0,d - 1);
+
+        // 输入：n x D   输出：d x D   降维：D -> d
+        return baseVectors;
+    }
+
+    public static RealMatrix PCAGetBaseVectors(double[][] mat, int d){
+        // 归一化+缩放，使均值为零，且最大最小值之差为1.
+        MatNormalize(mat);
+        // 获得协方差矩阵
+        RealMatrix covarianceMatrix = new Covariance(MatrixUtils.createRealMatrix(mat)).getCovarianceMatrix();
+
+        // 奇异值分解
+        SingularValueDecomposition svd = new SingularValueDecomposition(covarianceMatrix);
+        RealMatrix U = svd.getU();
+        RealMatrix baseVectors = U.getSubMatrix(0,U.getRowDimension() - 1,0,d - 1);
+
+        // 输入：n x D   输出：d x D   降维：D -> d
+        return baseVectors;
+    }
+
+    static void MatNormalize(double[][] mat){
+        int row = mat.length;
+        int col = mat[0].length;
+
+        double[] means = new double[col];
+        double[] max = new double[col];
+        double[] min = new double[col];
+        for (int i = 0; i < col; i++) {
+            float sum = 0;
+            max[i] = Double.MIN_VALUE;
+            min[i] = Double.MAX_VALUE;
+            // 获得每一列的均值、最大值、最小值
+            for (int j = 0; j < row; j++) {
+                if (max[i] < mat[j][i])
+                    max[i] = mat[j][i];
+                if (min[i] > mat[j][i])
+                    min[i] = mat[j][i];
+                sum += mat[j][i];
+            }
+            means[i] = sum / row;
+            // 数据预处理
+            for (int j = 0; j < row; j++) {
+                if (max[i] == min[i])
+                    mat[j][i] = 0;
+                else
+                    mat[j][i] = (mat[j][i] - means[i]) / (max[i] - min[i]);
+            }
+        }
+    }
+
+    static void MatReform(double[][] mat, double minimun, double maximun){
+        int col = mat[0].length;
+        int row = mat.length;
+
+        double[] max = new double[col];
+        double[] min = new double[col];
+        for (int i = 0; i < col; i++){
+            max[i] = Double.MIN_VALUE;
+            min[i] = Double.MAX_VALUE;
+            for (int j = 0; j < row; j++){
+                if (max[i] < mat[j][i])
+                    max[i] = mat[j][i];
+                if (min[i] > mat[j][i])
+                    min[i] = mat[j][i];
+            }
+            for (int j = 0; j < row; j++){
+                if ((max[i] - min[i]) == 0)
+                    mat[j][i] = 0;
+                else
+                    mat[j][i] = (mat[j][i] - min[i]) / (max[i] - min[i]) * (maximun - minimun) + minimun;
+                if (mat[j][i] < 0)
+                    System.out.println("No!!!");
+            }
+        }
+    }
+
+    public static double[][] MappingViaPCA(double[][] mat1, double[][] mat2){
+        // 迁移方向: mat1->mat2
+        RealMatrix realMatrix1 = MatrixUtils.createRealMatrix(mat1);
+
+        RealMatrix baseVectors1 = PCAGetBaseVectors(mat1);
+        RealMatrix baseVectors2 = PCAGetBaseVectors(mat2, baseVectors1.getColumnDimension());
+
+        RealMatrix M = baseVectors1.transpose().multiply(baseVectors2);
+
+        RealMatrix resMatrix = realMatrix1.multiply(baseVectors1);
+        resMatrix = resMatrix.multiply(M);
+        resMatrix = resMatrix.multiply(baseVectors2.transpose());
+
+        double[][] res = resMatrix.getData();
+        MatReform(res, 0, 1);
+        return res;
+    }
+
+    public static double[][] MappingViaPCA1(double[][] mat1, double[][] mat2){
+        // 迁移方向: mat1->mat2
+        RealMatrix realMatrix1 = MatrixUtils.createRealMatrix(mat1);
+        RealMatrix realMatrix2 = MatrixUtils.createRealMatrix(mat2);
+        RealMatrix baseVectors1 = PCAGetBaseVectors(mat1);
+        RealMatrix baseVectors2 = PCAGetBaseVectors(mat2, baseVectors1.getColumnDimension());
+
+        NDArray input = new NDArray(realMatrix1.multiply(baseVectors1).getData());
+        NDArray output = new NDArray(realMatrix2.multiply(baseVectors2).getData());
+
+        AutoEncoder ae = new AutoEncoder(input, output);
+        ae.train();
+        double[][] res = ae.predict(input);
+
+        MatReform(res, 0, 1);
+        return res;
+    }
+
+    public static double[][] MappingViaAE(double[][] mat1, double[][] mat2, int size){
+        AutoEncoder ae = new AutoEncoder(mat1, mat2);
+        ae.train();
+        double[][] goodPops = Arrays.copyOfRange(mat1, 0, 25);
+        double[][] res = ae.predict(Sample(goodPops, size));
+
+        MatReform(res, 0, 1);
+        return res;
+    }
+
+    public static double[][] MappingViaPE(double[][] mat1, double[][] mat2, int size){
+        // 迁移方向: mat1->mat2
+        RealMatrix realMatrix1 = MatrixUtils.createRealMatrix(mat1);
+        RealMatrix realMatrix2 = MatrixUtils.createRealMatrix(mat2);
+        RealMatrix baseVectors1 = PCAGetBaseVectors(mat1);
+        RealMatrix baseVectors2 = PCAGetBaseVectors(mat2, baseVectors1.getColumnDimension());
+
+        // 降维后的输入输出
+        NDArray input = new NDArray(realMatrix1.multiply(baseVectors1).getData());
+        NDArray output = new NDArray(realMatrix2.multiply(baseVectors2).getData());
+
+        // 训练自编码器
+        AutoEncoder ae = new AutoEncoder(input, output);
+        ae.train();
+
+        // 取输入样本前25个个体，建立正态分布，并采样。
+        double[][] goodPops = Arrays.copyOfRange(mat1, 0, 25);
+        RealMatrix goodPopsMat = MatrixUtils.createRealMatrix(goodPops);
+        // 预测前需要先降维
+        goodPopsMat = goodPopsMat.multiply(baseVectors1);
+        double[][] predicts = ae.predict(Sample(goodPopsMat.getData(), size));
+        // 输出个体要升维复原
+        RealMatrix recoveredPopsMat = MatrixUtils.createRealMatrix(predicts).multiply(baseVectors2.transpose());
+        double [][] res = recoveredPopsMat.getData();
+        MatReform(res, 0, 1);
+        return res;
+    }
+
+
+    public static double[][] MappingViaGAN(double[][] mat1, double[][] mat2, int size){
+        // mat1 -> mat2
+        int d1 = mat1[0].length;
+        int d2 = mat2[0].length;
+        int hG = (d1 + d2) / 2;
+        int hD = d2 / 2;
+
+        int SEED = 42;
+        int EPOCHS = 5;
+        int LATENT_DIM = d1;
+        double LR = 2e-4;
+        IUpdater UPDATER_ZERO = Sgd.builder().learningRate(0.0).build();
+        IUpdater UPDATER = Adam.builder().learningRate(LR).beta1(0.5).build();
+
+        Supplier<MultiLayerNetwork> genSupplier = () -> {
+            return new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
+                    .weightInit(WeightInit.XAVIER)
+                    .activation(Activation.IDENTITY)
+                    .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+                    .gradientNormalizationThreshold(100)
+                    .list()
+                    .layer(0, new DenseLayer.Builder().nIn(d1).nOut(hG).weightInit(WeightInit.NORMAL).build())
+                    .layer(1, new DenseLayer.Builder().nIn(hG).nOut(d2).activation(Activation.TANH).build())
+                    .build());
+        };
+
+        GAN.DiscriminatorProvider discriminatorProvider = (updater) -> {
+            return new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
+                    .seed(SEED)
+                    .updater(updater)
+                    .weightInit(WeightInit.XAVIER)
+                    .activation(Activation.IDENTITY)
+                    .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+                    .gradientNormalizationThreshold(100)
+                    .list()
+                    .layer(0, new DenseLayer.Builder().nIn(d2).nOut(hD).build())
+                    .layer(1, new OutputLayer.Builder().lossFunction(LossFunctions.LossFunction.XENT).nIn(hD).nOut(1).
+                            activation(Activation.SIGMOID).build())
+                    .build());
+        };
+
+        GAN gan = new GAN.Builder()
+                .generator(genSupplier)
+                .discriminator(discriminatorProvider)
+                .latentDimension(LATENT_DIM)
+                .seed(SEED)
+                .updater(UPDATER)
+                .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+                .gradientNormalizationThreshold(100)
+                .build();
+
+        gan.getGenerator().setListeners(new PerformanceListener(1, true));
+        gan.getDiscriminator().setListeners(new PerformanceListener(1, true));
+
+        INDArray features = new NDArray((new NDArray(mat2)).toFloatMatrix());
+        INDArray labels = Nd4j.zeros(mat2.length, 1);
+
+        DataSet trainData = new DataSet(features, labels);
+
+        for (int e = 0; e < EPOCHS; e++){
+            gan.fit(trainData);
+        }
+
+        INDArray samples = new NDArray(Sample(mat1, size));
+        INDArray predicts = gan.getGenerator().output(samples);
+
+        INDArray res = predicts.addi(1).divi(2);
+        return res.toDoubleMatrix();
+    }
+
+
+    public static double[][] GANTest(double[][] mat1, double[][] mat2, int size) throws IOException {
+        // mat1 -> mat2
+        int d1 = mat1[0].length;
+        int d2 = 784;
+        int hG = (d1 + d2) / 2;
+        int hD = d2 / 2;
+
+        int SEED = 42;
+        int EPOCHS = 5;
+        int LATENT_DIM = d1;
+        double LR = 2e-4;
+        IUpdater UPDATER_ZERO = Sgd.builder().learningRate(0.0).build();
+        IUpdater UPDATER = Adam.builder().learningRate(LR).beta1(0.5).build();
+
+        Supplier<MultiLayerNetwork> genSupplier = () -> {
+            return new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
+                    .weightInit(WeightInit.XAVIER)
+                    .activation(Activation.IDENTITY)
+                    .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+                    .gradientNormalizationThreshold(100)
+                    .list()
+                    .layer(0, new DenseLayer.Builder().nIn(d1).nOut(hG).weightInit(WeightInit.NORMAL).build())
+                    .layer(1, new DenseLayer.Builder().nIn(hG).nOut(d2).activation(Activation.TANH).build())
+                    .build());
+        };
+
+        GAN.DiscriminatorProvider discriminatorProvider = (updater) -> {
+            return new MultiLayerNetwork(new NeuralNetConfiguration.Builder()
+                    .seed(SEED)
+                    .updater(updater)
+                    .weightInit(WeightInit.XAVIER)
+                    .activation(Activation.IDENTITY)
+                    .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+                    .gradientNormalizationThreshold(100)
+                    .list()
+                    .layer(0, new DenseLayer.Builder().nIn(d2).nOut(hD).build())
+                    .layer(1, new OutputLayer.Builder().lossFunction(LossFunctions.LossFunction.XENT).nIn(hD).nOut(1).
+                            activation(Activation.SIGMOID).build())
+                    .build());
+        };
+
+        GAN gan = new GAN.Builder()
+                .generator(genSupplier)
+                .discriminator(discriminatorProvider)
+                .latentDimension(LATENT_DIM)
+                .seed(SEED)
+                .updater(UPDATER)
+                .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer)
+                .gradientNormalizationThreshold(100)
+                .build();
+
+        Nd4j.getMemoryManager().setAutoGcWindow(15 * 1000);
+
+        INDArray features = new NDArray((new NDArray(mat2)).toFloatMatrix());
+        INDArray labels = Nd4j.zeros(mat2.length, 1);
+
+        int batchSize = 64;
+        MnistDataSetIterator trainData = new MnistDataSetIterator(batchSize, true, 42);
+
+        for (int e = 0; e < EPOCHS; e++){
+            gan.fit(trainData.next());
+        }
+
+        INDArray samples = new NDArray(Sample(mat1, size));
+        INDArray predicts = gan.getGenerator().output(samples);
+
+        double[][] res = predicts.toDoubleMatrix();
+        MatReform(res, 0, 1);
+        return res;
+    }
+
+
+    public static double[][] Sample(double[][] mat, int size){
+        NDArray input = new NDArray(mat);
+        double[] means = input.mean(0).toDoubleVector();
+        double[] stds = input.var(0).toDoubleVector();
+
+        double[][] res = new double[size][input.columns()];
+        for (int j = 0; j < input.columns(); j ++){
+            if (stds[j] < 0.1)
+                stds[j] = 0.1;
+            Distribution d = new NormalDistribution(means[j], stds[j]);
+            for (int i = 0; i < size; i ++){
+                res[i][j] = d.sample();
+                if (res[i][j] < 0)
+                    res[i][j] = 0;
+                else if (res[i][j] > 1)
+                    res[i][j] = 1;
+            }
+        }
         return res;
     }
 }

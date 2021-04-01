@@ -1,21 +1,60 @@
 package etmo.metaheuristics.matmy2;
 
-import jdk.jshell.execution.Util;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.api.rng.Random;
+import org.nd4j.linalg.cpu.nativecpu.NDArray;
+import org.nd4j.linalg.factory.Nd4j;
+
+import java.io.IOException;
 
 public class test {
-    public static void main(String[] args) {
-        double[] vector1 = new double[]{1, 0};
-        double[] vector2 = new double[]{1, 1};
-        double[] vector3 = new double[]{0, 1};
-        double[] vector4 = new double[]{-1, 0};
+    public static void main(String[] args) throws IOException {
+//        double[] vector1 = new double[]{1, 0};
+//        double[] vector2 = new double[]{1, 1};
+//        double[] vector3 = new double[]{0, 1};
+//        double[] vector4 = new double[]{-1, 0};
+//
+//        // 0
+//        System.out.println(Utils.calVectorAngle(vector1, vector1));
+//        // 0.78
+//        System.out.println(Utils.calVectorAngle(vector1, vector2));
+//        // 1.57
+//        System.out.println(Utils.calVectorAngle(vector1, vector3));
+//        // 0
+//        System.out.println(Utils.calVectorAngle(vector1, vector4));
+//        for (int i = 0; i < 10; i++)
+//        {
+//            System.out.println(PseudoRandom.randInt(0, 1));
+//        }
 
-        // 0
-        System.out.println(Utils.calVectorAngle(vector1, vector1));
-        // 0.78
-        System.out.println(Utils.calVectorAngle(vector1, vector2));
-        // 1.57
-        System.out.println(Utils.calVectorAngle(vector1, vector3));
-        // 0
-        System.out.println(Utils.calVectorAngle(vector1, vector4));
+        double[][] mat1 = {{-1,1,0},{-4,3,0},{1,0,2}};
+//        double[][] mat2 = {{1,3,2},{2,4,2},{3,7,2}};
+        double[][] mat3 = {
+                {1,3,5,2,1},
+                {2,4,7,2,2},
+                {4,9,5,5,8},
+                {9,2,7,5,9},
+                {1,2,3,4,1},
+        };
+        double[][] mat4 = {
+                {9,2,7,5,9},
+                {2,4,7,2,2},
+                {1,3,5,2,1},
+                {1,2,3,4,1},
+                {4,9,5,5,8},
+        };
+//        double[][] res1 = Utils.MappingViaPCA(mat1, mat2);
+
+//        INDArray in = Nd4j.rand(100, 50);
+//        INDArray out = Nd4j.rand(100, 50);
+//
+////        AutoEncoder ae = new AutoEncoder(in.toDoubleMatrix(), out.toDoubleMatrix());
+////        ae.train();
+////        ae.predict(in.toDoubleMatrix());
+//        double[][] res = Utils.MappingViaPCA1(in.toDoubleMatrix(), out.toDoubleMatrix());
+//        double[][] res = Utils.Sample(mat1, 1);
+//        LTR.test(mat3);
+        Utils.MappingViaGAN(mat3, mat4, 10);
+        System.out.println("a");
     }
 }

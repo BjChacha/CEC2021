@@ -21,7 +21,7 @@ public class MaTDE_main {
         int problemStart = 32;
         int problemEnd = 32;
 
-        int times = 21;
+        int times = 5;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 

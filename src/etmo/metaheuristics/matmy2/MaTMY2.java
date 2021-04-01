@@ -4,13 +4,11 @@ import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
-import etmo.util.JMException;
+import etmo.util.*;
 import etmo.metaheuristics.matmy2.libs.*;
-import etmo.util.PseudoRandom;
+import etmo.util.comparators.CrowdingComparator;
 import etmo.util.logging.LogPopulation;
-import jdk.jshell.execution.Util;
 
-import javax.management.openmbean.OpenMBeanParameterInfo;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -44,6 +42,8 @@ public class MaTMY2 extends MtoAlgorithm {
 
     double forceTransferRate;
 
+    int minObjNum;
+
     boolean isDRA;
 
     private String algoName;
@@ -52,6 +52,9 @@ public class MaTMY2 extends MtoAlgorithm {
     int[] debugRunTimes;
     int goodTransferCnt = 0;
     int badTransferCnt = 0;
+
+    // MaTDE
+    double[][] probability;
 
     public MaTMY2(ProblemSet problemSet) {
         super(problemSet);
@@ -103,9 +106,14 @@ public class MaTMY2 extends MtoAlgorithm {
             populationCenterPositions[k] = new double[problemSet_.get(k).getNumberOfVariables()];
         }
 
+        minObjNum = Integer.MAX_VALUE;
+
         // TODO: DEBUG
         debugRunTimes = new int[taskNum];
         Arrays.fill(debugRunTimes, 0);
+
+        // MaTDE
+        probability = new double[problemSet_.size()][problemSet_.size()];
     }
 
     private void initPopulations() throws ClassNotFoundException, JMException {
@@ -117,6 +125,14 @@ public class MaTMY2 extends MtoAlgorithm {
                 problemSet_.get(k).evaluate(newSolution);
                 populations[k].add(newSolution);
             }
+            if (minObjNum > populations[k].get(0).numberOfVariables())
+                minObjNum = populations[k].get(0).numberOfVariables();
+
+//            // MaTDE
+//            for (int kk = 0; kk < problemSet_.size(); kk++){
+//                probability[k][kk] = 0.0;
+//                scores[k][kk] = 1.0;
+//            }
         }
         evaluations += (taskNum * populationSize);
         Arrays.fill(debugRunTimes, 1);
@@ -286,7 +302,9 @@ public class MaTMY2 extends MtoAlgorithm {
 //            firstBestVectors[k] = populations[k].getAverageObjectiveVector();
         }
 
+
         Converge(1);
+
 
         double[][] secondBestVectors = new double[taskNum][];
         for (int k = 0; k < taskNum; k++){
@@ -295,6 +313,7 @@ public class MaTMY2 extends MtoAlgorithm {
         }
 
         processConvergeImprovement(firstBestVectors, secondBestVectors);
+
     }
 
     private void selectiveTransfer(int[] times) throws JMException, ClassNotFoundException {
@@ -302,7 +321,7 @@ public class MaTMY2 extends MtoAlgorithm {
         Converge(times);
     }
 
-    private int[] getTransferSourceIndexes() {
+    private int[] getTransferSourceIndexes() throws JMException {
         int[] srcTask = new int[taskNum];
 
 //        // 随机挑选
@@ -362,26 +381,62 @@ public class MaTMY2 extends MtoAlgorithm {
                     minAngle = angles[kk];
                     minIdx = kk;
                 }
-
                 if (angles[kk] > 1.57){
                     finalScore[kk] = 0;
                 }else{
                     finalScore[kk] = 1.57 - angles[kk];
                     finalScore[kk] = (finalScore[kk] + scores[k][kk]) / finalScore[kk];
+//                    finalScore[kk] = (1/(1 + Math.log(1 + angles[kk])) + scores[k][kk]) / (1 + Math.log(1 + angles[kk]));
                 }
             }
 
-            if (PseudoRandom.randDouble() < forceTransferRate) {
+            double transferRate = Arrays.stream(scores[k]).sum()/scores[k].length;
+
+            if (PseudoRandom.randDouble(0, 1) < transferRate) {
                 double[] softmax = Utils.softMaxOnlyPositive(finalScore);
                 int tmp = k;
-                while (tmp == k)
+                while (tmp == k) {
                     tmp = Utils.roulette(softmax);
+                }
                 srcTask[k] = tmp;
             }else{
-                srcTask[k] = minIdx;
+                srcTask[k] = -1;
             }
         }
+
+
+//        // 采用MaTDE方法
+//        for (int k = 0; k < taskNum; k++){
+//            srcTask[k] = findAssistTask(k);
+//        }
         return srcTask;
+    }
+
+    // MaTDE
+    private int findAssistTask(int task) throws JMException {
+        KLD kldCalculator = new KLD(problemSet_, populations);
+        double[] kld = kldCalculator.getKDL(task);
+        double sum = 0;
+        for (int k = 0; k < problemSet_.size(); k++){
+            if (k == task)
+                continue;
+            probability[task][k] = 0.8 * probability[task][k] + scores[task][k] / (1 + Math.log(1 + kld[k]));
+            sum += probability[task][k];
+        }
+        double s = 0;
+        double p = PseudoRandom.randDouble();
+        int idx;
+        // 轮盘赌算法
+        for (idx = 0; idx < problemSet_.size(); idx++) {
+            if (idx == task)
+                continue;
+            s += probability[task][idx] / sum;
+            if (s >= p)
+                break;
+        }
+        if (idx >= problemSet_.size())
+            idx = problemSet_.size() - 1;
+        return idx;
     }
 
     private SolutionSet[] prepareTransferIndividuals() throws JMException {
@@ -407,10 +462,24 @@ public class MaTMY2 extends MtoAlgorithm {
             }
         }
 
+//        // 选择最优个体
+//        for (int k = 0; k < taskNum; k++){
+//            subPop[k] = new SolutionSet(transferVolume);
+//            NondominationSorting(k);
+//            for (int i = 0; i < transferVolume; i++){
+//                subPop[k].add(populations[k].get(i));
+//            }
+//        }
+
         return subPop;
     }
 
     private void transferIndividuals() throws JMException {
+        boolean[] sorted = new boolean[taskNum];
+
+//        // LTR
+//        double[][][] Ms = LTR.LTR(populations, populations[0].get(0).getDecisionVariables().length);
+
         SolutionSet[] subPop = prepareTransferIndividuals();
 
         for (int k = 0; k < taskNum; k++){
@@ -418,23 +487,115 @@ public class MaTMY2 extends MtoAlgorithm {
                 int[] permutation = new int[transferVolume];
                 Utils.randomPermutation(permutation, transferVolume, populations[k].size());
 
-//                // 直接替换
+//                // 直接随机替换
 //                for (int i = 0; i < transferVolume; i++) {
 //                    Solution newIndiv = new Solution(subPop[transferSourceIndexes[k]].get(i));
 //                    newIndiv.setProblemSet_(problemSet_.getTask(k));
 //                    populations[k].replace(permutation[i], newIndiv);
 //                }
-                // 先交叉再替换
+
+//                // 先交叉再随机替换
+//                for (int i = 0; i < transferVolume; i++){
+//                    Solution[] parents = new Solution[2];
+//                    parents[0] = subPop[transferSourceIndexes[k]].get(i);
+//                    parents[1] = populations[k].get(permutation[i]);
+//                    Solution[] children = (Solution[]) crossover.execute(parents);
+//                    Solution newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+//                    newIndiv.setProblemSet_(problemSet_.getTask(k));
+//                    evaluations ++;
+//                    populations[k].replace(permutation[i], newIndiv);
+//                }
+
+//                // PCA映射
+//                for (int i = 0; i < transferVolume; i++){
+//                    double[][] mappingPops = Utils.MappingViaPCA(populations[transferSourceIndexes[k]].getMat(), populations[k].getMat());
+//                    Solution newIndiv = new Solution(subPop[transferSourceIndexes[k]].get(i));
+//                    newIndiv.setDecisionVariables(mappingPops[permutation[i]]);
+//                    newIndiv.setProblemSet_(problemSet_.getTask(k));
+////                    //TODO:DEBUG
+////                    problemSet_.get(k).evaluate(newIndiv);
+////                    if (Double.isNaN(newIndiv.getObjective(0)) || Double.isNaN(newIndiv.getObjective(1)))
+////                        System.out.println("Error! Nan Transfer");
+//                    populations[k].replace(permutation[i], newIndiv);
+//                }
+
+//                // AutoEncoder
+//                for (int i = 0; i < transferVolume; i++){
+//                    if (!sorted[k]){
+//                        NondominationSorting(k);
+//                        sorted[k] = true;
+//                    }
+//                    if (!sorted[transferSourceIndexes[k]]){
+//                        NondominationSorting(transferSourceIndexes[k]);
+//                        sorted[k] = true;
+//                    }
+//
+//                    double[][] mappingPops = Utils.MappingViaAE(populations[transferSourceIndexes[k]].getMat(), populations[k].getMat(), transferVolume);
+//
+//                    Solution newIndiv = new Solution(populations[k].get(populationSize - 1 - i));
+//                    newIndiv.setDecisionVariables(mappingPops[i]);
+//                    populations[k].replace(populationSize - 1 - i, newIndiv);
+//                }
+
+//                // PCA + AutoEncoder
+//                for (int i = 0; i < transferVolume; i++){
+//                    // 非支配排序
+//                    if (!sorted[k]){
+//                        NondominationSorting(k);
+//                        sorted[k] = true;
+//                    }
+//                    if (!sorted[transferSourceIndexes[k]]){
+//                        NondominationSorting(transferSourceIndexes[k]);
+//                        sorted[k] = true;
+//                    }
+//
+//                    double[][] mappingPops = Utils.MappingViaPE(populations[transferSourceIndexes[k]].getMat(), populations[k].getMat(), transferVolume);
+//
+//                    Solution newIndiv = new Solution(populations[k].get(populationSize - 1 - i));
+//                    newIndiv.setDecisionVariables(mappingPops[i]);
+//                    //TODO:DEBUG
+//                    problemSet_.get(k).evaluate(newIndiv);
+//                    if (Double.isNaN(newIndiv.getObjective(0)) || Double.isNaN(newIndiv.getObjective(1)))
+//                        System.out.println("Error! Nan Transfer");
+//                    populations[k].replace(populationSize - 1 - i, newIndiv);
+//                }
+
+//                // LTR (give up)
+//                for (int i = 0; i < transferVolume; i++) {
+//                    Solution newIndiv = LTR.Mapping(subPop[transferSourceIndexes[k]].get(i), Ms[transferSourceIndexes[k]], Ms[k]);
+//                    newIndiv.setProblemSet_(problemSet_.getTask(k));
+//                    populations[k].replace(permutation[i], newIndiv);
+//                }
+
+
+                // GAN
                 for (int i = 0; i < transferVolume; i++){
-                    Solution[] parents = new Solution[2];
-                    parents[0] = subPop[transferSourceIndexes[k]].get(i);
-                    parents[1] = populations[k].get(permutation[i]);
-                    Solution[] children = (Solution[]) crossover.execute(parents);
-                    Solution newIndiv = new Solution(children[0]);
-                    newIndiv.setProblemSet_(problemSet_.getTask(k));
-                    populations[k].replace(permutation[i], newIndiv);
+                    double[][] mappingPops = Utils.MappingViaGAN(populations[transferSourceIndexes[k]].getMat(), populations[k].getMat(), transferVolume);
+
+                    Solution newIndiv = new Solution(populations[k].get(populationSize - 1 - i));
+                    newIndiv.setDecisionVariables(mappingPops[i]);
+                    populations[k].replace(populationSize - 1 - i, newIndiv);
                 }
             }
+        }
+    }
+
+    private void NondominationSorting(int k){
+        Distance distance = new Distance();
+        Ranking ranking = new Ranking(populations[k]);
+        int remain = populations[k].size();
+        int index = 0;
+        SolutionSet front = null;
+        populations[k].clear();
+
+        while (remain > 0){
+            front = ranking.getSubfront(index);
+            distance.crowdingDistanceAssignment(front, problemSet_.get(k).getNumberOfObjectives());
+            for (int i = 0; i < front.size(); i++){
+                populations[k].add(front.get(i));
+            }
+            remain -= front.size();
+            index ++;
         }
     }
 
@@ -469,23 +630,27 @@ public class MaTMY2 extends MtoAlgorithm {
             isBetter = improveModulus[k] > 0;
 
             if (!isBetter) {
-                if (transferSourceIndexes[k] >= 0)
+                if (transferSourceIndexes[k] >= 0) {
                     scores[k][transferSourceIndexes[k]] *= scoreDecreaseRate;
+
+                    goodTransferCnt++;
+//                    System.out.println(evaluations + "/" + maxEvaluations +
+//                            ": Bad transfer:" + transferSourceIndexes[k] + "->" + k +
+//                            "\tTransfer Rate: " + Arrays.stream(scores[k]).sum()/scores[k].length) ;
+
+                }
                 transferSourceIndexes[k] = -1;
                 betterCount --;
 
-
             }else{
-                if (transferSourceIndexes[k] >= 0)
+                if (transferSourceIndexes[k] >= 0) {
                     scores[k][transferSourceIndexes[k]] += scoreIncrement;
-            }
 
-            // TODO:DEBUG
-            if (transferSourceIndexes[k] >= 0) {
-                if (isBetter)
-                    goodTransferCnt ++;
-                else
-                    badTransferCnt ++;
+                    badTransferCnt++;
+//                    System.out.println(evaluations + "/" + maxEvaluations +
+//                            ": Good transfer:" + transferSourceIndexes[k] + "->" + k +
+//                            "\tTransfer Rate: " + Arrays.stream(scores[k]).sum()/scores[k].length);
+                }
             }
 
         }
