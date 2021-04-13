@@ -254,7 +254,7 @@ public class SolutionSet implements Serializable {
 	public void printObjectivesToFile(String path) {
 		try {
 			/* Open the file */
-			path = "datas//" + path;
+			path = "data//" + path;
 			FileOutputStream fos = new FileOutputStream(path);
 			OutputStreamWriter osw = new OutputStreamWriter(fos);
 			BufferedWriter bw = new BufferedWriter(osw);
@@ -461,7 +461,7 @@ public class SolutionSet implements Serializable {
 	}
 
 //	add from moeac
-    public Solution getCentroidVector() {
+	public Solution getCentroidVector() {
 		int objectNumb = 0;
 		if(solutionsList_.size() != 0){
 			objectNumb = solutionsList_.get(0).getNumberOfObjectives();
@@ -469,12 +469,18 @@ public class SolutionSet implements Serializable {
 			System.out.println("solutionsList size == 0");
 			System.exit(0);
 		}
+		int objStart = 0;
+		if (solutionsList_.get(0).getSkillFactor() >= 0) {
+			objStart = solutionsList_.get(0).getProblemSet().get(solutionsList_.get(0).getSkillFactor()).getStartObjPos();
+			objectNumb = solutionsList_.get(0).getProblemSet().get(solutionsList_.get(0).getSkillFactor()).getNumberOfObjectives();
+		}
+
 		Solution sol = new Solution(objectNumb);
 		double sumValue = 0.0;
 		for (int m = 0; m < objectNumb; m++) {
 			double value = 0;
 			for (int k = 0; k < solutionsList_.size(); k++) {
-				value += solutionsList_.get(k).getNormalizedObjective(m);
+				value += solutionsList_.get(k).getNormalizedObjective(m + objStart);
 			}
 			value = value / solutionsList_.size();
 			sol.setNormalizedObjective(m, value);
@@ -491,8 +497,8 @@ public class SolutionSet implements Serializable {
 		normDistance = Math.sqrt(normDistance);
 
 		sol.setDistanceToIdealPoint(normDistance);
-		return sol;
-    }
+	return sol;
+}
 
     public double getMeanOfIdx(int idx) throws JMException {
 		double sum = 0;
@@ -545,15 +551,30 @@ public class SolutionSet implements Serializable {
 	}
 
 	public double[] getAverageDecisionVector() throws JMException {
-		double[] vector = new double[solutionsList_.get(0).numberOfVariables()];
-		for (int i = 0; i < vector.length; i++){
+		double[] res = new double[solutionsList_.get(0).numberOfVariables()];
+		for (int i = 0; i < res.length; i++){
 			double sum = 0;
 			for (int j = 0; j < solutionsList_.size(); j++){
 				sum += solutionsList_.get(j).getDecisionVariables(i);
 			}
-			vector[i] = sum / solutionsList_.size();
+			res[i] = sum / solutionsList_.size();
 		}
-		return vector;
+		return res;
+	}
+
+	public double[] getNDWeightedDecisionVector() throws JMException {
+		double[] res = new double[solutionsList_.get(0).numberOfVariables()];
+		double weightSum = 0;
+		for (int i = 0; i < res.length; i++){
+			double sum = 0;
+			for (int j = 0; j < solutionsList_.size(); j++){
+				sum += solutionsList_.get(j).getDecisionVariables(i)
+						* 1 / (solutionsList_.get(j).getRank() + 1);
+				weightSum += 1 / (solutionsList_.get(j).getRank() + 1);
+			}
+			res[i] = sum / solutionsList_.size() / weightSum;
+		}
+		return res;
 	}
 
 	public SolutionSet copy(){
