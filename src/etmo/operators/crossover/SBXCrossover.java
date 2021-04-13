@@ -184,7 +184,7 @@ public class SBXCrossover extends Crossover {
 	public Object execute(Object object) throws JMException {
 		Solution[] parents = (Solution[]) object;
 
-		if (parents.length != 2) {
+		if (parents.length < 2) {
 			Configuration.logger_.severe("SBXCrossover.execute: operator needs two " + "parents");
 			Class cls = java.lang.String.class;
 			String name = cls.getName();
