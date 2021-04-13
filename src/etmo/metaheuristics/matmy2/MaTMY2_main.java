@@ -1,5 +1,6 @@
 package etmo.metaheuristics.matmy2;
 
+import ch.qos.logback.core.joran.spi.ElementSelector;
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
@@ -20,10 +21,10 @@ public class MaTMY2_main {
         Operator crossover;
         Operator selection;
 
-        int problemStart = 25;
-        int problemEnd = 25;
+        int problemStart = 28;
+        int problemEnd = 28;
 
-        int times = 1;
+        int times = 3;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -79,6 +80,18 @@ public class MaTMY2_main {
 //            pSName = pSName.substring(0, pSName.length()-2);
             System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
 
+//            // DEBUG
+//            ProblemSet tmp = new ProblemSet(problemSet.size());
+//            for (int i = 0; i < problemSet.size(); i ++){
+//                if (i == 0)
+//                    tmp.add(problemSet.get(19));
+//                else if (i == 19)
+//                    tmp.add(problemSet.get(0));
+//                else
+//                    tmp.add(problemSet.get(i));
+//            }
+//            problemSet = tmp;
+
             algorithm = new MaTMY2(problemSet);
 
             algorithm.setInputParameter("populationSize", 100);
@@ -91,7 +104,7 @@ public class MaTMY2_main {
             algorithm.setInputParameter("scoreIncrement", 0.5);
             algorithm.setInputParameter("scoreDecreaseRate", 0.2);
             algorithm.setInputParameter("isDRA", false);
-            algorithm.setInputParameter("algoName", "MOEAD");
+            algorithm.setInputParameter("algoName", "MaOEAC");
 
             HashMap parameters;
 
@@ -99,6 +112,14 @@ public class MaTMY2_main {
             parameters.put("probability", 0.9);
             parameters.put("distributionIndex", 20.0);
             crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+
+//            parameters = new HashMap();
+//            parameters.put("CR_LB", 0.1);
+//            parameters.put("CR_UB", 0.9);
+//            parameters.put("F_LB", 0.1);
+//            parameters.put("F_UB", 2.0);
+//            crossover = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
+//            algorithm.addOperator("crossover", crossover);
 
             parameters = null;
             selection = SelectionFactory.getSelectionOperator("BinaryTournament2", parameters);
@@ -112,7 +133,6 @@ public class MaTMY2_main {
 //                long endTime = System.currentTimeMillis();
 //                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
 
-                // 各个任务的目标数不一，所以评价时需要根据任务来重新设置种群规模。
                 SolutionSet resPopulation[] = new SolutionSet[taskNum];
                 for (int k = 0; k < taskNum; k++) {
                     resPopulation[k] = new SolutionSet();
@@ -141,6 +161,7 @@ public class MaTMY2_main {
                     igd = indicator.getIGD(resPopulation[k]);
                     ave[k] += igd;
                 }
+//                System.out.println("Times: " + t + " finished.");
             }
             for(int i=0;i<taskNum;i++)
                 System.out.println(form.format(ave[i] / times));

@@ -33,6 +33,7 @@ public class HierarchicalClustering1 {
                     }
                 }
             }
+
             minAngles[i] =  min;
             minIndexs[i] = index[1];
             if(minAngle > min){
@@ -40,6 +41,10 @@ public class HierarchicalClustering1 {
                 index[2] = index[0];
                 index[3] = index[1];
             }
+
+//            if (index[0] == -1 && index[1] == -1 && index[2] == -1 && index[3] == -1 && i == size - 1)
+//                System.out.println("DEBUG");
+
         }
         while(size > clusteringSize){
             SolutionSet sols = (list.get(index[2]).union(list.get(index[3])));
@@ -132,15 +137,12 @@ public class HierarchicalClustering1 {
         double angle = 0.0;//所求两个向量的角度
         double distanceToidealPoint1 = s1.getDistanceToIdealPoint();//S1到理想点的距离
         double distanceToidealPoint2 = s2.getDistanceToIdealPoint();//S2到理想点的距离
+
         double innerProduc = 0.0; //两个向量的内积
-        for(int i=0; i<list.get(0).get(0).getNumberOfObjectives(); i++){
+        for(int i=0; i<s1.getNumberOfObjectives(); i++){
             innerProduc += s1.getNormalizedObjective(i) * s2.getNormalizedObjective(i);
         }
         double value = Math.abs(innerProduc/(distanceToidealPoint1*distanceToidealPoint2));
-        if(value > 1.0){
-            //System.out.println(value);
-            value = 1.0;
-        }
         angle = Math.acos(value);
         return angle;
     }//computeAngle

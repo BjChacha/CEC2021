@@ -6,7 +6,6 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.util.*;
 import etmo.metaheuristics.matmy2.libs.*;
-import etmo.util.comparators.CrowdingComparator;
 import etmo.util.logging.LogPopulation;
 
 import java.util.Arrays;
@@ -16,8 +15,8 @@ public class MaTMY2 extends MtoAlgorithm {
     MaTAlgorithm[] optimizers;
     SolutionSet[] populations;
 
-    Operator crossover;
-    Operator selection;
+    Operator crossover_;
+    Operator selection_;
 
     private int populationSize;
     private int maxEvaluations;
@@ -42,8 +41,6 @@ public class MaTMY2 extends MtoAlgorithm {
 
     double forceTransferRate;
 
-    int minObjNum;
-
     boolean isDRA;
 
     private String algoName;
@@ -52,6 +49,9 @@ public class MaTMY2 extends MtoAlgorithm {
     int[] debugRunTimes;
     int goodTransferCnt = 0;
     int badTransferCnt = 0;
+
+    int cntGAN = 0;
+    int cntCross = 0;
 
     // MaTDE
     double[][] probability;
@@ -76,8 +76,8 @@ public class MaTMY2 extends MtoAlgorithm {
 
         algoName = (String) getInputParameter("algoName");
 
-        crossover = operators_.get("crossover");
-        selection = operators_.get("selection");
+        crossover_ = operators_.get("crossover");
+        selection_ = operators_.get("selection");
 
         taskNum = problemSet_.size();
         transferSourceIndexes = new int[taskNum];
@@ -106,8 +106,6 @@ public class MaTMY2 extends MtoAlgorithm {
             populationCenterPositions[k] = new double[problemSet_.get(k).getNumberOfVariables()];
         }
 
-        minObjNum = Integer.MAX_VALUE;
-
         // TODO: DEBUG
         debugRunTimes = new int[taskNum];
         Arrays.fill(debugRunTimes, 0);
@@ -121,12 +119,13 @@ public class MaTMY2 extends MtoAlgorithm {
         for (int k = 0; k < taskNum; k++){
             populations[k] = new SolutionSet(populationSize);
             for (int i = 0; i < populationSize; i++){
-                Solution newSolution = new Solution(problemSet_.getTask(k));
+//                Solution newSolution = new Solution(problemSet_.getTask(k));
+                Solution newSolution = new Solution(problemSet_);
+                newSolution.setSkillFactor(k);
                 problemSet_.get(k).evaluate(newSolution);
+                evaluations ++;
                 populations[k].add(newSolution);
             }
-            if (minObjNum > populations[k].get(0).numberOfVariables())
-                minObjNum = populations[k].get(0).numberOfVariables();
 
 //            // MaTDE
 //            for (int kk = 0; kk < problemSet_.size(); kk++){
@@ -134,7 +133,6 @@ public class MaTMY2 extends MtoAlgorithm {
 //                scores[k][kk] = 1.0;
 //            }
         }
-        evaluations += (taskNum * populationSize);
         Arrays.fill(debugRunTimes, 1);
         LogPopulation.LogPopulation("MaTMY2", populations, problemSet_, evaluations);
     }
@@ -150,8 +148,8 @@ public class MaTMY2 extends MtoAlgorithm {
             HashMap parameters;
 
             for (int k = 0; k < taskNum; k++) {
-                ProblemSet pS = problemSet_.getTask(k);
-                optimizers[k] = new MOEAD(pS, populations[k]);
+//                ProblemSet pS = problemSet_.getTask(k);
+                optimizers[k] = new MOEAD(problemSet_, populations[k], k);
                 optimizers[k].setInputParameter("populationSize", 100);
                 optimizers[k].setInputParameter("maxEvaluations", 1000 * 100);
 
@@ -167,7 +165,7 @@ public class MaTMY2 extends MtoAlgorithm {
                 crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover", parameters);
 
                 parameters = new HashMap();
-                parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
+                parameters.put("probability", 1.0 / problemSet_.get(k).getNumberOfVariables());
                 parameters.put("distributionIndex", 20.0);
                 mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 
@@ -185,8 +183,9 @@ public class MaTMY2 extends MtoAlgorithm {
             HashMap parameters;
 
             for (int k = 0; k < taskNum; k++) {
-                ProblemSet pS = problemSet_.getTask(k);
-                optimizers[k] = new MaOEAC(pS, populations[k]);
+//                ProblemSet pS = problemSet_.getTask(k);
+//                optimizers[k] = new MaOEAC(pS, populations[k]);
+                optimizers[k] = new MaOEAC(problemSet_, populations[k], k);
 
                 optimizers[k].setInputParameter("populationSize",100);
                 optimizers[k].setInputParameter("maxGenerations",1000);
@@ -197,7 +196,7 @@ public class MaTMY2 extends MtoAlgorithm {
                 crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
 
                 parameters = new HashMap();
-                parameters.put("probability", 1.0 / pS.get(0).getNumberOfVariables());
+                parameters.put("probability", 1.0 / problemSet_.get(k).getNumberOfVariables());
                 parameters.put("distributionIndex", 20.0);
                 mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 
@@ -272,7 +271,7 @@ public class MaTMY2 extends MtoAlgorithm {
 //                    System.out.println(IntStream.of(debugRunTimes).sum() * populationSize);
                 }
 
-                if (evaluations % (20 * taskNum * populationSize) == 0) {
+                if (((evaluations/100)*100) % (20 * taskNum * populationSize) == 0) {
 //                System.out.println(totalCount+"x"+taskNum+"x"+populationSize+"="+totalCount * taskNum * populationSize);
                     LogPopulation.LogPopulation("MaTMY2", populations, problemSet_, evaluations);
                 }
@@ -282,10 +281,14 @@ public class MaTMY2 extends MtoAlgorithm {
 
     private void calculativeConverge() throws JMException, ClassNotFoundException {
         for (int k = 0; k < taskNum; k++){
+//            NondominationSorting(k);
+//            populationCenterPositions[k] = populations[k].getNDWeightedDecisionVector();
             populationCenterPositions[k] = populations[k].getAverageDecisionVector();
         }
         Converge(3);
         for (int k = 0; k < taskNum; k++){
+//            NondominationSorting(k);
+//            double[] newPosition = populations[k].getNDWeightedDecisionVector();
             double[] newPosition = populations[k].getAverageDecisionVector();
             convergeDirections[k] = Utils.vectorMinus(newPosition, populationCenterPositions[k]);
             populationCenterPositions[k] = newPosition;
@@ -395,15 +398,21 @@ public class MaTMY2 extends MtoAlgorithm {
             if (PseudoRandom.randDouble(0, 1) < transferRate) {
                 double[] softmax = Utils.softMaxOnlyPositive(finalScore);
                 int tmp = k;
-                while (tmp == k) {
+                int cnt = 0;
+                while (tmp == k && cnt < 100) {
                     tmp = Utils.roulette(softmax);
+                    cnt ++;
+//                    System.out.println("Count: "+cnt);
                 }
-                srcTask[k] = tmp;
+                if (cnt < 100)
+                    srcTask[k] = tmp;
+                else
+                    srcTask[k] = -1;
             }else{
                 srcTask[k] = -1;
             }
         }
-
+//        System.out.println(evaluations + ": " + Arrays.toString(srcTask));
 
 //        // 采用MaTDE方法
 //        for (int k = 0; k < taskNum; k++){
@@ -457,7 +466,7 @@ public class MaTMY2 extends MtoAlgorithm {
         for (int k = 0; k < taskNum; k++){
             subPop[k] = new SolutionSet(transferVolume);
             for (int i = 0; i < transferVolume; i++){
-                Solution indiv = new Solution((Solution) selection.execute(populations[k]));
+                Solution indiv = new Solution((Solution) selection_.execute(populations[k]));
                 subPop[k].add(indiv);
             }
         }
@@ -490,21 +499,24 @@ public class MaTMY2 extends MtoAlgorithm {
 //                // 直接随机替换
 //                for (int i = 0; i < transferVolume; i++) {
 //                    Solution newIndiv = new Solution(subPop[transferSourceIndexes[k]].get(i));
-//                    newIndiv.setProblemSet_(problemSet_.getTask(k));
+//                    newIndiv.setSkillFactor(k);
 //                    populations[k].replace(permutation[i], newIndiv);
 //                }
 
-//                // 先交叉再随机替换
-//                for (int i = 0; i < transferVolume; i++){
-//                    Solution[] parents = new Solution[2];
-//                    parents[0] = subPop[transferSourceIndexes[k]].get(i);
-//                    parents[1] = populations[k].get(permutation[i]);
-//                    Solution[] children = (Solution[]) crossover.execute(parents);
-//                    Solution newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+                // 先交叉再随机替换
+                for (int i = 0; i < transferVolume; i++){
+                    Solution[] parents = new Solution[2];
+                    parents[0] = subPop[transferSourceIndexes[k]].get(i);
+                    parents[1] = populations[k].get(permutation[i]);
+                    Solution[] children = (Solution[]) crossover_.execute(parents);
+                    Solution newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
 //                    newIndiv.setProblemSet_(problemSet_.getTask(k));
-//                    evaluations ++;
-//                    populations[k].replace(permutation[i], newIndiv);
-//                }
+                    newIndiv.setSkillFactor(k);
+                    problemSet_.get(k).evaluate(newIndiv);
+                    evaluations ++;
+
+                    populations[k].replace(permutation[i], newIndiv);
+                }
 
 //                // PCA映射
 //                for (int i = 0; i < transferVolume; i++){
@@ -560,22 +572,59 @@ public class MaTMY2 extends MtoAlgorithm {
 //                    populations[k].replace(populationSize - 1 - i, newIndiv);
 //                }
 
-//                // LTR (give up)
-//                for (int i = 0; i < transferVolume; i++) {
-//                    Solution newIndiv = LTR.Mapping(subPop[transferSourceIndexes[k]].get(i), Ms[transferSourceIndexes[k]], Ms[k]);
-//                    newIndiv.setProblemSet_(problemSet_.getTask(k));
+
+//                // GAN
+//                boolean[] isGAN = {false};
+//                double[][] mappingPops = Utils.MappingViaGANMixCrossover(
+//                        populations[transferSourceIndexes[k]].getMat(),
+//                        populations[k].getMat(),
+//                        isGAN,
+//                        transferVolume);
+////                    System.out.println("Eval: " + evaluations + "\tGAN: " + isGAN[0]);
+//                for (int i = 0; i < transferVolume; i++){
+//                    Solution newIndiv;
+//                    if (isGAN[0]) {
+//                        newIndiv = new Solution(populations[k].get(permutation[i]));
+//                        newIndiv.setDecisionVariables(mappingPops[i]);
+//                        cntGAN ++;
+//                    }else{
+//                        cntCross ++;
+//                        Solution[] parents = new Solution[2];
+//                        parents[0] = new Solution(subPop[transferSourceIndexes[k]].get(i));
+//                        parents[1] = new Solution(populations[k].get(permutation[i]));
+//                        Solution[] children = (Solution[]) crossover_.execute(parents);
+//                        newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+//                    }
+//                    newIndiv.setSkillFactor(k);
+//                    problemSet_.get(k).evaluate(newIndiv);
+//                    evaluations++;
 //                    populations[k].replace(permutation[i], newIndiv);
 //                }
 
-
-                // GAN
-                for (int i = 0; i < transferVolume; i++){
-                    double[][] mappingPops = Utils.MappingViaGAN(populations[transferSourceIndexes[k]].getMat(), populations[k].getMat(), transferVolume);
-
-                    Solution newIndiv = new Solution(populations[k].get(populationSize - 1 - i));
-                    newIndiv.setDecisionVariables(mappingPops[i]);
-                    populations[k].replace(populationSize - 1 - i, newIndiv);
-                }
+//                // GAN & Crossover
+//                for (int i = 0; i < transferVolume; i++){
+//                    double[] features = Utils.MappingViaGAN(
+//                            subPop[transferSourceIndexes[k]].get(i), populations[k].getMat()
+//                    );
+//
+//                    Solution newIndiv = new Solution(populations[k].get(i));
+//                    newIndiv.setDecisionVariables(features);
+//
+//                    Solution[] parents = new Solution[3];
+//                    parents[0] = newIndiv;
+//                    parents[1] = new Solution(subPop[transferSourceIndexes[k]].get(i));
+//                    parents[2] = new Solution(subPop[transferSourceIndexes[k]].get(i));
+//
+//                    // DE
+////                    Solution offspring = (Solution) crossover_.execute(new Object[] {subPop[transferSourceIndexes[k]].get(i), parents});
+//
+//                    // SBX
+//                    Solution offspring = ((Solution[]) crossover_.execute(parents))[0];
+//
+//                    problemSet_.get(k).evaluate(offspring);
+//                    evaluations ++;
+//                    populations[k].replace(i, offspring);
+//                }
             }
         }
     }
@@ -604,6 +653,8 @@ public class MaTMY2 extends MtoAlgorithm {
         Arrays.fill(improveModulus, 0);
         int betterCount = inProgressTaskNum;
         for (int k = 0; k < taskNum; k++) {
+//            if (evaluations < maxEvaluations / 3)
+//                System.out.println("DEBUG: 638");
             double[] difference = Utils.vectorMinus(secondBestVectors[k], firstBestVectors[k]);
 //            // 1. 宽松更优
 //            boolean isBetter = false;
@@ -703,7 +754,8 @@ public class MaTMY2 extends MtoAlgorithm {
             selectiveTransfer(runTimes);
 //            System.out.println(evaluations + "/" + maxEvaluations);
         }
-//        System.out.println("Good transfer rate: " + (double)goodTransferCnt / (goodTransferCnt + badTransferCnt));
+        System.out.println("GAN count: " + cntGAN +"/"+ (cntGAN + cntCross));
+        //        System.out.println("Good transfer rate: " + (double)goodTransferCnt / (goodTransferCnt + badTransferCnt));
         return populations;
     }
 }

@@ -8,9 +8,12 @@ public class PartitionalSolutionSet {
 	int numberOfClusters;
 	int[][] neighbor;
 
+	int objStart;
+
 	public PartitionalSolutionSet(SolutionSet solutionSet_,int numberOfObjectives){
 		this.solutionSet_ = solutionSet_;
 		this.numberOfClusters = numberOfObjectives;
+		this.objStart = solutionSet_.get(0).getProblemSet().get(solutionSet_.get(0).getSkillFactor()).getStartObjPos();
 		neighbor = new int[numberOfObjectives][solutionSet_.size()/numberOfObjectives];
 	}
 
@@ -36,7 +39,7 @@ public class PartitionalSolutionSet {
 			int t = 0;
 			for(int j=0;j<solutionSet_.size();j++){
 				if(!isAsocciated[j]){
-					x[t] = Math.acos(Math.abs(solutionSet_.get(j).getNormalizedObjective(n)/solutionSet_.get(j).getDistanceToIdealPoint()));
+					x[t] = Math.acos(Math.abs(solutionSet_.get(j).getNormalizedObjective(n+objStart)/solutionSet_.get(j).getDistanceToIdealPoint()));
 					idx[t] = j;
 					t++;
 				}

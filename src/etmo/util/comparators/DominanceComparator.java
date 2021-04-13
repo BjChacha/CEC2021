@@ -44,7 +44,7 @@ public class DominanceComparator implements Comparator {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param comparator
 	 */
 	public DominanceComparator(IConstraintViolationComparator comparator) {
@@ -53,7 +53,7 @@ public class DominanceComparator implements Comparator {
 
 	/**
 	 * Compares two solutions.
-	 * 
+	 *
 	 * @param object1
 	 *            Object representing the first <code>Solution</code>.
 	 * @param object2
@@ -95,11 +95,21 @@ public class DominanceComparator implements Comparator {
 
 		// Equal number of violated constraints. Applying a dominance Test then
 		double value1, value2;
-		for (int i = 0; i < solution1.getNumberOfObjectives(); i++) {
-			value1 = solution1.getObjective(i);
-			value2 = solution2.getObjective(i);
-			if (Double.isInfinite(value1) || Double.isInfinite(value2))
-				continue;
+
+		int objStart = 0;
+		int objCnt = solution1.getNumberOfObjectives();
+
+		if (solution1.getProblemSet() != null){
+			objCnt = solution1.getProblemSet().get(solution1.getSkillFactor()).getNumberOfObjectives();
+			objStart = solution1.getProblemSet().get(solution1.getSkillFactor()).getStartObjPos();
+		}
+
+		for (int i = 0; i < objCnt; i++) {
+			value1 = solution1.getObjective(i+objStart);
+			value2 = solution2.getObjective(i+objStart);
+
+//			if (Double.isInfinite(value1) || Double.isInfinite(value2))
+//				continue;
 
 			if (value1 < value2) {
 				flag = -1;

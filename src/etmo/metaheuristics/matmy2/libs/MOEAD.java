@@ -93,10 +93,11 @@ public class MOEAD extends MaTAlgorithm {
 		functionType_ = "_TCHE1";
 	} // MOEAD
 
-	public MOEAD(ProblemSet problemSet, SolutionSet solutionSet) throws JMException, ClassNotFoundException {
+	public MOEAD(ProblemSet problemSet, SolutionSet solutionSet, int taskIdx) throws JMException, ClassNotFoundException {
 		super(problemSet);
 		population_ = solutionSet;
 		populationSize_ = solutionSet.size();
+		taskIdx_ = taskIdx;
 
 		functionType_ = "_TCHE1";
 	}
@@ -260,7 +261,7 @@ public class MOEAD extends MaTAlgorithm {
 				mutation_.execute(child);
 
 				// Evaluation
-				problemSet_.get(0).evaluate(child);
+				problemSet_.get(taskIdx_).evaluate(child);
 
 				evaluations_++;
 				evaluations++;
@@ -343,7 +344,7 @@ public class MOEAD extends MaTAlgorithm {
 		dataDirectory_ = this.getInputParameter("dataDirectory").toString();
 		//System.out.println("POPSIZE: " + populationSize_);
 
-		indArray_ = new Solution[problemSet_.get(0).getNumberOfObjectives()];
+		indArray_ = new Solution[problemSet_.get(taskIdx_).getNumberOfObjectives()];
 
 		T_ = ((Integer) this.getInputParameter("T")).intValue();
 		nr_ = ((Integer) this.getInputParameter("nr")).intValue();
@@ -355,9 +356,9 @@ public class MOEAD extends MaTAlgorithm {
 		 */
 		neighborhood_ = new int[populationSize_][T_];
 
-		z_ = new double[problemSet_.get(0).getNumberOfObjectives()];
+		z_ = new double[problemSet_.get(taskIdx_).getNumberOfObjectives()];
 		// lambda_ = new Vector(problemSet_.get(0).getNumberOfObjectives()) ;
-		lambda_ = new double[populationSize_][problemSet_.get(0).getNumberOfObjectives()];
+		lambda_ = new double[populationSize_][problemSet_.get(taskIdx_).getNumberOfObjectives()];
 
 		crossover_ = operators_.get("crossover"); // default: DE crossover
 		mutation_ = operators_.get("mutation"); // default: polynomial mutation
@@ -379,15 +380,15 @@ public class MOEAD extends MaTAlgorithm {
 //		// STEP 1.2. Initialize population
 //		initPopulation();
 //
-//		// STEP 1.3. Initialize z_
-//		initIdealPoint();
+		// STEP 1.3. Initialize z_
+		initIdealPoint();
 
 		initialized = true;
 	}
 
 	void initUniformWeight() { // init lambda vectors
 		int nw = 0;
-		if (problemSet_.get(0).getNumberOfObjectives() == 2) {
+		if (problemSet_.get(taskIdx_).getNumberOfObjectives() == 2) {
 			for (int n = 0; n < populationSize_; n++) {
 				double a = 1.0 * n / (populationSize_ - 1);
 				lambda_[n][0] = a;
@@ -395,7 +396,7 @@ public class MOEAD extends MaTAlgorithm {
 				nw++;
 			} // for
 		} // if
-		else if(problemSet_.get(0).getNumberOfObjectives() == 3) {
+		else if(problemSet_.get(taskIdx_).getNumberOfObjectives() == 3) {
 			int i, j;
 			for (i = 0; i <= H_; i++) {
 				for (j = 0; j <= H_ - i; j++) {
@@ -414,7 +415,7 @@ public class MOEAD extends MaTAlgorithm {
 		}
 		else{
 			String dataFileName;
-			dataFileName = "W" + problemSet_.get(0).getNumberOfObjectives() + "D_"
+			dataFileName = "W" + problemSet_.get(taskIdx_).getNumberOfObjectives() + "D_"
 					+ populationSize_ + ".dat";
 
 			try {
@@ -482,7 +483,7 @@ public class MOEAD extends MaTAlgorithm {
 		for (int i = 0; i < populationSize_; i++) {
 			Solution newSolution = new Solution(problemSet_);
 
-			problemSet_.get(0).evaluate(newSolution);
+			problemSet_.get(taskIdx_).evaluate(newSolution);
 			evaluations_++;
 			population_.add(newSolution);
 		} // for
@@ -492,10 +493,10 @@ public class MOEAD extends MaTAlgorithm {
    *
    */
 	void initIdealPoint() throws JMException, ClassNotFoundException {
-		for (int i = 0; i < problemSet_.get(0).getNumberOfObjectives(); i++) {
+		for (int i = 0; i < problemSet_.get(taskIdx_).getNumberOfObjectives(); i++) {
 			z_[i] = 1.0e+30;
 			indArray_[i] = new Solution(problemSet_);
-			problemSet_.get(0).evaluate(indArray_[i]);
+			problemSet_.get(taskIdx_).evaluate(indArray_[i]);
 			evaluations_++;
 		} // for
 
@@ -547,9 +548,10 @@ public class MOEAD extends MaTAlgorithm {
 	 * @param individual
 	 */
 	void updateReference(Solution individual) {
-		for (int n = 0; n < problemSet_.get(0).getNumberOfObjectives(); n++) {
-			if (individual.getObjective(n) < z_[n]) {
-				z_[n] = individual.getObjective(n);
+		int objStart = problemSet_.get(taskIdx_).getStartObjPos();
+		for (int n = 0; n < problemSet_.get(taskIdx_).getNumberOfObjectives(); n++) {
+			if (individual.getObjective(n + objStart) < z_[n]) {
+				z_[n] = individual.getObjective(n + objStart);
 
 				indArray_[n] = individual;
 			}
@@ -613,8 +615,9 @@ public class MOEAD extends MaTAlgorithm {
 		if (functionType_.equals("_TCHE1")) {
 			double maxFun = -1.0e+30;
 
-			for (int n = 0; n < problemSet_.get(0).getNumberOfObjectives(); n++) {
-				double diff = Math.abs(individual.getObjective(n) - z_[n]);
+			for (int n = 0; n < problemSet_.get(taskIdx_).getNumberOfObjectives(); n++) {
+				double diff = Math.abs(
+						individual.getObjective(n + problemSet_.get(taskIdx_).getStartObjPos()) - z_[n]);
 
 				double feval;
 				if (lambda[n] == 0) {

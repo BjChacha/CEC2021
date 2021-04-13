@@ -9,6 +9,8 @@ public abstract class MaTAlgorithm extends Algorithm {
 
     protected SolutionSet solutionSet_;
 
+    protected int taskIdx_;
+
     /**
      * Constructor
      *
@@ -17,6 +19,11 @@ public abstract class MaTAlgorithm extends Algorithm {
     public MaTAlgorithm(ProblemSet problemSet) {
         super(problemSet);
     }
+
+    public MaTAlgorithm(ProblemSet problemSet, int taskIdx){
+        super(problemSet);
+        taskIdx_ = taskIdx;
+    };
 
     // TODO
     public MaTAlgorithm(ProblemSet problemSet, SolutionSet solutionSet){
