@@ -478,7 +478,7 @@ public class MaOEAC extends Algorithm{
 
 		   double angle1 = Math.acos(Math.abs(sols.getCentroidVector().getNormalizedObjective(k) / sols.getCentroidVector().getDistanceToIdealPoint()));
 		   // TODO: for now
-		   if (angle1 == Double.NaN) {
+		   if (Double.isNaN(angle1)) {
 			   angle1 = 0.0;
 			   System.out.println("Warning: angle being Nan.");
 		   }
