@@ -113,3 +113,4 @@ fabric.properties
 /datas/
 *.class
 /target/
+/data/
