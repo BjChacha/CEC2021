@@ -425,6 +425,10 @@ public class Solution implements Serializable {
 		return objective_[i];
 	} // getObjective
 
+	public double[] getObjectives(){
+		return objective_;
+	}
+
 	public double getObjectiveWeightedSum(){
 		double sum = 0;
 		for (int i = 0; i < getNumberOfObjectives(); i++){
