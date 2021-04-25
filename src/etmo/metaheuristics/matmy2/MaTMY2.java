@@ -513,6 +513,16 @@ public class MaTMY2 extends MtoAlgorithm {
 //                    newIndiv.setProblemSet_(problemSet_.getTask(k));
                     newIndiv.setSkillFactor(k);
                     problemSet_.get(k).evaluate(newIndiv);
+
+                    // DEBUG
+                    boolean isBetter = false;
+                    for (int j = problemSet_.get(k).getStartObjPos(); j <= problemSet_.get(k).getEndObjPos(); j++){
+                        if (newIndiv.getObjective(j) < populations[k].get(permutation[i]).getObjective(j))
+                            isBetter = true;
+                    }
+                    if (isBetter)
+//                        System.out.println("");
+
                     evaluations ++;
 
                     populations[k].replace(permutation[i], newIndiv);
@@ -573,33 +583,33 @@ public class MaTMY2 extends MtoAlgorithm {
 //                }
 
 
-//                // GAN
-//                boolean[] isGAN = {false};
-//                double[][] mappingPops = Utils.MappingViaGANMixCrossover(
-//                        populations[transferSourceIndexes[k]].getMat(),
-//                        populations[k].getMat(),
-//                        isGAN,
-//                        transferVolume);
-////                    System.out.println("Eval: " + evaluations + "\tGAN: " + isGAN[0]);
-//                for (int i = 0; i < transferVolume; i++){
-//                    Solution newIndiv;
-//                    if (isGAN[0]) {
-//                        newIndiv = new Solution(populations[k].get(permutation[i]));
-//                        newIndiv.setDecisionVariables(mappingPops[i]);
-//                        cntGAN ++;
-//                    }else{
-//                        cntCross ++;
-//                        Solution[] parents = new Solution[2];
-//                        parents[0] = new Solution(subPop[transferSourceIndexes[k]].get(i));
-//                        parents[1] = new Solution(populations[k].get(permutation[i]));
-//                        Solution[] children = (Solution[]) crossover_.execute(parents);
-//                        newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
-//                    }
-//                    newIndiv.setSkillFactor(k);
-//                    problemSet_.get(k).evaluate(newIndiv);
-//                    evaluations++;
-//                    populations[k].replace(permutation[i], newIndiv);
-//                }
+                // GAN
+                boolean[] isGAN = {false};
+                double[][] mappingPops = Utils.MappingViaGANMixCrossover(
+                        populations[transferSourceIndexes[k]].getMat(),
+                        populations[k].getMat(),
+                        isGAN,
+                        transferVolume);
+//                    System.out.println("Eval: " + evaluations + "\tGAN: " + isGAN[0]);
+                for (int i = 0; i < transferVolume; i++){
+                    Solution newIndiv;
+                    if (isGAN[0]) {
+                        newIndiv = new Solution(populations[k].get(permutation[i]));
+                        newIndiv.setDecisionVariables(mappingPops[i]);
+                        cntGAN ++;
+                    }else{
+                        cntCross ++;
+                        Solution[] parents = new Solution[2];
+                        parents[0] = new Solution(subPop[transferSourceIndexes[k]].get(i));
+                        parents[1] = new Solution(populations[k].get(permutation[i]));
+                        Solution[] children = (Solution[]) crossover_.execute(parents);
+                        newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+                    }
+                    newIndiv.setSkillFactor(k);
+                    problemSet_.get(k).evaluate(newIndiv);
+                    evaluations++;
+                    populations[k].replace(permutation[i], newIndiv);
+                }
 
 //                // GAN & Crossover
 //                for (int i = 0; i < transferVolume; i++){
@@ -752,9 +762,30 @@ public class MaTMY2 extends MtoAlgorithm {
             calculativeConverge();
             tentativeTransfer();
             selectiveTransfer(runTimes);
+
+            // DEBUG: Get Population Mat
+//            if (evaluations > maxEvaluations / 4) {
+//                double[][] mat1 = populations[0].getMat();
+//                double[][] mat2 = populations[1].getMat();
+//                double[][] mat3 = populations[3].getMat();
+//                System.out.println("Mat1: ");
+//                for (int i = 0; i < mat1.length; i++) {
+//                    System.out.println(Arrays.toString(mat1[i]));
+//                }
+//                System.out.println("Mat2: ");
+//                for (int i = 0; i < mat2.length; i++) {
+//                    System.out.println(Arrays.toString(mat2[i]));
+//                }
+//                System.out.println("Mat3: ");
+//                for (int i = 0; i < mat3.length; i++) {
+//                    System.out.println(Arrays.toString(mat3[i]));
+//                }
+//
+//                System.out.println("Pause");
+//            }
 //            System.out.println(evaluations + "/" + maxEvaluations);
         }
-        System.out.println("GAN count: " + cntGAN +"/"+ (cntGAN + cntCross));
+//        System.out.println("GAN count: " + cntGAN +"/"+ (cntGAN + cntCross));
         //        System.out.println("Good transfer rate: " + (double)goodTransferCnt / (goodTransferCnt + badTransferCnt));
         return populations;
     }

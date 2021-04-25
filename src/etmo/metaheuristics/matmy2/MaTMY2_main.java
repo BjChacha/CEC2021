@@ -8,10 +8,12 @@ import etmo.operators.selection.SelectionFactory;
 import etmo.problems.benchmarks.*;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class MaTMY2_main {
@@ -21,10 +23,10 @@ public class MaTMY2_main {
         Operator crossover;
         Operator selection;
 
-        int problemStart = 28;
-        int problemEnd = 28;
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        int times = 3;
+        int times = 21;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -104,7 +106,7 @@ public class MaTMY2_main {
             algorithm.setInputParameter("scoreIncrement", 0.5);
             algorithm.setInputParameter("scoreDecreaseRate", 0.2);
             algorithm.setInputParameter("isDRA", false);
-            algorithm.setInputParameter("algoName", "MaOEAC");
+            algorithm.setInputParameter("algoName", "MOEAD");
 
             HashMap parameters;
 
@@ -153,6 +155,9 @@ public class MaTMY2_main {
                             problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D_run_"+t+".txt");
                 }
                 double igd;
+                // DEBUG
+                double[] igds = new double[ave.length];
+
                 for (int k = 0; k < taskNum; k++){
                     QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
                     if (population[k].size() == 0)
@@ -160,7 +165,12 @@ public class MaTMY2_main {
 
                     igd = indicator.getIGD(resPopulation[k]);
                     ave[k] += igd;
+
+                    // DEBUG
+                    igds[k] = igd;
                 }
+                // DEBUG
+                LogIGD.LogIGD("MaTMY2_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds);
 //                System.out.println("Times: " + t + " finished.");
             }
             for(int i=0;i<taskNum;i++)

@@ -1,5 +1,6 @@
 package etmo.util.logging;
 
+import etmo.core.Problem;
 import etmo.core.ProblemSet;
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
@@ -10,7 +11,7 @@ import java.io.File;
 public class LogPopulation {
     // Single Population
     public static void LogPopulation(String algoName, SolutionSet population, ProblemSet problemSet, int eval, boolean isMulTask){
-        File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\datas\\" + algoName);
+        File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\data\\" + algoName);
         if (!folder.exists() && !folder.isDirectory()) {
             folder.mkdirs();
         }
@@ -23,12 +24,9 @@ public class LogPopulation {
 
             for (int i = 0; i < population.size(); i++) {
                 Solution sol = population.get(i);
-
                 int pid = sol.getSkillFactor();
-
                 int start = problemSet.get(pid).getStartObjPos();
                 int end = problemSet.get(pid).getEndObjPos();
-
                 Solution newSolution = new Solution(end - start + 1);
 
                 for (int k = start; k <= end; k++)
@@ -48,7 +46,7 @@ public class LogPopulation {
 
     // Sub-population
     public static void LogPopulation(String algoName, SolutionSet[] population, ProblemSet problemSet, int eval) throws JMException {
-        File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\datas\\" + algoName);
+        File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\data\\" + algoName);
         if (!folder.exists() && !folder.isDirectory()) {
             folder.mkdirs();
         }
@@ -67,7 +65,7 @@ public class LogPopulation {
                 for (int kk = start; kk <= end; kk++)
                     newSolution.setObjective(kk - start, sol.getObjective(kk));
 
-                newSolution.setDecisionVariables(population[k].get(i).getDecisionVariables());
+//                newSolution.setDecisionVariables(population[k].get(i).getDecisionVariables());
 //                problemSet.get(k).evaluate(newSolution);
                 resPopulation[k].add(newSolution);
             }
@@ -75,4 +73,31 @@ public class LogPopulation {
                     problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D" + eval + ".txt");
         }
     }
+
+
+//    // Specific Task
+//    public static void LogPopulation(String algoName, SolutionSet population, Problem problem, int eval, int srcTask, int targetTask) throws JMException {
+//        File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\DEBUG\\" + algoName);
+//        if (!folder.exists() && !folder.isDirectory()) {
+//            folder.mkdirs();
+//        }
+//
+//        SolutionSet resPopulation = new SolutionSet();
+//
+//        for (int i = 0; i < population.size(); i++){
+//            Solution sol = population.get(i);
+//            int start = problem.getStartObjPos();
+//            int end = problem.getEndObjPos();
+//
+//            Solution newSolution = new Solution(end - start + 1);
+//            for (int k = start; k <= end; k++){
+//                newSolution.setObjective(k - start, sol.getObjective(k));
+//            }
+//            resPopulation.add(newSolution);
+//        }
+//
+//        resPopulation.printObjectivesToFile(algoName + "\\" + algoName + "_"+problem.getNumberOfObjectives()+"Obj_"+
+//                problem.getName()+ "_" + problem.getNumberOfVariables() + "D" + eval + "_" + srcTask + "-" + targetTask + ".txt");
+//
+//    }
 }

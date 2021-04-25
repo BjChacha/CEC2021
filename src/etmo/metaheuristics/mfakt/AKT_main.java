@@ -29,7 +29,7 @@ public class AKT_main {
 		int problemStart = 25;
 		int problemEnd = 32;
 
-		int times = 5;
+		int times = 21;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 

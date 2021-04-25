@@ -147,7 +147,8 @@ public class GAN {
         // Generate a new set of adversarial examples and try to mislead the discriminator.
         // by labeling the fake images as real images we reward the generator when it's output
         // tricks the discriminator.
-        INDArray adversarialExamples = Nd4j.rand(new int[]{batchSize, latentDim});
+        INDArray noise = Nd4j.rand(new int[]{batchSize, latentDim});
+        INDArray adversarialExamples = generator.output(noise);
         INDArray misleadingLabels = Nd4j.zeros(batchSize, 1);
         DataSet adversarialSet = new DataSet(adversarialExamples, misleadingLabels);
 
@@ -161,6 +162,77 @@ public class GAN {
         gan.fit(adversarialSet);
 
         // Copy the GANs generator part to "generator".
+        updateGeneratorFromGan();
+    }
+
+    public void fit2(DataSet real, DataSet fake) {
+        int batchSize;
+        INDArray realImages = real.getFeatures().muli(2).subi(1);
+
+        batchSize = (int) realImages.shape()[0];
+
+        // Real images are marked as "0", fake images at "1".
+        INDArray fakeImages = generator.output(fake.getFeatures());
+        DataSet realSet = new DataSet(realImages, Nd4j.zeros(batchSize, 1));
+        DataSet fakeSet = new DataSet(fakeImages, Nd4j.ones(batchSize, 1));
+
+        // Fit the discriminator on a combined batch of real and fake images.
+        DataSet combined = DataSet.merge(Arrays.asList(realSet, fakeSet));
+
+        /*for (int i = 0; i < discriminator.getLayers().length; i++) {
+            if (discriminatorLearningRates[i] != null) {
+                discriminator.setLearningRate(i, discriminatorLearningRates[i]);
+            }
+        }*/
+
+        discriminator.fit(combined);
+        //discriminator.fit(combined);
+
+        // Update the discriminator in the GAN network
+        updateGanWithDiscriminator();
+
+        // Generate a new set of adversarial examples and try to mislead the discriminator.
+        // by labeling the fake images as real images we reward the generator when it's output
+        // tricks the discriminator.
+        INDArray adversarialExamples = generator.output(fake.getFeatures());
+        INDArray misleadingLabels = Nd4j.zeros(batchSize, 1);
+        DataSet adversarialSet = new DataSet(adversarialExamples, misleadingLabels);
+
+        // Set learning rate of discriminator part of gan to zero.
+        /*for (int i = generator.getLayers().length; i < gan.getLayers().length; i++) {
+            gan.setLearningRate(i, 0.0);
+        }*/
+
+        // Fit the GAN on the adversarial set, trying to fool the discriminator by generating
+        // better fake images.
+        gan.fit(adversarialSet);
+
+        // Copy the GANs generator part to "generator".
+        updateGeneratorFromGan();
+    }
+
+    public void fit3(DataSet real, DataSet fake){
+        int batchSize;
+        INDArray realImages = real.getFeatures().muli(2).subi(1);
+
+        batchSize = (int) realImages.shape()[0];
+
+        INDArray fakeImages = generator.output(fake.getFeatures());
+        DataSet realSet = new DataSet(realImages, Nd4j.zeros(batchSize, 1));
+        DataSet fakeSet = new DataSet(fakeImages, Nd4j.ones(batchSize, 1));
+
+        DataSet combined = DataSet.merge(Arrays.asList(realSet, fakeSet));
+
+        discriminator.fit(combined);
+
+        updateGanWithDiscriminator();
+
+        INDArray adversarialExamples = generator.output(fake.getFeatures());
+        INDArray misleadingLabels = Nd4j.zeros(batchSize, 1);
+        DataSet adversarialSet = new DataSet(adversarialExamples, misleadingLabels);
+
+        gan.fit(adversarialSet);
+
         updateGeneratorFromGan();
     }
 

@@ -5,6 +5,7 @@ import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
@@ -125,6 +126,8 @@ public class MaTBML_main {
 
                 }
                 double igd;
+                // DEBUG
+                double[] igds = new double[ave.length];
                 for (int k = 0; k < taskNum; k++){
                     QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
                     if (population[k].size() == 0)
@@ -132,7 +135,11 @@ public class MaTBML_main {
 
                     igd = indicator.getIGD(resPopulation[k]);
                     ave[k] += igd;
+                    // DEBUG
+                    igds[k] = igd;
                 }
+                // DEBUG
+                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds);
             }
             for(int i=0;i<taskNum;i++)
                 System.out.println(form.format(ave[i] / times));
