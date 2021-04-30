@@ -211,25 +211,24 @@ public class GAN {
         updateGeneratorFromGan();
     }
 
-    public void fit3(DataSet real, DataSet fake){
-        int batchSize;
-        INDArray realImages = real.getFeatures().muli(2).subi(1);
+    public void fit3(DataSet real, DataSet fake, DataSet sample){
+        // Discriminator training
+        INDArray realFeatures = real.getFeatures();
+        DataSet realSet = new DataSet(realFeatures, Nd4j.zeros( (int) realFeatures.shape()[0], 1));
 
-        batchSize = (int) realImages.shape()[0];
-
-        INDArray fakeImages = generator.output(fake.getFeatures());
-        DataSet realSet = new DataSet(realImages, Nd4j.zeros(batchSize, 1));
-        DataSet fakeSet = new DataSet(fakeImages, Nd4j.ones(batchSize, 1));
+        INDArray fakeFeatures = fake.getFeatures();
+        INDArray sampleFeatures = sample.getFeatures();
+        INDArray fakeTotalFeatures = Nd4j.vstack(fakeFeatures, sampleFeatures);
+        DataSet fakeSet = new DataSet(fakeTotalFeatures, Nd4j.ones( (int) fakeTotalFeatures.shape()[0], 1));
 
         DataSet combined = DataSet.merge(Arrays.asList(realSet, fakeSet));
-
         discriminator.fit(combined);
-
         updateGanWithDiscriminator();
 
-        INDArray adversarialExamples = generator.output(fake.getFeatures());
-        INDArray misleadingLabels = Nd4j.zeros(batchSize, 1);
-        DataSet adversarialSet = new DataSet(adversarialExamples, misleadingLabels);
+        // Generator training
+        INDArray adversarialFeatures = sample.getFeatures();
+        INDArray misleadingLabels = Nd4j.zeros((int) adversarialFeatures.shape()[0], 1);
+        DataSet adversarialSet = new DataSet(adversarialFeatures, misleadingLabels);
 
         gan.fit(adversarialSet);
 

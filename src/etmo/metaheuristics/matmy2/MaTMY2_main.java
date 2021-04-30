@@ -26,7 +26,7 @@ public class MaTMY2_main {
         int problemStart = 25;
         int problemEnd = 32;
 
-        int times = 21;
+        int times = 3;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 

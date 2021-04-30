@@ -41,8 +41,24 @@ public class KLD {
         kld = new double[taskNum];
     }
 
+    public KLD(int taskNum, SolutionSet[] solutionSet){
+        archives = solutionSet;
+
+        varNum = Integer.MAX_VALUE;
+        maxVarNum = 0;
+        for (int i = 0; i < archives.length; i++){
+            varNum = Math.min(varNum, archives[i].get(0).numberOfVariables());
+            maxVarNum = Math.max(maxVarNum, archives[i].get(0).numberOfVariables());
+        }
+        this.taskNum = taskNum;
+        cov = new double[taskNum][maxVarNum][maxVarNum];
+        covInv = new double[taskNum][maxVarNum][maxVarNum];
+        covDet = new double[taskNum];
+        kld = new double[taskNum];
+    }
+
     public double[] getKDL(int task) throws JMException {
-        double[] kld = new double[problemSet.size()];
+        double[] kld = new double[taskNum];
         double tr, u;
         double s1, s2;
 
@@ -51,7 +67,7 @@ public class KLD {
         covInv[task] = getCovInv(task).getData();
 
         int varNum = archives[task].get(0).getDecisionVariables().length;
-        for (int i = 0; i < problemSet.size(); i++){
+        for (int i = 0; i < taskNum; i++){
             if (i == task)
                 continue;
 
@@ -266,7 +282,10 @@ public class KLD {
 //        return det;
         RealMatrix m = new Array2DRowRealMatrix(cov[task]);
         LUDecomposition L = new LUDecomposition(m);
-        return L.getDeterminant();
+        double det = L.getDeterminant();
+        if (det < 1e-3)
+            det = 1e-3;
+        return det;
     }
 
     // 计算种群archives[task]中变量间的相关性（所有个体之和，取平均）

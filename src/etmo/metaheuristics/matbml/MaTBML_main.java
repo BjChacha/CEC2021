@@ -21,7 +21,7 @@ public class MaTBML_main {
 
         int problemStart = 25;
         int problemEnd = 32;
-        int times = 21;
+        int times = 3;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML.");
@@ -77,11 +77,11 @@ public class MaTBML_main {
             algorithm = new MaTBML(problemSet);
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
-            algorithm.setInputParameter("k1", 5);
-            algorithm.setInputParameter("k2", 5);
+            algorithm.setInputParameter("k1", 3);
+            algorithm.setInputParameter("k2", 10);
             algorithm.setInputParameter("P_", 0.9);
             algorithm.setInputParameter("implicitTransferNum", 50);
-            algorithm.setInputParameter("algoName", "MOEAD");
+            algorithm.setInputParameter("algoName", "MaOEAC");
 
 //            // Randomly DE
 //            parameters = new HashMap();

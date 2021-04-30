@@ -15,6 +15,7 @@ import etmo.util.PseudoRandom;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.logging.LogPopulation;
+import etmo.util.KLD;
 
 import javax.swing.plaf.basic.BasicSliderUI;
 import java.util.ArrayList;
@@ -43,15 +44,16 @@ public class MaTBML extends MtoAlgorithm {
     
     int[] objStart_;
     int[] objEnd_;
-    boolean[] canTransfer_;
     boolean[] isFinished_;
     double[] ideals_;
     double[] nadirs_;
 
     double[][] scores;
 
-    List<Integer> leaderTaskIdx_;
+    int[] leaderList_;
+    int[] groups_;
 
+    List<Integer> leaderTaskIdx_;
     List<List<Integer>> groups;
 
     public MaTBML(ProblemSet problemSet){
@@ -80,33 +82,90 @@ public class MaTBML extends MtoAlgorithm {
         updateIdealPoint();
         updateNadirPoint();
 
-//        clusters = Utils.AGNES(populations_, minGroupNum_);
-        groups = Grouping();
+        // 1. 每个分组取一个leader
+//        SolutionSet[] representatives = prepareRepresentatives(50);
+//        groups = Utils.KLDGrouping(populations_, minGroupNum_, taskNum_);
 
-//        // DEBUG
+//        groups = Utils.AGNES(representatives, minGroupNum_);
+//        groups = Grouping();
+
+////        // DEBUG
 //        for (int c = 0; c < groups.size(); c++)
 //            System.out.println(evaluations_ + ": " + groups.get(c));
 
+//        leaderTaskIdx_.clear();
+//        for (int g = 0; g < groups.size(); g++) {
+//            double maxImprovement = 0;
+//            int leader = -1;
+//            for (int k: groups.get(g)) {
+//                double improvement = 0;
+//                for (int j = objStart_[k]; j <= objEnd_[k]; j++) {
+//                    improvement += (oldIdeal[j] - ideals_[j]);
+//                }
+//                if (improvement > maxImprovement) {
+//                    leader = k;
+//                    maxImprovement = improvement;
+//                }
+//            }
+//            leaderTaskIdx_.add(leader);
+//        }
+
+        // 2. 取前k个leader，每个leader lead一个分组
         leaderTaskIdx_.clear();
-        Arrays.fill(canTransfer_, true);
-        for (int g = 0; g < groups.size(); g++) {
-            double maxImprovement = 0;
-            int leader = -1;
-            for (int k: groups.get(g)) {
-                double improvement = 0;
-                for (int j = objStart_[k]; j <= objEnd_[k]; j++) {
-                    improvement += (oldIdeal[j] - ideals_[j]);
+        double[] improvements;
+        improvements = new double[taskNum_];
+        // 2.1 取前k个improvement最大的task作为leader
+        for (int k = 0; k < taskNum_; k++){
+            for (int j = objStart_[k]; j <= objEnd_[k]; j++)
+                improvements[k] += (oldIdeal[j] - ideals_[j]);
+            if (leaderTaskIdx_.size() < 1)
+                leaderTaskIdx_.add(k);
+            else {
+                for (int i = 0; i < minGroupNum_; i++) {
+                    if (i < leaderTaskIdx_.size()) {
+                        if (improvements[leaderTaskIdx_.get(i)] < improvements[k]) {
+                            leaderTaskIdx_.add(i, k);
+                            break;
+                        }
+                    }else{
+                        leaderTaskIdx_.add(i, k);
+                        break;
+                    }
                 }
-                if (improvement > maxImprovement) {
-                    leader = k;
-                    maxImprovement = improvement;
+                if (leaderTaskIdx_.size() > minGroupNum_)
+                    leaderTaskIdx_.remove(leaderTaskIdx_.size() - 1);
+            }
+        }
+        groups.clear();
+        int[] unionSet = new int[taskNum_];
+        int idx = 0;
+        for (int leader: leaderTaskIdx_) {
+            List<Integer> group = new ArrayList<>();
+            group.add(leader);
+            groups.add(group);
+            unionSet[leader] = idx;
+            idx ++;
+        }
+        // 2.2 其余task成员选与之kl散度最小的leader进组
+        KLD kld = new KLD(problemSet_, populations_);
+        for (int k = 0; k < taskNum_; k++){
+            if (leaderTaskIdx_.contains(k))
+                continue;
+            int chosenLeader = -1;
+            double minKL = Double.MAX_VALUE;
+            double[] kls = kld.getKDL(k);
+            for (int leader: leaderTaskIdx_){
+                if (minKL > kls[leader]){
+                    minKL = kls[leader];
+                    chosenLeader = leader;
                 }
             }
-            leaderTaskIdx_.add(leader);
+            groups.get(unionSet[chosenLeader]).add(k);
         }
     }
 
     private void transferConverge(int k2) throws JMException, ClassNotFoundException {
+//        System.out.println("Evaluations: " + evaluations_);
         for (int g = 0; g < groups.size(); g++) {
             if (leaderTaskIdx_.get(g) >= 0) {
                 // DEBUG
@@ -173,8 +232,8 @@ public class MaTBML extends MtoAlgorithm {
                     else if (partlyBetter) {
                         // Union and selection
                         SolutionSet union = populations_[k].union(tmpSet);
-                        rankSolutionOnTask(union, k);
-                        union.sort(new LocationComparator());
+                        rankSolutionOnTask(union, k, true);
+//                        union.sort(new LocationComparator());
                         for (int i = 0; i < populations_[k].size(); i++) {
                             populations_[k].replace(i, union.get(i));
                         }
@@ -220,8 +279,8 @@ public class MaTBML extends MtoAlgorithm {
                                 offspring.add(child);
                             }
                             SolutionSet union = populations_[k].union(offspring);
-                            rankSolutionOnTask(union, k);
-                            union.sort(new LocationComparator());
+                            rankSolutionOnTask(union, k, true);
+//                            union.sort(new LocationComparator());
                             for (int i = 0; i < populations_[k].size(); i++) {
                                 populations_[k].replace(i, union.get(i));
                             }
@@ -239,13 +298,13 @@ public class MaTBML extends MtoAlgorithm {
                 }
 
 //                // DEBUG
-//                System.out.println("Leader Task: " + leaderTaskIdx_.get(g));
-//                System.out.println("\tCompletely better and not worse: " + cbnw +
-//                        "\tCompletely better and worse: " + cbw +
-//                        "\tPartly better and not worse: " + pbnw +
-//                        "\tPartly better and worse: " + pbw +
-//                        "\tNot better and not worse: " + nbnw +
-//                        "\tNot better and worse: " + nbw
+//                System.out.println("\tLeader Task: " + leaderTaskIdx_.get(g));
+//                System.out.println("\t\tCompletely better and not worse: " + cbnw +
+//                        "\t\tCompletely better and worse: " + cbw +
+//                        "\t\tPartly better and not worse: " + pbnw +
+//                        "\t\tPartly better and worse: " + pbw +
+//                        "\t\tNot better and not worse: " + nbnw +
+//                        "\t\tNot better and worse: " + nbw
 //                        );
             }
             else{
@@ -256,7 +315,7 @@ public class MaTBML extends MtoAlgorithm {
         updateNadirPoint();
     }
 
-    private void rankSolutionOnTask(SolutionSet pop, int taskId) {
+    private void rankSolutionOnTask(SolutionSet pop, int taskId, boolean sorting) {
         for (int i = 0; i < pop.size(); i++)
             pop.get(i).setLocation(Integer.MAX_VALUE);
 
@@ -281,6 +340,24 @@ public class MaTBML extends MtoAlgorithm {
                 loc++;
             }
         }
+
+        if (sorting)
+            pop.sort(new LocationComparator());
+    }
+
+    private SolutionSet[] prepareRepresentatives(int repNum){
+        SolutionSet[] rSet = new SolutionSet[taskNum_];
+        for (int k = 0; k < taskNum_; k++){
+            rankSolutionOnTask(populations_[k], k, false);
+            rSet[k] = new SolutionSet(repNum);
+            for (int i = 0; i < populations_[k].size() && rSet[k].size() < repNum; i++){
+                if (populations_[k].get(i).getLocation() < repNum) {
+                    Solution tmp = new Solution(populations_[k].get(i));
+                    rSet[k].add(tmp);
+                }
+            }
+        }
+        return rSet;
     }
 
     private List<List<Integer>> Grouping(){
@@ -383,7 +460,6 @@ public class MaTBML extends MtoAlgorithm {
         objNum_ = problemSet_.getTotalNumberOfObjs();
         minGroupNum_ = (int) Math.sqrt(taskNum_);
         isFinished_ = new boolean[taskNum_];
-        canTransfer_ = new boolean[minGroupNum_];
         ideals_ = new double[objNum_];
         nadirs_ = new double[objNum_];
         objStart_ = new int[taskNum_];
@@ -391,8 +467,11 @@ public class MaTBML extends MtoAlgorithm {
 
         scores = new double[taskNum_][taskNum_];
 
+        leaderList_ = new int[minGroupNum_];
+        groups_ = new int[taskNum_];
+
         leaderTaskIdx_ = new ArrayList<>();
-        
+        groups = new ArrayList<>();
 //        Arrays.fill(isFinished_, false);
         Arrays.fill(ideals_, Double.MAX_VALUE);
 //        Arrays.fill(nadirs_, 0);

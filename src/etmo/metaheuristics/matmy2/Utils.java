@@ -633,38 +633,38 @@ public class Utils {
 
 
 
-    public static double[] MappingViaGAN(Solution srcIndividual, double[][] targetDomain) throws JMException {
+    public static double[][] MappingViaGAN(double[][] srcIndividuals, double[][] targetGoodIndividuals, double[][] targetBadIndividuals) throws JMException {
         // mat1 -> mat2
-        int shape = targetDomain.length;
-        int d1 = srcIndividual.getDecisionVariables().length;
-        int d2 = targetDomain[0].length;
+        int d1 = srcIndividuals[0].length;
+        int d2 = targetGoodIndividuals[0].length;
 
         int EPOCHS = 200;
-        int LATENT_DIM = d1;
         double LR = 1e-4;
 
-        GAN gan = GANBuilder(d2, LATENT_DIM, LR);
+        GAN gan = GANBuilder(d2, d1, LR);
 
-        INDArray features = new NDArray((new NDArray(targetDomain)).toFloatMatrix());
-        INDArray labels = Nd4j.zeros(shape, 1);
+        INDArray realFeatures = new NDArray((new NDArray(targetGoodIndividuals)).toFloatMatrix());
+        INDArray realLabels = Nd4j.zeros(targetGoodIndividuals.length, 1);
+        DataSet realData = new DataSet(realFeatures, realLabels);
 
-        DataSet trainData = new DataSet(features, labels);
+        INDArray fakeFeatures = new NDArray((new NDArray(targetBadIndividuals)).toFloatMatrix());
+        INDArray fakeLabels = Nd4j.ones((fakeFeatures.size(0)), 1);
+        DataSet fakeData = new DataSet(fakeFeatures, fakeLabels);
+
+        INDArray sampleFeatures = new NDArray((new NDArray(Sample(srcIndividuals, srcIndividuals.length))).toFloatMatrix());
+        INDArray sampleLabels = Nd4j.ones((fakeFeatures.size(0)), 1);
+        DataSet sampleData = new DataSet(sampleFeatures, sampleLabels);
 
         for (int e = 0; e < EPOCHS; e++){
-            gan.fit(trainData);
+            gan.fit3(realData, fakeData, sampleData);
         }
 
-        double[][] srcI = new double[1][];
-        srcI[0] = srcIndividual.getDecisionVariablesInDouble();
-        INDArray samples = new NDArray(srcI);
-        INDArray predicts = gan.getGenerator().output(samples);
+        INDArray predicts = gan.getGenerator().output(new NDArray(srcIndividuals));
 
         gan = null;
         Nd4j.getMemoryManager().invokeGc();
 
-        INDArray res = predicts.addi(1).divi(2);
-
-        return res.toDoubleMatrix()[0];
+        return predicts.toDoubleMatrix();
     }
 
 

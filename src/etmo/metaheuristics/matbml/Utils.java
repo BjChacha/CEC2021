@@ -3,6 +3,7 @@ package etmo.metaheuristics.matbml;
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
 import etmo.util.JMException;
+import etmo.util.KLD;
 import etmo.util.PseudoRandom;
 
 import java.util.ArrayList;
@@ -10,6 +11,54 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Utils {
+    static public List<List<Integer>> KLDGrouping(SolutionSet[] populations, int clusterNum, int taskNum) throws JMException {
+        double[][] kls = new double[taskNum][taskNum];
+        KLD kld = new KLD(taskNum, populations);
+        for (int k = 0; k < taskNum; k++){
+            kls[k] = kld.getKDL(k);
+        }
+
+        List<List<Integer>> clusters = new ArrayList<>();
+        // 1. each population is one cluster
+        for (int k = 0; k < populations.length; k++){
+            List<Integer> cluster = new ArrayList<>();
+            cluster.add(k);
+            clusters.add(cluster);
+        }
+
+        int[] idx;
+        double minDistance;
+        // DEBUG
+        double[][] distances;
+
+        while (clusters.size() > clusterNum) {
+            // 2. find the closest clusters pair
+            minDistance = Double.MAX_VALUE;
+            idx = new int[2];
+
+            distances = new double[clusters.size()][clusters.size()];
+
+            for (int i = 0; i < clusters.size() - 1; i++) {
+                for (int j = i + 1; j < clusters.size(); j++) {
+                    double dis = getKLDistanceBetweenTasks(clusters.get(i), clusters.get(j), kls);
+                    distances[i][j] = dis;
+                    if (dis < minDistance){
+                        idx[0] = i;
+                        idx[1] = j;
+                        minDistance = dis;
+                    }
+                }
+            }
+
+            // 3. merge two clusters found above.
+            for (int i = 0; i < clusters.get(idx[1]).size(); i++)
+                clusters.get(idx[0]).add(clusters.get(idx[1]).get(i));
+            clusters.remove(idx[1]);
+        }
+
+        return clusters;
+    }
+
     static public List<List<Integer>> AGNES(SolutionSet[] populations, int clusterNum) throws JMException {
         List<List<Integer>> clusters = new ArrayList<>();
         // 1. each population is one cluster
@@ -19,10 +68,18 @@ public class Utils {
             clusters.add(cluster);
         }
 
-        int[] idx = new int[2];
+        int[] idx;
+        double minDistance;
+        // DEBUG
+        double[][] distances;
+
         while (clusters.size() > clusterNum) {
             // 2. find the closest clusters pair
-            double minDistance = Double.MAX_VALUE;
+            minDistance = Double.MAX_VALUE;
+            idx = new int[2];
+
+            distances = new double[clusters.size()][clusters.size()];
+
             for (int i = 0; i < clusters.size() - 1; i++) {
                 for (int j = i + 1; j < clusters.size(); j++) {
                     SolutionSet[] c1 = new SolutionSet[clusters.get(i).size()];
@@ -33,6 +90,7 @@ public class Utils {
                         c2[jj] = populations[clusters.get(j).get(jj)];
 
                     double dis = getMaxDistanceBetweenTasks(c1, c2);
+                    distances[i][j] = dis;
                     if (dis < minDistance){
                         idx[0] = i;
                         idx[1] = j;
@@ -50,15 +108,94 @@ public class Utils {
         return clusters;
     }
 
+    static public List<List<Integer>> AGNES(double[][][] populations, int clusterNum) throws JMException {
+        List<List<Integer>> clusters = new ArrayList<>();
+        // 1. each population is one cluster
+        for (int k = 0; k < populations.length; k++){
+            List<Integer> cluster = new ArrayList<>();
+            cluster.add(k);
+            clusters.add(cluster);
+        }
+
+        int[] idx;
+        double minDistance;
+        // DEBUG
+        double[][] distances;
+
+        while (clusters.size() > clusterNum) {
+            // 2. find the closest clusters pair
+            minDistance = Double.MAX_VALUE;
+            idx = new int[2];
+
+            distances = new double[clusters.size()][clusters.size()];
+
+            for (int i = 0; i < clusters.size() - 1; i++) {
+                for (int j = i + 1; j < clusters.size(); j++) {
+                    double[][][] c1 = new double[clusters.get(i).size()][][];
+                    double[][][] c2 = new double[clusters.get(j).size()][][];
+                    for (int ii = 0; ii < clusters.get(i).size(); ii++)
+                        c1[ii] = populations[clusters.get(i).get(ii)];
+                    for (int jj = 0; jj < clusters.get(j).size(); jj++)
+                        c2[jj] = populations[clusters.get(j).get(jj)];
+
+                    double dis = getMaxDistanceBetweenTasks(c1, c2);
+                    distances[i][j] = dis;
+                    if (dis < minDistance){
+                        idx[0] = i;
+                        idx[1] = j;
+                        minDistance = dis;
+                    }
+                }
+            }
+
+            // 3. merge two clusters found above.
+            for (int i = 0; i < clusters.get(idx[1]).size(); i++)
+                clusters.get(idx[0]).add(clusters.get(idx[1]).get(i));
+            clusters.remove(idx[1]);
+        }
+
+        return clusters;
+    }
+
     static double getMaxDistanceBetweenTasks(SolutionSet[] PA, SolutionSet[] PB) throws JMException {
         double distance = 0;
         for (int k1 = 0; k1 < PA.length; k1++){
             for (int k2 = 0; k2 < PB.length; k2++){
                 for (int i = 0; i < PA[k1].size(); i++){
                     for (int j = 0; j < PB[k2].size(); j++){
-                        distance = Math.max(distance, getDistanceBetweenIndividuals(PA[k1].get(i), PB[k2].get(j)));
+                        Solution a = PA[k1].get(i);
+                        Solution b = PB[k2].get(j);
+                        double tmp = getDistanceBetweenIndividuals(a, b);
+                        distance = Math.max(distance, tmp);
                     }
                 }
+            }
+        }
+        return distance;
+    }
+
+    static double getMaxDistanceBetweenTasks(double[][][] PA, double[][][] PB) throws JMException {
+        double distance = 0;
+        for (int k1 = 0; k1 < PA.length; k1++){
+            for (int k2 = 0; k2 < PB.length; k2++){
+                for (int i = 0; i < PA[k1].length; i++){
+                    for (int j = 0; j < PB[k2].length; j++){
+                        double[] a = PA[k1][i];
+                        double[] b = PB[k2][j];
+                        double tmp = getDistanceBetweenIndividuals(a, b);
+                        distance = Math.max(distance, tmp);
+                    }
+                }
+            }
+        }
+        return distance;
+    }
+
+    static double getKLDistanceBetweenTasks(List<Integer> PA, List<Integer> PB, double[][] kls) throws JMException {
+        double distance = 0;
+        for (int k1 = 0; k1 < PA.size(); k1++){
+            for (int k2 = 0; k2 < PB.size(); k2++){
+                distance = Math.max(distance, kls[PA.get(k1)][PB.get(k2)]);
             }
         }
         return distance;

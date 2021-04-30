@@ -6,6 +6,8 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.util.*;
 import etmo.metaheuristics.matmy2.libs.*;
+import etmo.util.comparators.CrowdingComparator;
+import etmo.util.comparators.LocationComparator;
 import etmo.util.logging.LogPopulation;
 
 import java.util.Arrays;
@@ -22,6 +24,9 @@ public class MaTMY2 extends MtoAlgorithm {
     private int maxEvaluations;
     private int evaluations;
     int taskNum;
+
+    int[] objStart_;
+    int[] objEnd_;
 
     int[] transferSourceIndexes;
     int[] runTimes;
@@ -104,6 +109,13 @@ public class MaTMY2 extends MtoAlgorithm {
         populationCenterPositions = new double[taskNum][];
         for (int k = 0; k < taskNum; k++){
             populationCenterPositions[k] = new double[problemSet_.get(k).getNumberOfVariables()];
+        }
+
+        objStart_ = new int[taskNum];
+        objEnd_ = new int[taskNum];
+        for (int k = 0; k < taskNum; k++){
+            objStart_[k] = problemSet_.get(k).getStartObjPos();
+            objEnd_[k] = problemSet_.get(k).getEndObjPos();
         }
 
         // TODO: DEBUG
@@ -503,30 +515,30 @@ public class MaTMY2 extends MtoAlgorithm {
 //                    populations[k].replace(permutation[i], newIndiv);
 //                }
 
-                // 先交叉再随机替换
-                for (int i = 0; i < transferVolume; i++){
-                    Solution[] parents = new Solution[2];
-                    parents[0] = subPop[transferSourceIndexes[k]].get(i);
-                    parents[1] = populations[k].get(permutation[i]);
-                    Solution[] children = (Solution[]) crossover_.execute(parents);
-                    Solution newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
-//                    newIndiv.setProblemSet_(problemSet_.getTask(k));
-                    newIndiv.setSkillFactor(k);
-                    problemSet_.get(k).evaluate(newIndiv);
-
-                    // DEBUG
-                    boolean isBetter = false;
-                    for (int j = problemSet_.get(k).getStartObjPos(); j <= problemSet_.get(k).getEndObjPos(); j++){
-                        if (newIndiv.getObjective(j) < populations[k].get(permutation[i]).getObjective(j))
-                            isBetter = true;
-                    }
-                    if (isBetter)
-//                        System.out.println("");
-
-                    evaluations ++;
-
-                    populations[k].replace(permutation[i], newIndiv);
-                }
+//                // 先交叉再随机替换
+//                for (int i = 0; i < transferVolume; i++){
+//                    Solution[] parents = new Solution[2];
+//                    parents[0] = subPop[transferSourceIndexes[k]].get(i);
+//                    parents[1] = populations[k].get(permutation[i]);
+//                    Solution[] children = (Solution[]) crossover_.execute(parents);
+//                    Solution newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+////                    newIndiv.setProblemSet_(problemSet_.getTask(k));
+//                    newIndiv.setSkillFactor(k);
+//                    problemSet_.get(k).evaluate(newIndiv);
+//
+//                    // DEBUG
+//                    boolean isBetter = false;
+//                    for (int j = problemSet_.get(k).getStartObjPos(); j <= problemSet_.get(k).getEndObjPos(); j++){
+//                        if (newIndiv.getObjective(j) < populations[k].get(permutation[i]).getObjective(j))
+//                            isBetter = true;
+//                    }
+//                    if (isBetter)
+////                        System.out.println("");
+//
+//                    evaluations ++;
+//
+//                    populations[k].replace(permutation[i], newIndiv);
+//                }
 
 //                // PCA映射
 //                for (int i = 0; i < transferVolume; i++){
@@ -584,32 +596,44 @@ public class MaTMY2 extends MtoAlgorithm {
 
 
                 // GAN
-                boolean[] isGAN = {false};
-                double[][] mappingPops = Utils.MappingViaGANMixCrossover(
-                        populations[transferSourceIndexes[k]].getMat(),
-                        populations[k].getMat(),
-                        isGAN,
-                        transferVolume);
-//                    System.out.println("Eval: " + evaluations + "\tGAN: " + isGAN[0]);
-                for (int i = 0; i < transferVolume; i++){
-                    Solution newIndiv;
-                    if (isGAN[0]) {
-                        newIndiv = new Solution(populations[k].get(permutation[i]));
+                if (PseudoRandom.randDouble() < 0.5) {
+                    rankSolutionOnTask(populations[k], k, false);
+                    SolutionSet goodPops = new SolutionSet(populationSize/2);
+                    SolutionSet badPops = new SolutionSet(populationSize - populationSize/2);
+                    for (int i = 0; i < populationSize; i++){
+                        if (populations[k].get(i).getLocation() < populationSize / 2)
+                            goodPops.add(populations[k].get(i));
+                        else
+                            badPops.add(populations[k].get(i));
+                    }
+                    double[][] mappingPops = Utils.MappingViaGAN(
+                            populations[transferSourceIndexes[k]].getMat(),
+                            goodPops.getMat(),
+                            badPops.getMat()
+                    );
+                    for (int i = 0; i < transferVolume; i++) {
+                        Solution newIndiv = new Solution(populations[k].get(permutation[i]));
                         newIndiv.setDecisionVariables(mappingPops[i]);
-                        cntGAN ++;
-                    }else{
-                        cntCross ++;
+                        newIndiv.setSkillFactor(k);
+                        problemSet_.get(k).evaluate(newIndiv);
+                        evaluations++;
+                        populations[k].replace(permutation[i], newIndiv);
+                    }
+                }else {
+                    for (int i = 0; i < transferVolume; i++) {
+                        cntCross++;
                         Solution[] parents = new Solution[2];
                         parents[0] = new Solution(subPop[transferSourceIndexes[k]].get(i));
                         parents[1] = new Solution(populations[k].get(permutation[i]));
                         Solution[] children = (Solution[]) crossover_.execute(parents);
-                        newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+                        Solution newIndiv = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+                        newIndiv.setSkillFactor(k);
+                        problemSet_.get(k).evaluate(newIndiv);
+                        evaluations++;
+                        populations[k].replace(permutation[i], newIndiv);
                     }
-                    newIndiv.setSkillFactor(k);
-                    problemSet_.get(k).evaluate(newIndiv);
-                    evaluations++;
-                    populations[k].replace(permutation[i], newIndiv);
                 }
+
 
 //                // GAN & Crossover
 //                for (int i = 0; i < transferVolume; i++){
@@ -637,6 +661,36 @@ public class MaTMY2 extends MtoAlgorithm {
 //                }
             }
         }
+    }
+
+    private void rankSolutionOnTask(SolutionSet pop, int taskId, boolean sorting) {
+        for (int i = 0; i < pop.size(); i++)
+            pop.get(i).setLocation(Integer.MAX_VALUE);
+
+        boolean selec[] = new boolean[problemSet_.getTotalNumberOfObjs()];
+
+        for (int i = 0; i < selec.length; i++) {
+            if (i < objStart_[taskId] || i > objEnd_[taskId])
+                selec[i] = false;
+            else
+                selec[i] = true;
+        }
+        Distance distance = new Distance();
+        PORanking pr = new PORanking(pop, selec);
+        int loc = 0;
+        for (int i = 0; i < pr.getNumberOfSubfronts(); i++) {
+            SolutionSet front = pr.getSubfront(i);
+            distance.crowdingDistanceAssignment(front, problemSet_.getTotalNumberOfObjs(), selec);
+            front.sort(new CrowdingComparator());
+            for (int j = 0; j < front.size(); j++) {
+                if (loc < front.get(j).getLocation())
+                    front.get(j).setLocation(loc);
+                loc++;
+            }
+        }
+
+        if (sorting)
+            pop.sort(new LocationComparator());
     }
 
     private void NondominationSorting(int k){
