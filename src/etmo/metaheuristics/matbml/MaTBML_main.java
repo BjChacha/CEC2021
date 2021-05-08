@@ -9,6 +9,7 @@ import etmo.util.logging.LogIGD;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class MaTBML_main {
@@ -19,9 +20,9 @@ public class MaTBML_main {
         Operator selection;
         HashMap parameters;
 
-        int problemStart = 25;
+        int problemStart = 19;
         int problemEnd = 32;
-        int times = 3;
+        int times = 21;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML.");
@@ -103,6 +104,8 @@ public class MaTBML_main {
             algorithm.addOperator("crossover", crossover);
             algorithm.addOperator("selection", selection);
 
+            // DEBUG
+            double[][] igds = new double[times][taskNum];
             for (int t = 0; t < times; t++) {
                 SolutionSet population[] = algorithm.execute();
                 SolutionSet resPopulation[] = new SolutionSet[taskNum];
@@ -126,23 +129,37 @@ public class MaTBML_main {
 
                 }
                 double igd;
-                // DEBUG
-                double[] igds = new double[ave.length];
                 for (int k = 0; k < taskNum; k++){
                     QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
                     if (population[k].size() == 0)
                         continue;
 
                     igd = indicator.getIGD(resPopulation[k]);
-                    ave[k] += igd;
+//                    ave[k] += igd;
                     // DEBUG
-                    igds[k] = igd;
+                    igds[t][k] = igd;
                 }
                 // DEBUG
-                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds);
+                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
-            for(int i=0;i<taskNum;i++)
-                System.out.println(form.format(ave[i] / times));
+            for(int i=0;i<taskNum;i++) {
+                double[] tmp = new double[times];
+                for (int t = 0; t < times; t++){
+                    tmp[t] = igds[t][i];
+                }
+                Arrays.sort(tmp);
+                double best, worst, mean, median, std = 0;
+                best = tmp[0];
+                worst = tmp[times-1];
+                mean = Arrays.stream(tmp).sum() / times;
+                median = tmp[times/2];
+                for (double e: tmp){
+                    std += Math.pow(e - mean, 2);
+                }
+                std = Math.sqrt(std / times);
+                System.out.println(best + "\t" + worst + "\t" + mean + "\t" + median + "\t" + std);
+//                System.out.println(form.format(ave[i] / times));
+            }
             System.out.println();
         }
     }

@@ -1,36 +1,31 @@
-package etmo.metaheuristics.matmy2;
+package etmo.metaheuristics.matbml;
 
-import ch.qos.logback.core.joran.spi.ElementSelector;
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
-import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
-import etmo.problems.benchmarks.*;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class MaTMY2_main {
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException {
+public class MaTBML_main3 {
+    public static void main(String[] args) throws JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
         Operator crossover;
         Operator selection;
+        HashMap parameters;
 
-        int problemStart = 17;
-        int problemEnd = 32;
-
+        int problemStart = 24;
+        int problemEnd = 24;
         int times = 21;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
-
-        System.out.println("Algo: MaTMY2.");
+        System.out.println("Algo: MaTBML.");
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
             // CEC2021
@@ -69,73 +64,50 @@ public class MaTMY2_main {
 //                    problemSet = CIHS.getProblem();
 //            }
 
-
             int taskNum = problemSet.size();
             double[] ave = new double[taskNum];
 
             String[] pf = new String[taskNum];
-            for (int k = 0; k < pf.length; k++){
+            for (int k = 0; k < taskNum; k++){
                 pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
             }
 
             String pSName = problemSet.get(0).getName();
-//            pSName = pSName.substring(0, pSName.length()-2);
             System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
 
-//            // DEBUG
-//            ProblemSet tmp = new ProblemSet(problemSet.size());
-//            for (int i = 0; i < problemSet.size(); i ++){
-//                if (i == 0)
-//                    tmp.add(problemSet.get(19));
-//                else if (i == 19)
-//                    tmp.add(problemSet.get(0));
-//                else
-//                    tmp.add(problemSet.get(i));
-//            }
-//            problemSet = tmp;
-
-            algorithm = new MaTMY2(problemSet);
-
+            algorithm = new MaTBML(problemSet);
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
-            algorithm.setInputParameter("transferVolume", 10);
-            algorithm.setInputParameter("baseRunTime", 3);
+            algorithm.setInputParameter("k1", 3);
+            algorithm.setInputParameter("k2", 10);
+            algorithm.setInputParameter("P_", 0.9);
+            algorithm.setInputParameter("implicitTransferNum", 50);
+            algorithm.setInputParameter("algoName", "MaOEAC");
 
-            algorithm.setInputParameter("forceTransferRate", 0.2);
-
-            algorithm.setInputParameter("scoreIncrement", 0.5);
-            algorithm.setInputParameter("scoreDecreaseRate", 0.2);
-            algorithm.setInputParameter("isDRA", false);
-            algorithm.setInputParameter("algoName", "MOEAD");
-
-            HashMap parameters;
-
-            parameters = new HashMap();
-            parameters.put("probability", 0.9);
-            parameters.put("distributionIndex", 20.0);
-            crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
-
+//            // Randomly DE
 //            parameters = new HashMap();
 //            parameters.put("CR_LB", 0.1);
 //            parameters.put("CR_UB", 0.9);
 //            parameters.put("F_LB", 0.1);
 //            parameters.put("F_UB", 2.0);
 //            crossover = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
-//            algorithm.addOperator("crossover", crossover);
+
+            // SBX
+            parameters = new HashMap();
+            parameters.put("probability", 0.9);
+            parameters.put("distributionIndex", 20.0);
+            crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
 
             parameters = null;
             selection = SelectionFactory.getSelectionOperator("BinaryTournament2", parameters);
 
-            algorithm.addOperator("crossover",crossover);
+            algorithm.addOperator("crossover", crossover);
             algorithm.addOperator("selection", selection);
 
+            // DEBUG
             double[][] igds = new double[times][taskNum];
-            for (int t = 0; t < times; t++){
-//                long startTime = System.currentTimeMillis();
+            for (int t = 0; t < times; t++) {
                 SolutionSet population[] = algorithm.execute();
-//                long endTime = System.currentTimeMillis();
-//                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
-
                 SolutionSet resPopulation[] = new SolutionSet[taskNum];
                 for (int k = 0; k < taskNum; k++) {
                     resPopulation[k] = new SolutionSet();
@@ -152,28 +124,25 @@ public class MaTMY2_main {
 
                         resPopulation[k].add(newSolution);
                     }
-                    resPopulation[k].printObjectivesToFile("MaTMY2_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
-                            problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D_run_"+t+".txt");
+                    resPopulation[k].printObjectivesToFile("MaTBML_" + problemSet.get(k).getNumberOfObjectives() + "Obj_" +
+                            problemSet.get(k).getName() + "_" + problemSet.get(k).getNumberOfVariables() + "D_run_" + t + ".txt");
+
                 }
                 double igd;
-
                 for (int k = 0; k < taskNum; k++){
                     QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
                     if (population[k].size() == 0)
                         continue;
 
                     igd = indicator.getIGD(resPopulation[k]);
-                    ave[k] += igd;
-
+//                    ave[k] += igd;
                     // DEBUG
                     igds[t][k] = igd;
                 }
                 // DEBUG
-                LogIGD.LogIGD("MaTMY2_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
-//                System.out.println("Times: " + t + " finished.");
+                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
             for(int i=0;i<taskNum;i++) {
-                System.out.println("Task " + i);
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){
                     tmp[t] = igds[t][i];
@@ -188,12 +157,8 @@ public class MaTMY2_main {
                     std += Math.pow(e - mean, 2);
                 }
                 std = Math.sqrt(std / times);
-                System.out.println("\tBest: " + best);
-                System.out.println("\tWorst: " + worst);
-                System.out.println("\tMean: " + mean);
-                System.out.println("\tMedian: " + median);
-                System.out.println("\tStd: " + std);
-
+                System.out.println(best + "\t" + worst + "\t" + mean + "\t" + median + "\t" + std);
+//                System.out.println(form.format(ave[i] / times));
             }
             System.out.println();
         }

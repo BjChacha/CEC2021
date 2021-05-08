@@ -261,6 +261,8 @@ public class MaOEAC extends MaTAlgorithm {
 			 * and K-Cluster Stopping Condition
 			 */
 			list = new HierarchicalClustering1(list).clusteringAnalysis(populationSize_/(objNum));
+			while (list.size() > populationSize_/(objNum))
+				list.remove(list.size() - 1);
 			if(list.size() != populationSize_/(objNum)){
 				System.out.println("ListSize1 = "+list.size());
 				System.exit(0);

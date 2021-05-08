@@ -570,6 +570,8 @@ public class MaOEAC extends MaTAlgorithm{
 			}
 		}
 		if (PseudoRandom.randDouble() < 0.5) {
+			if (minId == -1)
+				minId = PseudoRandom.randInt(0, list.size() - 1);
 			population_.add(list.get(min2CenterLineId).get(minId));
 			list.remove(min2CenterLineId);
 		}

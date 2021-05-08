@@ -127,6 +127,9 @@ public class HierarchicalClustering1 {
                 iterator.remove();
             }
         }
+        while (this.list.size() > clusteringSize){
+            this.list.remove(this.list.size() - 1);
+        }
         return this.list;
     }
 

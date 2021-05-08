@@ -1,10 +1,7 @@
 package etmo.metaheuristics.matbml;
 
 import etmo.core.*;
-import etmo.metaheuristics.matmy2.libs.MOEAD;
-import etmo.metaheuristics.matmy2.libs.MaOEAC;
-import etmo.metaheuristics.matmy2.libs.MaTAlgorithm;
-import etmo.metaheuristics.matmy2.libs.NSGAII;
+import etmo.metaheuristics.matbml.libs.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
@@ -292,9 +289,9 @@ public class MaTBML extends MtoAlgorithm {
                     }
 
 
-                    if (((evaluations_ / 100) * 100) % (20 * taskNum_ * populationSize_) == 0) {
-                        LogPopulation.LogPopulation("MaTBML", populations_, problemSet_, evaluations_);
-                    }
+//                    if (((evaluations_ / 100) * 100) % (20 * taskNum_ * populationSize_) == 0) {
+//                        LogPopulation.LogPopulation("MaTBML", populations_, problemSet_, evaluations_);
+//                    }
                 }
 
 //                // DEBUG
@@ -435,9 +432,9 @@ public class MaTBML extends MtoAlgorithm {
                     isFinished_[k] = !optimizers_[k].step();
                     evaluations_ += populationSize_;
 
-                    if (((evaluations_ / 100) * 100) % (20 * taskNum_ * populationSize_) == 0) {
-                        LogPopulation.LogPopulation("MaTBML", populations_, problemSet_, evaluations_);
-                    }
+//                    if (((evaluations_ / 100) * 100) % (20 * taskNum_ * populationSize_) == 0) {
+//                        LogPopulation.LogPopulation("MaTBML", populations_, problemSet_, evaluations_);
+//                    }
                 }
             }
         }
@@ -499,7 +496,7 @@ public class MaTBML extends MtoAlgorithm {
         updateIdealPoint();
         updateNadirPoint();
 
-        LogPopulation.LogPopulation("MaTBML", populations_, problemSet_, evaluations_);
+//        LogPopulation.LogPopulation("MaTBML", populations_, problemSet_, evaluations_);
     }
 
     private void initOptimizers() throws JMException, ClassNotFoundException {

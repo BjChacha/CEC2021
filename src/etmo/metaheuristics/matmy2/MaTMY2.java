@@ -146,7 +146,7 @@ public class MaTMY2 extends MtoAlgorithm {
 //            }
         }
         Arrays.fill(debugRunTimes, 1);
-        LogPopulation.LogPopulation("MaTMY2", populations, problemSet_, evaluations);
+//        LogPopulation.LogPopulation("MaTMY2", populations, problemSet_, evaluations);
     }
 
     private void initOptimizers() throws JMException, ClassNotFoundException {
@@ -283,10 +283,10 @@ public class MaTMY2 extends MtoAlgorithm {
 //                    System.out.println(IntStream.of(debugRunTimes).sum() * populationSize);
                 }
 
-                if (((evaluations/100)*100) % (20 * taskNum * populationSize) == 0) {
-//                System.out.println(totalCount+"x"+taskNum+"x"+populationSize+"="+totalCount * taskNum * populationSize);
-                    LogPopulation.LogPopulation("MaTMY2", populations, problemSet_, evaluations);
-                }
+//                if (((evaluations/100)*100) % (20 * taskNum * populationSize) == 0) {
+////                System.out.println(totalCount+"x"+taskNum+"x"+populationSize+"="+totalCount * taskNum * populationSize);
+//                    LogPopulation.LogPopulation("MaTMY2", populations, problemSet_, evaluations);
+//                }
             }
         }
     }
