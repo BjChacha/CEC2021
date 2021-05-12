@@ -3,9 +3,9 @@ package etmo.util.sorting;
 import java.util.Arrays;
 
 public class SortingIdx {
-    static public int[] SortingIdx(double[] a, double sign){
+    static public int[] SortingIdx(double[] a, boolean inversed){
         int[] resIdx = new int[a.length];
-
+        int sign = inversed ? -1 : 1;
         Number sorted[] = new Number[a.length];
         for (int i = 0; i < a.length; ++i) {
             sorted[i] = new Number(sign * a[i], i);
