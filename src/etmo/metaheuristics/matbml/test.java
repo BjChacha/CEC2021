@@ -33,10 +33,27 @@ public class test {
 //        data[8][0] = new double[]{6.5, 2.5};
 //        List<List<Integer>> res = Utils.AGNES(data, 3);
 
-        int[] a = {1,2,3,4,5};
-        if (IntStream.of(a).anyMatch(x -> x == 4))
-            System.out.println("contain!");
+//        int[] a = {1,2,3,4,5};
+////        if (IntStream.of(a).anyMatch(x -> x == 4))
+////            System.out.println("contain!");
+////
+////        System.out.println("end");
 
-        System.out.println("end");
+        double[][] data1 = {
+                {2, 5, 2, 3, 6},
+                {4, 2, 1, 2, 4},
+                {1, 2, 2, 3, 5},
+                {5, 4, 3, 3, 2},
+                {2, 1, 5, 1, 1},
+        };
+        double[][] data2 = {
+                {1, 2, 3, 4, 5},
+                {4, 2, 1, 3, 5},
+                {1, 1, 3, 3, 1},
+                {2, 5, 2, 3, 6},
+                {5, 4, 5, 5, 5},
+        };
+        double distance = WassersteinDistance.getWD(data1, data2);
+        System.out.println("distance: " + distance);
     }
 }

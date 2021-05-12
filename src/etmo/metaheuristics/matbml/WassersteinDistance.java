@@ -51,4 +51,8 @@ class WassersteinDistance {
 
         return res;
     }
+
+    public static double getWD2(double[][] p1, double[][] p2){
+
+    }
 }

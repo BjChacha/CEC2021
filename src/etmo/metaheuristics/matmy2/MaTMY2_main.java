@@ -24,7 +24,7 @@ public class MaTMY2_main {
         Operator selection;
 
         int problemStart = 17;
-        int problemEnd = 32;
+        int problemEnd = 24;
 
         int times = 21;
 
@@ -173,7 +173,6 @@ public class MaTMY2_main {
 //                System.out.println("Times: " + t + " finished.");
             }
             for(int i=0;i<taskNum;i++) {
-                System.out.println("Task " + i);
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){
                     tmp[t] = igds[t][i];
@@ -187,13 +186,9 @@ public class MaTMY2_main {
                 for (double e: tmp){
                     std += Math.pow(e - mean, 2);
                 }
-                std = Math.sqrt(std / times);
-                System.out.println("\tBest: " + best);
-                System.out.println("\tWorst: " + worst);
-                System.out.println("\tMean: " + mean);
-                System.out.println("\tMedian: " + median);
-                System.out.println("\tStd: " + std);
-
+                std = Math.sqrt(std / (times-1));
+                System.out.println(best + "\t" + worst + "\t" + mean + "\t" + median + "\t" + std);
+//                System.out.println(form.format(ave[i] / times));
             }
             System.out.println();
         }
