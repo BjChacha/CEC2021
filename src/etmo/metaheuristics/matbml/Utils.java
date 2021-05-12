@@ -291,14 +291,14 @@ public class Utils {
     }
 
     public static int roulette(double[] arr){
-        arr = softmax(arr);
+        double[] sm = softmax(arr);
 
         double s = 0;
         double p = PseudoRandom.randDouble();
         int idx;
 
-        for (idx = 0; idx < arr.length - 1; idx++) {
-            s += arr[idx];
+        for (idx = 0; idx < sm.length - 1; idx++) {
+            s += sm[idx];
             if (s >= p) break;
         }
         return idx;

@@ -20,9 +20,9 @@ public class MaTBML_main {
         Operator selection;
         HashMap parameters;
 
-        int problemStart = 19;
+        int problemStart = 27;
         int problemEnd = 32;
-        int times = 21;
+        int times = 5;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML.");
@@ -139,26 +139,26 @@ public class MaTBML_main {
                     // DEBUG
                     igds[t][k] = igd;
                 }
-                // DEBUG
-                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
+//                // DEBUG
+//                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
             for(int i=0;i<taskNum;i++) {
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){
                     tmp[t] = igds[t][i];
                 }
-                Arrays.sort(tmp);
+//                Arrays.sort(tmp);
                 double best, worst, mean, median, std = 0;
-                best = tmp[0];
-                worst = tmp[times-1];
+//                best = tmp[0];
+//                worst = tmp[times-1];
                 mean = Arrays.stream(tmp).sum() / times;
-                median = tmp[times/2];
-                for (double e: tmp){
-                    std += Math.pow(e - mean, 2);
-                }
-                std = Math.sqrt(std / times);
-                System.out.println(best + "\t" + worst + "\t" + mean + "\t" + median + "\t" + std);
-//                System.out.println(form.format(ave[i] / times));
+//                median = tmp[times/2];
+//                for (double e: tmp){
+//                    std += Math.pow(e - mean, 2);
+//                }
+//                std = Math.sqrt(std / （times - 1));
+//                System.out.println(best + "\t" + worst + "\t" + mean + "\t" + median + "\t" + std);
+                System.out.println(form.format(mean));
             }
             System.out.println();
         }
