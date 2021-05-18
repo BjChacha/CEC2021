@@ -11,13 +11,55 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Utils {
-    static public List<List<Integer>> KLDGrouping(SolutionSet[] populations, int clusterNum, int taskNum) throws JMException {
-        double[][] kls = new double[taskNum][taskNum];
-        KLD kld = new KLD(taskNum, populations);
-        for (int k = 0; k < taskNum; k++){
-            kls[k] = kld.getKDL(k);
-        }
+//    static public List<List<Integer>> KLDGrouping(SolutionSet[] populations, int clusterNum, int taskNum) throws JMException {
+//        double[][] kls = new double[taskNum][taskNum];
+//        KLD kld = new KLD(taskNum, populations);
+//        for (int k = 0; k < taskNum; k++){
+//            kls[k] = kld.getKDL(k);
+//        }
+//
+//        List<List<Integer>> clusters = new ArrayList<>();
+//        // 1. each population is one cluster
+//        for (int k = 0; k < populations.length; k++){
+//            List<Integer> cluster = new ArrayList<>();
+//            cluster.add(k);
+//            clusters.add(cluster);
+//        }
+//
+//        int[] idx;
+//        double minDistance;
+//        // DEBUG
+//        double[][] distances;
+//
+//        while (clusters.size() > clusterNum) {
+//            // 2. find the closest clusters pair
+//            minDistance = Double.MAX_VALUE;
+//            idx = new int[2];
+//
+//            distances = new double[clusters.size()][clusters.size()];
+//
+//            for (int i = 0; i < clusters.size() - 1; i++) {
+//                for (int j = i + 1; j < clusters.size(); j++) {
+//                    double dis = getKLDistanceBetweenTasks(clusters.get(i), clusters.get(j), kls);
+//                    distances[i][j] = dis;
+//                    if (dis < minDistance){
+//                        idx[0] = i;
+//                        idx[1] = j;
+//                        minDistance = dis;
+//                    }
+//                }
+//            }
+//
+//            // 3. merge two clusters found above.
+//            for (int i = 0; i < clusters.get(idx[1]).size(); i++)
+//                clusters.get(idx[0]).add(clusters.get(idx[1]).get(i));
+//            clusters.remove(idx[1]);
+//        }
+//
+//        return clusters;
+//    }
 
+    static public List<List<Integer>> WDGrouping(SolutionSet[] populations, int clusterNum, int taskNum) throws JMException {
         List<List<Integer>> clusters = new ArrayList<>();
         // 1. each population is one cluster
         for (int k = 0; k < populations.length; k++){
@@ -40,7 +82,7 @@ public class Utils {
 
             for (int i = 0; i < clusters.size() - 1; i++) {
                 for (int j = i + 1; j < clusters.size(); j++) {
-                    double dis = getKLDistanceBetweenTasks(clusters.get(i), clusters.get(j), kls);
+                    double dis = getWDistanceBetweenTasks(clusters.get(i), clusters.get(j), populations);
                     distances[i][j] = dis;
                     if (dis < minDistance){
                         idx[0] = i;
@@ -191,16 +233,6 @@ public class Utils {
         return distance;
     }
 
-    static double getKLDistanceBetweenTasks(List<Integer> PA, List<Integer> PB, double[][] kls) throws JMException {
-        double distance = 0;
-        for (int k1 = 0; k1 < PA.size(); k1++){
-            for (int k2 = 0; k2 < PB.size(); k2++){
-                distance = Math.max(distance, kls[PA.get(k1)][PB.get(k2)]);
-            }
-        }
-        return distance;
-    }
-
     static double getMinDistanceBetweenTasks(SolutionSet[] PA, SolutionSet[] PB) throws JMException {
         double distance = Double.MAX_VALUE;
         for (int k1 = 0; k1 < PA.length; k1++){
@@ -232,6 +264,17 @@ public class Utils {
             }
         }
         distance /= (CA * CB);
+        return distance;
+    }
+
+    static double getWDistanceBetweenTasks(List<Integer> PA, List<Integer> PB, SolutionSet[] populations) throws JMException {
+        double distance = 0;
+        for (int k1 = 0; k1 < PA.size(); k1++){
+            for (int k2 = 0; k2 < PB.size(); k2++){
+                double WD = WassersteinDistance.getWD(populations[PA.get(k1)].getMat(), populations[PB.get(k2)].getMat());
+                distance = Math.max(distance, WD);
+            }
+        }
         return distance;
     }
 

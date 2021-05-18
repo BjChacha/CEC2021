@@ -1,6 +1,10 @@
 package etmo.metaheuristics.matbml;
 
-import weka.estimators.MahalanobisEstimator;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.cpu.nativecpu.NDArray;
+import org.nd4j.linalg.dimensionalityreduction.PCA;
+import org.nd4j.linalg.factory.Nd4j;
+import org.nd4j.linalg.ops.transforms.Transforms;
 
 class WassersteinDistance {
     public static double getWD(double[][] p1, double[][] p2){
@@ -53,6 +57,28 @@ class WassersteinDistance {
     }
 
     public static double getWD2(double[][] p1, double[][] p2){
+        INDArray P1 = new NDArray(p1);
+        INDArray P2 = new NDArray(p2);
 
+        INDArray reduced1 = PCA.pca(P1, 5, false);
+        INDArray reduced2 = PCA.pca(P2, 5, false);
+
+        INDArray[] d1 = PCA.covarianceMatrix(reduced1);
+        INDArray[] d2 = PCA.covarianceMatrix(reduced2);
+
+        INDArray mean1 = d1[1];
+        INDArray cov1 = d1[0];
+        INDArray mean2 = d2[1];
+        INDArray cov2 = d2[0];
+
+        double distance1 = 0;
+        double distance2 = 0;
+
+        distance1 = Transforms.pow(mean1.sub(mean2), 2).sumNumber().doubleValue();
+        INDArray tmp = Transforms.pow(cov1, 0.5);
+        distance2 = (Transforms.pow((Transforms.pow(cov1, 0.5).sub(Transforms.pow(cov2, 0.5))), 2)).sumNumber().doubleValue();
+
+        double distance = distance1 + distance2;
+        return distance;
     }
 }

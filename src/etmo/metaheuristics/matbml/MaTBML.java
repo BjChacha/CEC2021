@@ -11,11 +11,8 @@ import etmo.util.PORanking;
 import etmo.util.PseudoRandom;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.LocationComparator;
-import etmo.util.logging.LogPopulation;
-import etmo.util.KLD;
 import etmo.util.sorting.SortingIdx;
 
-import javax.swing.plaf.basic.BasicSliderUI;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -23,6 +20,7 @@ public class MaTBML extends MtoAlgorithm {
     MaTAlgorithm[] optimizers_;
     SolutionSet[] populations_;
     Operator crossover_;
+    Operator mutation_;
     Operator selection_;
 
     String algoName_;
@@ -38,8 +36,8 @@ public class MaTBML extends MtoAlgorithm {
     // implicit transfer probability
     double P_;
 
-    double CBScore;
-    double PBScore;
+    double CBRate;
+    double PBRate;
 
     int[] objStart_;
     int[] objEnd_;
@@ -50,16 +48,24 @@ public class MaTBML extends MtoAlgorithm {
     double[][] scores;
     double[][] distances;
 
-    int[] leaderList_;
     int[] groups_;
     int[] leaders_;
     int[] fails;
     int[] skips;
 
+    // DEBUG
     Map<String, Integer> CBD = new HashMap<>();
     Map<String, Integer> PBD = new HashMap<>();
     Map<String, Integer> ND = new HashMap<>();
     Map<String, Integer> WD = new HashMap<>();
+
+    int[] leaderTimes;
+    int[] transferredTimes;
+
+    int[][] CBTimes;
+    int[][] PBTimes;
+    int[][] NDTImes;
+    int[][] WDTimes;
 
     public MaTBML(ProblemSet problemSet){
         super(problemSet);
@@ -74,7 +80,7 @@ public class MaTBML extends MtoAlgorithm {
 
         // Algorithm execution
         while (evaluations_ < maxEvaluations_){
-             solelyConverge(k1_);
+            solelyConverge(k1_);
             transferConverge(k2_);
         }
 
@@ -87,36 +93,36 @@ public class MaTBML extends MtoAlgorithm {
         updateIdealPoint();
         updateNadirPoint();
 
-        // 1. 先分组后分配
-//        SolutionSet[] representatives = prepareRepresentatives(50);
-//        groups = Utils.KLDGrouping(populations_, minGroupNum_, taskNum_);
+        leaders_ = new int[minGroupNum_];
 
-//        groups = Utils.AGNES(representatives, minGroupNum_);
-//        groups = Grouping();
-
-////        // DEBUG
-//        for (int c = 0; c < groups.size(); c++)
-//            System.out.println(evaluations_ + ": " + groups.get(c));
-
-//        leaderTaskIdx_.clear();
-//        for (int g = 0; g < groups.size(); g++) {
+////         1. 先分组后选leader
+//        Arrays.fill(groups_, -1);
+//        List<List<Integer>> clusters = Utils.WDGrouping(populations_, minGroupNum_, taskNum_);
+//
+//////        // DEBUG
+////        for (int c = 0; c < clusters.size(); c++)
+////            System.out.println(evaluations_ + ": " + clusters.get(c));
+//
+//        for (int g = 0; g < clusters.size(); g++) {
 //            double maxImprovement = 0;
-//            int leader = -1;
-//            for (int k: groups.get(g)) {
+//            leaders_[g] = -1;
+//            for (int k: clusters.get(g)) {
 //                double improvement = 0;
 //                for (int j = objStart_[k]; j <= objEnd_[k]; j++) {
 //                    improvement += (oldIdeal[j] - ideals_[j]);
 //                }
 //                if (improvement > maxImprovement) {
-//                    leader = k;
+//                    leaders_[g] = k;
 //                    maxImprovement = improvement;
 //                }
 //            }
-//            leaderTaskIdx_.add(leader);
+//            for (int k: clusters.get(g)) {
+//                if (k != leaders_[g])
+//                    groups_[k] = leaders_[g];
+//            }
 //        }
 
-        // 2. 先分配后分组
-        leaders_ = new int[minGroupNum_];
+        // 2. 先选leader后分组
         double[] improvements = new double[taskNum_];
         // 2.1 取前k个improvement最大的task作为leader
         for (int k = 0; k < taskNum_; k++){
@@ -138,12 +144,12 @@ public class MaTBML extends MtoAlgorithm {
             double[] finalScore = new double[leaders_.length];
             for (int i = 0; i < finalScore.length; i++){
                 // TODO: 可调整计算公式
-                finalScore[i] = (3.0 / 2) * Math.log(scores[k][leaders_[i]] + 1) * Math.exp(1 / distances[k][leaders_[i]]);
-                // TODO: 可调整最低阈值
-                if (finalScore[i] < 1)
-                    finalScore[i] = 0;
+                finalScore[i] = scores[k][leaders_[i]] * Math.exp(1 / (1 + distances[k][leaders_[i]]) - 1);
+//                // TODO: 可调整最低阈值
+//                if (finalScore[i] < 1)
+//                    finalScore[i] = 0;
             }
-            if (skips[k] > 0 && Arrays.stream(finalScore).sum() == 0)
+            if (Arrays.stream(finalScore).sum() == 0)
                 continue;
             else{
                 groups_[k] = leaders_[Utils.roulette(finalScore)];
@@ -152,12 +158,14 @@ public class MaTBML extends MtoAlgorithm {
     }
 
     private void UpdateDistances() throws JMException {
-        // Wasserstein Distance (psedo)
-        for (int i = 0; i < taskNum_ - 1; i++){
-            for (int j = i + 1; j < taskNum_; j++){
-                distances[i][j] = distances[j][i] = WassersteinDistance.getWD(populations_[i].getMat(), populations_[j].getMat());
-            }
-        }
+//        // Wasserstein Distance (psedo)
+//        for (int i = 0; i < taskNum_ - 1; i++){
+//            for (int j = i + 1; j < taskNum_; j++){
+//                double d1 = WassersteinDistance.getWD(populations_[i].getMat(), populations_[j].getMat());
+//                distances[i][j] = distances[j][i] = d1;
+//            }
+//        }
+
 //        // KL Diversity
 //        KLD kld = new KLD(problemSet_, populations_);
 //        for (int i = 0; i < taskNum_; i++)
@@ -168,7 +176,8 @@ public class MaTBML extends MtoAlgorithm {
         // Leader先收敛k2代。
         int[] runTimes = new int[taskNum_];
         for (int leader: leaders_)
-            runTimes[leader] = k2;
+            if (leader >= 0)
+                runTimes[leader] = k2;
         Converge(runTimes);
 
         for (int k = 0; k < taskNum_; k++){
@@ -214,13 +223,22 @@ public class MaTBML extends MtoAlgorithm {
 
             String key = groups_[k] + "->" + k;
             if (completelyBetter) {
-                // apply the whole population
-                for (int i = 0; i < tmpSet.size(); i++) {
-                    populations_[k].replace(i, tmpSet.get(i));
+//                // apply the whole population
+//                for (int i = 0; i < tmpSet.size(); i++) {
+//                    populations_[k].replace(i, tmpSet.get(i));
+//                }
+
+                // Union and selection
+                SolutionSet union = populations_[k].union(tmpSet);
+                rankSolutionOnTask(union, k, true);
+                for (int i = 0; i < populations_[k].size(); i++) {
+                    populations_[k].replace(i, union.get(i));
                 }
-                scores[k][groups_[k]] += CBScore;
+
+                scores[k][groups_[k]] *= CBRate;
                 fails[k] = 0;
 
+                CBTimes[k][groups_[k]] += 1;
                 if (CBD.containsKey(key))
                     CBD.put(key, CBD.get(key) + 1);
                 else
@@ -233,9 +251,11 @@ public class MaTBML extends MtoAlgorithm {
                 for (int i = 0; i < populations_[k].size(); i++) {
                     populations_[k].replace(i, union.get(i));
                 }
-                scores[k][groups_[k]] += PBScore;
+
+                scores[k][groups_[k]] *= PBRate;
                 fails[k] = 0;
 
+                PBTimes[k][groups_[k]] += 1;
                 if (PBD.containsKey(key))
                     PBD.put(key, PBD.get(key) + 1);
                 else
@@ -246,23 +266,25 @@ public class MaTBML extends MtoAlgorithm {
                     partlyImplicitTransfer(groups_[k], k, implicitTransferNum_);
                 }
                 fails[k] += 1;
-                skips[k] = fails[k];
+                skips[k] = fails[k] - 1;
 
                 if (ND.containsKey(key))
                     ND.put(key, ND.get(key) + 1);
                 else
                     ND.put(key, 1);
+
+                scores[k][groups_[k]] /= CBRate;
             }
             else{
                 fails[k] += 1;
-                skips[k] = fails[k];
+                skips[k] = fails[k] - 1;
 
                 if (WD.containsKey(key))
                     WD.put(key, WD.get(key) + 1);
                 else
                     WD.put(key, 1);
 
-                scores[k][groups_[k]] *= 0.5;
+                scores[k][groups_[k]] = 0;
             }
         }
 
@@ -285,6 +307,7 @@ public class MaTBML extends MtoAlgorithm {
             parents[1] = populations_[src].get(i);
             Solution[] children = (Solution[]) crossover_.execute(parents);
             Solution child = new Solution(children[PseudoRandom.randInt(0, children.length - 1)]);
+            mutation_.execute(child);
             child.setSkillFactor(trg);
             problemSet_.get(trg).evaluate(child);
             evaluations_++;
@@ -437,6 +460,7 @@ public class MaTBML extends MtoAlgorithm {
         algoName_ = (String) getInputParameter("algoName");
 
         crossover_ = operators_.get("crossover");
+        mutation_ = operators_.get("mutation");
         selection_ = operators_.get("selection");
 
         taskNum_ = problemSet_.size();
@@ -454,7 +478,6 @@ public class MaTBML extends MtoAlgorithm {
         fails = new int[taskNum_];
         skips = new int[taskNum_];
 
-        leaderList_ = new int[minGroupNum_];
         groups_ = new int[taskNum_];
 
 //        Arrays.fill(isFinished_, false);
@@ -468,8 +491,16 @@ public class MaTBML extends MtoAlgorithm {
             Arrays.fill(scores[k], 1);
         }
 
-        CBScore = 1;
-        PBScore = 0.5;
+        CBRate = 1.2;
+        PBRate = 1.1;
+
+        // DEBUG
+        leaderTimes = new int[taskNum_];
+        transferredTimes = new int[taskNum_];
+        CBTimes = new int[taskNum_][taskNum_];
+        PBTimes = new int[taskNum_][taskNum_];
+        NDTImes = new int[taskNum_][taskNum_];
+        WDTimes = new int[taskNum_][taskNum_];
     }
 
     private void initPopulations() throws JMException, ClassNotFoundException {
@@ -565,8 +596,7 @@ public class MaTBML extends MtoAlgorithm {
             HashMap parameters;
 
             for (int k = 0; k < taskNum_; k++){
-                ProblemSet pS = problemSet_.getTask(k);
-                optimizers_[k] = new NSGAII(pS, populations_[k]);
+                optimizers_[k] = new NSGAII(problemSet_, populations_[k], k);
 
                 optimizers_[k].setInputParameter("populationSize", 100);
                 optimizers_[k].setInputParameter("maxEvaluations", 100 * 1000);
@@ -577,7 +607,7 @@ public class MaTBML extends MtoAlgorithm {
                 crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
 
                 parameters = new HashMap();
-                parameters.put("probability", 1.0 / pS.getMaxDimension());
+                parameters.put("probability", 1.0 / problemSet_.getMaxDimension());
                 parameters.put("distributionIndex", 20.0);
                 mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 

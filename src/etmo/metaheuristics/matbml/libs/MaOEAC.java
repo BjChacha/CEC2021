@@ -164,40 +164,7 @@ public class MaOEAC extends MaTAlgorithm {
 				}
 				Solution[] offSpring = (Solution[]) crossover_
 						.execute(parents);
-				/*if(rd0 < 0.2){
-					mutation_.execute(offSpring[0]);
-				}else if(rd0 < 0.8 && rd0 > 0.2){
-					Solution[] objectSolutionSet = new Solution[4];
-					objectSolutionSet[0] = offSpring[0];
-					//double rd = PseudoRandom.randDouble();
-					if(parents[0].getSumValue() < parents[1].getSumValue()){
-						objectSolutionSet[1] = parents[0];
-					}else{
-						objectSolutionSet[1] = parents[1];
-					}
-					int rnd = PseudoRandom.randInt(0, offspringSolutionSets[i].size()/5);
-					objectSolutionSet[2] = offspringSolutionSets[i].get(rnd);
 
-					int red = PseudoRandom.randInt(0, problem_.getNumberOfObjectives()-1);
-					objectSolutionSet[3] = gbests[red];
-					learning_.execute(objectSolutionSet);
-				}else{
-					Solution[] objectSolutionSet = new Solution[4];
-					objectSolutionSet[0] = offSpring[0];
-					//double rd = PseudoRandom.randDouble();
-					if(parents[0].getSumValue() < parents[1].getSumValue()){
-						objectSolutionSet[1] = parents[0];
-					}else{
-						objectSolutionSet[1] = parents[1];
-					}
-					int rnd = PseudoRandom.randInt(0, offspringSolutionSets[i].size()/5);
-					objectSolutionSet[2] = offspringSolutionSets[i].get(rnd);
-
-					int red = PseudoRandom.randInt(0, problem_.getNumberOfObjectives()-1);
-					objectSolutionSet[3] = gbests[red];
-					learning_.execute(objectSolutionSet);
-					mutation_.execute(offSpring[0]);
-				}*/
 				mutation_.execute(offSpring[0]);
 
 				problemSet_.get(taskIdx_).evaluate(offSpring[0]);

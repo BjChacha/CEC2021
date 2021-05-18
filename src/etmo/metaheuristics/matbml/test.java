@@ -53,7 +53,8 @@ public class test {
                 {2, 5, 2, 3, 6},
                 {5, 4, 5, 5, 5},
         };
-        double distance = WassersteinDistance.getWD(data1, data2);
-        System.out.println("distance: " + distance);
+        double distance1 = WassersteinDistance.getWD(data1, data2);
+        double distance2 = WassersteinDistance.getWD2(data1, data2);
+        System.out.println("distance1: " + distance1 + "\ndistance2: " + distance2);
     }
 }

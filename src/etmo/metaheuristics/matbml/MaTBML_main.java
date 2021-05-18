@@ -2,9 +2,11 @@ package etmo.metaheuristics.matbml;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
+import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.comparators.LocationComparator;
 import etmo.util.logging.LogIGD;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,11 +19,12 @@ public class MaTBML_main {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
         Operator crossover;
+        Operator mutation;
         Operator selection;
         HashMap parameters;
 
-        int problemStart = 27;
-        int problemEnd = 32;
+        int problemStart = 28;
+        int problemEnd = 31;
         int times = 5;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
@@ -34,35 +37,6 @@ public class MaTBML_main {
                     .getMethod("getProblem")
                     .invoke(null, null);
 
-            // CEC 2017
-//            switch (pCase){
-//                case 2:
-//                    problemSet = CIMS.getProblem();
-//                    break;
-//                case 3:
-//                    problemSet = CILS.getProblem();
-//                    break;
-//                case 4:
-//                    problemSet = PIHS.getProblem();
-//                    break;
-//                case 5:
-//                    problemSet = PIMS.getProblem();
-//                    break;
-//                case 6:
-//                    problemSet = PILS.getProblem();
-//                    break;
-//                case 7:
-//                    problemSet = NIHS.getProblem();
-//                    break;
-//                case 8:
-//                    problemSet = NIMS.getProblem();
-//                    break;
-//                case 9:
-//                    problemSet = NILS.getProblem();
-//                    break;
-//                default:
-//                    problemSet = CIHS.getProblem();
-//            }
 
             int taskNum = problemSet.size();
             double[] ave = new double[taskNum];
@@ -78,10 +52,10 @@ public class MaTBML_main {
             algorithm = new MaTBML(problemSet);
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
-            algorithm.setInputParameter("k1", 3);
-            algorithm.setInputParameter("k2", 10);
-            algorithm.setInputParameter("P_", 0.9);
-            algorithm.setInputParameter("implicitTransferNum", 50);
+            algorithm.setInputParameter("k1", 1);
+            algorithm.setInputParameter("k2", 3);
+            algorithm.setInputParameter("P_", 0.5);
+            algorithm.setInputParameter("implicitTransferNum", 10);
             algorithm.setInputParameter("algoName", "MaOEAC");
 
 //            // Randomly DE
@@ -97,11 +71,20 @@ public class MaTBML_main {
             parameters.put("probability", 0.9);
             parameters.put("distributionIndex", 20.0);
             crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+            // Mutation operator
+            parameters = new HashMap();
+            parameters.put("probability", 1.0 / problemSet.getMaxDimension());
+            parameters.put("distributionIndex", 20.0);
+            mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 
-            parameters = null;
-            selection = SelectionFactory.getSelectionOperator("BinaryTournament2", parameters);
+            // Selection Operator
+            parameters = new HashMap() ;
+            parameters.put("comparator", new LocationComparator());
+            selection = SelectionFactory.getSelectionOperator("BinaryTournament",
+                    parameters);
 
             algorithm.addOperator("crossover", crossover);
+            algorithm.addOperator("mutation", mutation);
             algorithm.addOperator("selection", selection);
 
             // DEBUG

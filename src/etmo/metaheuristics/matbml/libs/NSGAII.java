@@ -55,6 +55,8 @@ public class NSGAII extends MaTAlgorithm {
 
 	Distance distance;
 
+	boolean[] selected;
+
 	/**
 	 * Constructor
 	 * 
@@ -70,6 +72,20 @@ public class NSGAII extends MaTAlgorithm {
 		super(problemSet);
 		population = solutionSet;
 		populationSize = solutionSet.size();
+	}
+
+	public NSGAII(ProblemSet problemSet, SolutionSet solutionSet, int taskIdx){
+		super(problemSet);
+		population = solutionSet;
+		populationSize = solutionSet.size();
+		taskIdx_ = taskIdx;
+		selected = new boolean[problemSet.getTotalNumberOfObjs()];
+		for (int i = 0; i < selected.length; i++){
+			if (i < problemSet.get(taskIdx_).getStartObjPos() || i > problemSet.get(taskIdx_).getEndObjPos())
+				selected[i] = false;
+			else
+				selected[i] = true;
+		}
 	}
 
 	/**
@@ -94,17 +110,17 @@ public class NSGAII extends MaTAlgorithm {
 					Solution[] offSpring = (Solution[]) crossoverOperator.execute(parents);
 					mutationOperator.execute(offSpring[0]);
 					mutationOperator.execute(offSpring[1]);
-					problemSet_.get(0).evaluate(offSpring[0]);
-					problemSet_.get(0).evaluateConstraints(offSpring[0]);
-					problemSet_.get(0).evaluate(offSpring[1]);
-					problemSet_.get(0).evaluateConstraints(offSpring[1]);
+					problemSet_.get(taskIdx_).evaluate(offSpring[0]);
+					problemSet_.get(taskIdx_).evaluateConstraints(offSpring[0]);
+					problemSet_.get(taskIdx_).evaluate(offSpring[1]);
+					problemSet_.get(taskIdx_).evaluateConstraints(offSpring[1]);
 					offspringPopulation.add(offSpring[0]);
 					offspringPopulation.add(offSpring[1]);
 					evaluations += 2;
 
-					if (evaluations % (populationSize * 20) == 0){
-						LogPopulation.LogPopulation("NSGAII", population, problemSet_, evaluations, false);
-					}
+//					if (evaluations % (populationSize * 20) == 0){
+//						LogPopulation.LogPopulation("NSGAII", population, problemSet_, evaluations, false);
+//					}
 				} // if
 			} // for
 
@@ -124,7 +140,7 @@ public class NSGAII extends MaTAlgorithm {
 
 			while ((remain > 0) && (remain >= front.size())) {
 				// Assign crowding distance to individuals
-				distance.crowdingDistanceAssignment(front, problemSet_.get(0).getNumberOfObjectives());
+				distance.crowdingDistanceAssignment(front, problemSet_.get(taskIdx_).getNumberOfObjectives());
 				// Add the individuals of this front
 				for (int k = 0; k < front.size(); k++) {
 					population.add(front.get(k));
@@ -142,7 +158,7 @@ public class NSGAII extends MaTAlgorithm {
 
 			// Remain is less than front(index).size, insert only the best one
 			if (remain > 0) { // front contains individuals to insert
-				distance.crowdingDistanceAssignment(front, problemSet_.get(0).getNumberOfObjectives());
+				distance.crowdingDistanceAssignment(front, problemSet_.get(taskIdx_).getNumberOfObjectives());
 				front.sort(new CrowdingComparator());
 				for (int k = 0; k < remain; k++) {
 					population.add(front.get(k));
@@ -163,8 +179,8 @@ public class NSGAII extends MaTAlgorithm {
 		Solution newSolution;
 		for (int i = 0; i < populationSize; i++) {
 			newSolution = new Solution(problemSet_);
-			problemSet_.get(0).evaluate(newSolution);
-			problemSet_.get(0).evaluateConstraints(newSolution);
+			problemSet_.get(taskIdx_).evaluate(newSolution);
+			problemSet_.get(taskIdx_).evaluateConstraints(newSolution);
 			evaluations++;
 			population.add(newSolution);
 		}
@@ -194,10 +210,10 @@ public class NSGAII extends MaTAlgorithm {
 				Solution[] offSpring = (Solution[]) crossoverOperator.execute(parents);
 				mutationOperator.execute(offSpring[0]);
 				mutationOperator.execute(offSpring[1]);
-				problemSet_.get(0).evaluate(offSpring[0]);
-				problemSet_.get(0).evaluateConstraints(offSpring[0]);
-				problemSet_.get(0).evaluate(offSpring[1]);
-				problemSet_.get(0).evaluateConstraints(offSpring[1]);
+				problemSet_.get(taskIdx_).evaluate(offSpring[0]);
+				problemSet_.get(taskIdx_).evaluateConstraints(offSpring[0]);
+				problemSet_.get(taskIdx_).evaluate(offSpring[1]);
+				problemSet_.get(taskIdx_).evaluateConstraints(offSpring[1]);
 				offspringPopulation.add(offSpring[0]);
 				offspringPopulation.add(offSpring[1]);
 				evaluations += 2;
@@ -218,7 +234,7 @@ public class NSGAII extends MaTAlgorithm {
 
 		while ((remain > 0) && (remain >= front.size())) {
 			// Assign crowding distance to individuals
-			distance.crowdingDistanceAssignment(front, problemSet_.get(0).getNumberOfObjectives());
+			distance.crowdingDistanceAssignment(front, problemSet_.get(taskIdx_).getNumberOfObjectives(), selected);
 			// Add the individuals of this front
 			for (int k = 0; k < front.size(); k++) {
 				population.add(front.get(k));
@@ -236,7 +252,7 @@ public class NSGAII extends MaTAlgorithm {
 
 		// Remain is less than front(index).size, insert only the best one
 		if (remain > 0) { // front contains individuals to insert
-			distance.crowdingDistanceAssignment(front, problemSet_.get(0).getNumberOfObjectives());
+			distance.crowdingDistanceAssignment(front, problemSet_.get(taskIdx_).getNumberOfObjectives(), selected);
 			front.sort(new CrowdingComparator());
 			for (int k = 0; k < remain; k++) {
 				population.add(front.get(k));
