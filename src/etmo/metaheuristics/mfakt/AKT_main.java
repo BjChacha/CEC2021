@@ -7,6 +7,7 @@ import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.comparators.LocationComparator;
+import etmo.util.logging.LogIGD;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -80,8 +81,13 @@ public class AKT_main {
 			algorithm.addOperator("mutation", mutation);
 			algorithm.addOperator("selection", selection);
 
+			double[][] IGDs = new double[taskNum][times];
 			for (int t = 0; t <= times; t++) {
+				long startTime = System.currentTimeMillis();
 				SolutionSet population = algorithm.execute();
+				long endTime = System.currentTimeMillis();
+				System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
+
 				SolutionSet[] resPopulation = new SolutionSet[problemSet.size()];
 				for (int i = 0; i < problemSet.size(); i++)
 					resPopulation[i] = new SolutionSet();
@@ -108,9 +114,11 @@ public class AKT_main {
 					if (resPopulation[i].size() == 0)
 						continue;
 					igd = indicator.getIGD(resPopulation[i]);
+					IGDs[i][t] = igd;
 					ave[i] += igd;
 				}
 			}
+			LogIGD.LogIGD("MFEA_AKT", pCase, IGDs);
 			for (int i = 0; i < taskNum; i++)
 				System.out.println("T" + (i + 1) + "\t" + form.format(ave[i] / times));
 			System.out.println();

@@ -4,6 +4,7 @@ import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
@@ -18,10 +19,10 @@ public class MaTDE_main {
 
         HashMap parameters;
 
-        int problemStart = 32;
+        int problemStart = 25;
         int problemEnd = 32;
 
-        int times = 5;
+        int times = 21;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -76,11 +77,12 @@ public class MaTDE_main {
             crossover2 = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
             algorithm.addOperator("crossover2", crossover2);
 
+            double[][] IGDs = new double[taskNum][times];
             for (int t = 0; t < times; t++){
-//                long startTime = System.currentTimeMillis();
+                long startTime = System.currentTimeMillis();
                 SolutionSet[] population = algorithm.execute();
-//                long endTime = System.currentTimeMillis();
-//                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
+                long endTime = System.currentTimeMillis();
+                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
 
                 // 各个任务的目标数不一，所以评价时需要根据任务来重新设置种群规模。
                 SolutionSet[] resPopulation = new SolutionSet[taskNum];
@@ -109,9 +111,11 @@ public class MaTDE_main {
                         continue;
 
                     igd = indicator.getIGD(resPopulation[k]);
+                    IGDs[k][t] = igd;
                     ave[k] += igd;
                 }
             }
+            LogIGD.LogIGD("MaTDE", pCase, IGDs);
             for(int i=0;i<taskNum;i++)
                 System.out.println(form.format(ave[i] / times));
             System.out.println();

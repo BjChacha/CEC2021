@@ -18,6 +18,7 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 public class MOMFEAII_main {
 	public static void main(String args[]) throws IOException, JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -29,10 +30,10 @@ public class MOMFEAII_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 31;
+		int taskStart = 25;
 		int taskEnd = 32;
 
-		int times = 1;
+		int times = 21;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -84,13 +85,13 @@ public class MOMFEAII_main {
 			algorithm.addOperator("mutation", mutation);
 			algorithm.addOperator("selection", selection);
 
+			double[][] IGDs = new double[taskNum][times];
 			for (int t = 1; t <= times; t++) {
 				long startTime = System.currentTimeMillis();
-
 				SolutionSet population = algorithm.execute();
-
 				long endTime = System.currentTimeMillis();
 				System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
+
 				SolutionSet[] resPopulation = new SolutionSet[taskNum];
 				for (int i = 0; i < taskNum; i++)
 					resPopulation[i] = new SolutionSet();
@@ -117,9 +118,11 @@ public class MOMFEAII_main {
 					if(resPopulation[i].size()==0)
 						continue;
 					igd =  indicator.getIGD(resPopulation[i]);
+					IGDs[i][t] = igd;
 					ave[i] += igd;
 				}
 			}
+			LogIGD.LogIGD("MOMFEAII", pCase, IGDs);
 			for(int i=0;i<taskNum;i++)
 				System.out.println("T" + (i+1) + "\t" + form.format(ave[i] / times));
 			System.out.println();

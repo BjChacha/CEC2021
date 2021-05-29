@@ -20,6 +20,7 @@ import etmo.operators.selection.SelectionFactory;
 
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 public class MOMFEA_main {
 	public static void main(String args[]) throws IOException, JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -34,7 +35,7 @@ public class MOMFEA_main {
 		int taskStart = 25;
 		int taskEnd = 32;
 
-		int times = 1;
+		int times = 21;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -86,7 +87,8 @@ public class MOMFEA_main {
 			algorithm.addOperator("mutation", mutation);
 			algorithm.addOperator("selection", selection);
 
-			for (int t = 1; t <= times; t++) {
+			double[][] IGDs = new double[taskNum][times];
+			for (int t = 0; t < times; t++) {
 				long startTime = System.currentTimeMillis();
 
 				SolutionSet population = algorithm.execute();
@@ -119,9 +121,11 @@ public class MOMFEA_main {
 					if(resPopulation[i].size()==0)
 						continue;
 					igd =  indicator.getIGD(resPopulation[i]);
+					IGDs[i][t] = igd;
 					ave[i] += igd;
 				}
 			}
+			LogIGD.LogIGD("MOMFEA", pCase, IGDs);
 			for(int i=0;i<taskNum;i++)
 				System.out.println("T" + (i+1) + "\t" + form.format(ave[i] / times));
 			System.out.println();
