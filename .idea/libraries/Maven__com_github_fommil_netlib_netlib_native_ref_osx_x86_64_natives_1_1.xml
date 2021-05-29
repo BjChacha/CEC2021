@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Maven: com.github.fommil.netlib:netlib-native_ref-osx-x86_64:natives:1.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../../../.m2/repository/com/github/fommil/netlib/netlib-native_ref-osx-x86_64/1.1/netlib-native_ref-osx-x86_64-1.1-natives.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-osx-x86_64/1.1/netlib-native_ref-osx-x86_64-1.1-natives.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$PROJECT_DIR$/../../../../.m2/repository/com/github/fommil/netlib/netlib-native_ref-osx-x86_64/1.1/netlib-native_ref-osx-x86_64-1.1-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-osx-x86_64/1.1/netlib-native_ref-osx-x86_64-1.1-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/../../../../.m2/repository/com/github/fommil/netlib/netlib-native_ref-osx-x86_64/1.1/netlib-native_ref-osx-x86_64-1.1-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fommil/netlib/netlib-native_ref-osx-x86_64/1.1/netlib-native_ref-osx-x86_64-1.1-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

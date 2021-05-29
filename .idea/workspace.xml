@@ -4,11 +4,57 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
+    <list default="true" id="54540dcd-a816-4130-ba45-2590af769cab" name="Default Changelist" comment="collect algorithm igd.">
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MOMFEA.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MOMFEAII.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MOMFEAII_main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MOMFEA_main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MaTDE.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MaTDE_main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/WassersteinDistance.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/experiments/learnRMP.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_jniloader_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_jniloader_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_core_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_core_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_native_ref_java_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_native_ref_java_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_native_system_java_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_native_system_java_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_linux_armhf_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_linux_armhf_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_linux_i686_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_linux_i686_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_linux_x86_64_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_linux_x86_64_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_osx_x86_64_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_osx_x86_64_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_win_i686_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_win_i686_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_win_x86_64_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_ref_win_x86_64_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_linux_armhf_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_linux_armhf_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_linux_i686_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_linux_i686_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_linux_x86_64_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_linux_x86_64_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_osx_x86_64_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_osx_x86_64_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_win_i686_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_win_i686_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_win_x86_64_natives_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_netlib_native_system_win_x86_64_natives_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_mbuzdalov_non_dominated_sorting_implementations_0_2_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_mbuzdalov_non_dominated_sorting_implementations_0_2_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_googlecode_matrix_toolkits_java_mtj_1_0_4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_googlecode_matrix_toolkits_java_mtj_1_0_4.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_googlecode_netlib_java_netlib_java_1_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__com_googlecode_netlib_java_netlib_java_1_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__commons_io_commons_io_2_4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_io_commons_io_2_4.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__de_erichseifert_vectorgraphics2d_VectorGraphics2D_0_11.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__de_erichseifert_vectorgraphics2d_VectorGraphics2D_0_11.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__gov_nist_math_jama_1_0_3.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__gov_nist_math_jama_1_0_3.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__net_sourceforge_f2j_arpack_combined_all_0_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__net_sourceforge_f2j_arpack_combined_all_0_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_thirdparty_bounce_0_18.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_thirdparty_bounce_0_18.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_thirdparty_java_cup_11b_2015_03_26.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_thirdparty_java_cup_11b_2015_03_26.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_thirdparty_java_cup_11b_runtime_2015_03_26.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_thirdparty_java_cup_11b_runtime_2015_03_26.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_weka_stable_3_8_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__nz_ac_waikato_cms_weka_weka_stable_3_8_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_collections4_4_4.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_lang3_3_9.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_lang3_3_9.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_math3_3_6_1.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_commons_commons_math3_3_6_1.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_maven_doxia_doxia_sink_api_1_0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_maven_doxia_doxia_sink_api_1_0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_maven_reporting_maven_reporting_api_3_0.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_maven_reporting_maven_reporting_api_3_0.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_2_2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_hamcrest_hamcrest_2_2.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_knowm_xchart_xchart_3_2_2.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_knowm_xchart_xchart_3_2_2.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__org_uma_jmetal_jmetal_core_5_10.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_uma_jmetal_jmetal_core_5_10.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/WassersteinDistance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/WassersteinDistance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/test.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/test.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/core/Solution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/core/Solution.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/MaTBML.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/MaTBML.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/MaTBML_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/MaTBML_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matbml/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/MaTMY2_main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -57,14 +103,15 @@
       </set>
     </option>
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/src/etmo/metaheuristics/matbml/WassersteinDistance.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/Utils.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/etmo/metaheuristics/matbml/MaTBML_main.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/etmo/metaheuristics/matbml/test.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/etmo/metaheuristics/matbml/Utils.java" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/etmo/metaheuristics/matbml/MaTBML.java" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="MavenImportPreferences">
-    <option name="generalSettings">
-      <MavenGeneralSettings>
-        <option name="localRepository" value="D:\.m2\repository" />
-        <option name="mavenHome" value="C:\maven" />
-        <option name="userSettingsFile" value="C:\maven\conf\settings.xml" />
-      </MavenGeneralSettings>
-    </option>
     <option name="importingSettings">
       <MavenImportingSettings>
         <option name="downloadDocsAutomatically" value="true" />
@@ -93,8 +140,8 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/.ssh/id_rsa" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/etmo/metaheuristics/experiments" />
+    <property name="project.structure.last.edited" value="Libraries" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
@@ -103,24 +150,27 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\etmo\metaheuristics\experiments" />
+      <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\etmo\metaheuristics\MOMFEA_exp" />
       <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\etmo\metaheuristics\matbml" />
       <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\etmo\metaheuristics\matmy2\libs" />
       <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\etmo\metaheuristics\matmy2" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="etmo.metaheuristics.MOMFEA_exp" />
       <recent name="etmo.metaheuristics.matmy2" />
       <recent name="etmo.qualityIndicator" />
       <recent name="etmo.metaheuristics.matmy2.libs" />
       <recent name="etmo.metaheuristics.moead" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.test">
-    <configuration name="AKT_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.mfakt.AKT_main" />
+  <component name="RunManager" selected="Application.MOMFEA_main (1)">
+    <configuration name="MOMFEAII_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.experiments.MOMFEAII_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.mfakt.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.experiments.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -128,12 +178,25 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MOEAD_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.moead.MOEAD_main" />
+    <configuration name="MOMFEA_main (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.momfea.MOMFEA_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.moead.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.momfea.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MOMFEA_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.experiments.MOMFEA_main" />
+      <module name="MTO-cec2021-" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="etmo.metaheuristics.experiments.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -154,25 +217,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="MaTMY2_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.matmy2.MaTMY2_main" />
+    <configuration name="MaTDE_main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.experiments.MaTDE_main" />
       <module name="MTO-cec2021-" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.matmy2.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="etmo.metaheuristics.matbml.test" />
-      <module name="MTO-cec2021-" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="etmo.metaheuristics.matbml.*" />
+          <option name="PATTERN" value="etmo.metaheuristics.experiments.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -181,19 +231,19 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Application.AKT_main" />
-      <item itemvalue="Application.MOEAD_main" />
       <item itemvalue="Application.MaTBML_main" />
-      <item itemvalue="Application.MaTMY2_main" />
-      <item itemvalue="Application.test" />
+      <item itemvalue="Application.MOMFEA_main" />
+      <item itemvalue="Application.MOMFEA_main (1)" />
+      <item itemvalue="Application.MOMFEAII_main (1)" />
+      <item itemvalue="Application.MaTDE_main" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.test" />
+        <item itemvalue="Application.MOMFEA_main (1)" />
         <item itemvalue="Application.MaTBML_main" />
-        <item itemvalue="Application.MaTMY2_main" />
-        <item itemvalue="Application.AKT_main" />
-        <item itemvalue="Application.MOEAD_main" />
+        <item itemvalue="Application.MOMFEA_main" />
+        <item itemvalue="Application.MaTDE_main" />
+        <item itemvalue="Application.MOMFEAII_main (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -211,34 +261,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1611191764309</updated>
-    </task>
-    <task id="LOCAL-00056" summary="modified algo MaTDE: add BinaryTournament selector; use dominance comparator.">
-      <created>1612099341010</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1612099341010</updated>
-    </task>
-    <task id="LOCAL-00057" summary="improve my tools: plot final PF.">
-      <created>1612181334570</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1612181334570</updated>
-    </task>
-    <task id="LOCAL-00058" summary="fixed comparator bug.">
-      <created>1612181358804</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1612181358804</updated>
-    </task>
-    <task id="LOCAL-00059" summary="fixed crossover bug (weird that bug only occurs in every task 1)">
-      <created>1612181412435</created>
-      <option name="number" value="00059" />
-      <option name="presentableId" value="LOCAL-00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1612181412435</updated>
     </task>
     <task id="LOCAL-00060" summary="add new parameter: transfer threshold.">
       <created>1612181441064</created>
@@ -555,7 +577,35 @@
       <option name="project" value="LOCAL" />
       <updated>1620809064831</updated>
     </task>
-    <option name="localTasksCounter" value="105" />
+    <task id="LOCAL-00105" summary="backup">
+      <created>1620818321126</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1620818321127</updated>
+    </task>
+    <task id="LOCAL-00106" summary="MaTBML: modified grouping probability formula.">
+      <created>1621301751554</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1621301751555</updated>
+    </task>
+    <task id="LOCAL-00107" summary="add LogIGD function">
+      <created>1622253049577</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1622253049578</updated>
+    </task>
+    <task id="LOCAL-00108" summary="collect algorithm igd.">
+      <created>1622253804555</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1622253804555</updated>
+    </task>
+    <option name="localTasksCounter" value="109" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -572,9 +622,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="fixed bug in MaT(NSGAII)" />
-    <MESSAGE value="fixed algorithm: MOMFEAII." />
-    <MESSAGE value="reorganize import" />
     <MESSAGE value="add new benchmarks: cec2017" />
     <MESSAGE value="add new algo: MFEA-AKT" />
     <MESSAGE value="remove evaluate before logging individual because there's bug in MaTDE" />
@@ -593,11 +640,14 @@
     <MESSAGE value="rename folder: datas -&gt; data" />
     <MESSAGE value="add a new algorithm: MaTBML (Base on Meta Learning)" />
     <MESSAGE value="add a function" />
-    <MESSAGE value="backup" />
     <MESSAGE value="back up" />
     <MESSAGE value="modified function: index sorting." />
     <MESSAGE value="add Wassertstein Distance; use union set to describe group." />
-    <option name="LAST_COMMIT_MESSAGE" value="add Wassertstein Distance; use union set to describe group." />
+    <MESSAGE value="backup" />
+    <MESSAGE value="MaTBML: modified grouping probability formula." />
+    <MESSAGE value="add LogIGD function" />
+    <MESSAGE value="collect algorithm igd." />
+    <option name="LAST_COMMIT_MESSAGE" value="collect algorithm igd." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -675,9 +725,34 @@
           <option name="timeStamp" value="354" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matbml/test.java</url>
+          <line>57</line>
+          <option name="timeStamp" value="363" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://C:/dev/jdk-16.0.1/lib/src.zip!/java.base/java/util/TimSort.java</url>
+          <line>780</line>
+          <option name="timeStamp" value="368" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MOMFEAII.java</url>
+          <line>155</line>
+          <option name="timeStamp" value="374" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MaTDE.java</url>
+          <line>88</line>
+          <option name="timeStamp" value="378" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/experiments/MOMFEA.java</url>
+          <line>73</line>
+          <option name="timeStamp" value="380" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matbml/MaTBML.java</url>
-          <line>80</line>
-          <option name="timeStamp" value="360" />
+          <line>309</line>
+          <option name="timeStamp" value="384" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/etmo/metaheuristics/matmy2/Utils.java</url>
@@ -691,6 +766,7 @@
     </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
+        <PinnedItemInfo parentTag="etmo.metaheuristics.MOMFEA_exp.MOMFEAII" memberName="groups" />
         <PinnedItemInfo parentTag="org.nd4j.linalg.cpu.nativecpu.NDArray" memberName="data" />
       </pinned-members>
     </pin-to-top-manager>
@@ -714,6 +790,7 @@
         <watch expression="iDominate" />
         <watch expression="sets" />
         <watch expression="transferIndividual" />
+        <watch expression="((MOMFEAII)this).distances" custom="etmo.metaheuristics.MOMFEA_exp.MOMFEAII" />
       </configuration>
       <inline-watch fileUrl="file://$PROJECT_DIR$/src/etmo/metaheuristics/matmy/MaTMY.java" line="135">
         <watch expression="offspringList" language="JAVA" />
