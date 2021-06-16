@@ -347,6 +347,20 @@ public class Utils {
         return idx;
     }
 
+    public static int rouletteExceptZero(double[] arr){
+        double[] sm = softmaxExceptZero(arr);
+
+        double s = 0;
+        double p = PseudoRandom.randDouble();
+        int idx;
+
+        for (idx = 0; idx < sm.length - 1; idx++) {
+            s += sm[idx];
+            if (s >= p) break;
+        }
+        return idx;
+    }
+
     public static double[] softmax(double[] arr){
         double[] res = new double[arr.length];
         double sum = 0;
@@ -354,6 +368,23 @@ public class Utils {
         for (int i = 0; i < res.length; i++){
             res[i] = Math.exp(arr[i]);
             sum += res[i];
+        }
+
+        for (int i = 0; i < res.length; i++) {
+            res[i] /= sum;
+        }
+        return res;
+    }
+
+    public static double[] softmaxExceptZero(double[] arr){
+        double[] res = new double[arr.length];
+        double sum = 0;
+
+        for (int i = 0; i < res.length; i++){
+            if (arr[i] > 0) {
+                res[i] = Math.exp(arr[i]);
+                sum += res[i];
+            }
         }
 
         for (int i = 0; i < res.length; i++) {

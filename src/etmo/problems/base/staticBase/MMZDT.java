@@ -119,7 +119,7 @@ public class MMZDT extends Problem {
 			return GFunctions.getF5(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("F6") || gType_.equalsIgnoreCase("ackley"))
 			return GFunctions.getF6(xII, shiftValues_, rotationMatrix_);
-		else if (gType_.equalsIgnoreCase("F7"))
+		else if (gType_.equalsIgnoreCase("F7") || gType_.equalsIgnoreCase("weierstrass"))
 			return GFunctions.getF7(xII, shiftValues_, rotationMatrix_);
 		else if (gType_.equalsIgnoreCase("F8") || gType_.equalsIgnoreCase("griewank"))
 			return GFunctions.getF8(xII, shiftValues_, rotationMatrix_);

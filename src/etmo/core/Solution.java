@@ -22,11 +22,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package etmo.core;
-
-
-
 import etmo.util.JMException;
-
 import java.io.Serializable;
 
 /**
@@ -90,6 +86,8 @@ public class Solution implements Serializable {
 	 */
 	private int location_;
 
+	private int flag;
+
 	/**
 	 * Stores the distance to his k-nearest neighbor into a
 	 * <code>SolutionSet</code>. Used in SPEA2.
@@ -120,6 +118,8 @@ public class Solution implements Serializable {
 	private double[] normalizedObjective_;
 	private double distanceToIdealPoint;
 	private double[] unitHyperplaneObjective_;
+
+	private double pdf_;
 
 	/**
 	 * Constructor.
@@ -161,13 +161,6 @@ public class Solution implements Serializable {
 		label_ = LABEL_DEFAULT_VALUE;
 	}
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param problemSet
-	 *            The problem to solve
-	 * @throws ClassNotFoundException
-	 */
 	public Solution(ProblemSet problemSet) throws ClassNotFoundException {
 		problemSet_ = problemSet;
 		type_ = problemSet.getSolutionType();
@@ -997,4 +990,16 @@ public class Solution implements Serializable {
 	public void setParent(Solution parent) {
 		this.parent_ = parent;
 	}
+
+	public void setFlag(int flag){
+		this.flag = flag;
+	}
+
+	public int getFlag(){
+		return this.flag;
+	}
+
+    public void setPdf(double density) {this.pdf_ = density; }
+
+	public double getPdf() {return this.pdf_; }
 } // Solution

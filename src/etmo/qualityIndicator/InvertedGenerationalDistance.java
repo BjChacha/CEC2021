@@ -35,7 +35,7 @@ public class InvertedGenerationalDistance {
 															// access to the
 	// MetricsUtil funcionalities
 
-	static final double pow_ = 1.0; // pow. This is the pow used for the
+	static final double pow_ = 2.0; // pow. This is the pow used for the
 									// distances
 
 	/**

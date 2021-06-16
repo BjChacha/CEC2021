@@ -5,10 +5,7 @@ import etmo.metaheuristics.matbml.libs.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
-import etmo.util.Distance;
-import etmo.util.JMException;
-import etmo.util.PORanking;
-import etmo.util.PseudoRandom;
+import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.sorting.SortingIdx;
@@ -36,17 +33,16 @@ public class MaTBML extends MtoAlgorithm {
     // implicit transfer probability
     double P_;
 
-    double CBRate;
-    double PBRate;
-
     int[] objStart_;
     int[] objEnd_;
     boolean[] isFinished_;
     double[] ideals_;
     double[] nadirs_;
-
     double[][] scores;
     double[][] distances;
+    double[][] lastBetterRate;
+    double[][] implicitTransferP;
+    double[] improvements;
 
     int[] groups_;
     int[] leaders_;
@@ -56,16 +52,20 @@ public class MaTBML extends MtoAlgorithm {
     // DEBUG
     Map<String, Integer> CBD = new HashMap<>();
     Map<String, Integer> PBD = new HashMap<>();
-    Map<String, Integer> ND = new HashMap<>();
+    Map<String, Integer> NDB = new HashMap<>();
+    Map<String, Integer> NDW = new HashMap<>();
     Map<String, Integer> WD = new HashMap<>();
+    double[][] proceed;
+    int proceedIdx;
 
     int[] leaderTimes;
     int[] transferredTimes;
 
-    int[][] CBTimes;
-    int[][] PBTimes;
-    int[][] NDTImes;
-    int[][] WDTimes;
+    int CBTimes;
+    int PBTimes;
+    int NDTimes;
+    int WDTimes;
+    int savedEvalTimes;
 
     public MaTBML(ProblemSet problemSet){
         super(problemSet);
@@ -84,6 +84,10 @@ public class MaTBML extends MtoAlgorithm {
             transferConverge(k2_);
         }
 
+//        //DEBUG
+//        for (int i = 0; i < taskNum_; i++)
+//            System.out.println(i + ": " + Arrays.toString(proceed[i]));
+
         return populations_;
     }
 
@@ -93,8 +97,8 @@ public class MaTBML extends MtoAlgorithm {
         updateIdealPoint();
         updateNadirPoint();
 
-        leaders_ = new int[minGroupNum_];
-
+        Arrays.fill(leaders_, -1);
+        Arrays.fill(groups_, -1);
 ////         1. 先分组后选leader
 //        Arrays.fill(groups_, -1);
 //        List<List<Integer>> clusters = Utils.WDGrouping(populations_, minGroupNum_, taskNum_);
@@ -123,53 +127,54 @@ public class MaTBML extends MtoAlgorithm {
 //        }
 
         // 2. 先选leader后分组
-        double[] improvements = new double[taskNum_];
+        improvements = new double[taskNum_];
         // 2.1 取前k个improvement最大的task作为leader
         for (int k = 0; k < taskNum_; k++){
             for (int j = objStart_[k]; j <= objEnd_[k]; j++)
                 improvements[k] += (oldIdeal[j] - ideals_[j]);
+            if (improvements[k] < 1e-4)
+                improvements[k] = 0;
         }
-        int[] idxs = SortingIdx.SortingIdx(improvements, true);
-        for (int i = 0; i < leaders_.length; i++)
-            leaders_[i] = idxs[i];
+        if (Arrays.stream(improvements).sum() > 0) {
+            int[] idxs = SortingIdx.SortingIdx(improvements, true);
+            for (int i = 0; i < leaders_.length; i++)
+                leaders_[i] = idxs[i];
 
-        Arrays.fill(groups_, -1);
+            // 2.2 其余task成员leader进组
+            UpdateDistances();
+            for (int k = 0; k < taskNum_; k++) {
+                int finalK = k;
+                if (IntStream.of(leaders_).anyMatch(x -> x == finalK))
+                    continue;
+                double[] finalScore = new double[leaders_.length];
+                for (int i = 0; i < finalScore.length; i++) {
+//                double factor = scores[k][leaders_[i]] > 0 ? scores[k][leaders_[i]] : 0.5 * Math.pow(2, scores[k][leaders_[i]]);
+                    // TODO: 调整计算公式
+//                finalScore[i] = factor * Math.exp(1 / (1 + distances[k][leaders_[i]]) - 1);
+                    finalScore[i] = 0.5 * scores[k][leaders_[i]] * Math.exp(1 / (1 + distances[k][leaders_[i]]) - 1);
+//                finalScore[i] = scores[k][leaders_[i]] * Math.exp(1 / (1 + distances[k][leaders_[i]]) - 1);
+                }
 
-        // 2.2 其余task成员leader进组
-        UpdateDistances();
-        for (int k = 0; k < taskNum_; k++){
-            int finalK = k;
-            if (IntStream.of(leaders_).anyMatch(x -> x == finalK))
-                continue;
-            double[] finalScore = new double[leaders_.length];
-            for (int i = 0; i < finalScore.length; i++){
-                // TODO: 可调整计算公式
-                finalScore[i] = scores[k][leaders_[i]] * Math.exp(1 / (1 + distances[k][leaders_[i]]) - 1);
-//                // TODO: 可调整最低阈值
-//                if (finalScore[i] < 1)
-//                    finalScore[i] = 0;
+                if (Arrays.stream(finalScore).sum() == 0)
+                    continue;
+                else {
+                    groups_[k] = leaders_[Utils.rouletteExceptZero(finalScore)];
+//                groups_[k] = leaders_[Utils.roulette(finalScore)];
+                }
             }
-            if (Arrays.stream(finalScore).sum() == 0)
-                continue;
-            else{
-                groups_[k] = leaders_[Utils.roulette(finalScore)];
+        }else{
+            for (int k = 0; k < taskNum_; k++){
+                if (PseudoRandom.randDouble() < 0.1){
+                    int idx = k;
+                    while (idx == k)
+                        idx = PseudoRandom.randInt(0, taskNum_ - 1);
+                    groups_[k] = idx;
+                }
             }
         }
-    }
 
-    private void UpdateDistances() throws JMException {
-//        // Wasserstein Distance (psedo)
-//        for (int i = 0; i < taskNum_ - 1; i++){
-//            for (int j = i + 1; j < taskNum_; j++){
-//                double d1 = WassersteinDistance.getWD(populations_[i].getMat(), populations_[j].getMat());
-//                distances[i][j] = distances[j][i] = d1;
-//            }
-//        }
-
-//        // KL Diversity
-//        KLD kld = new KLD(problemSet_, populations_);
-//        for (int i = 0; i < taskNum_; i++)
-//            distances[i] = kld.getKDL(i);
+//        // DEBUG
+//        System.out.println(evaluations_ + ": " + Arrays.toString(groups_));
     }
 
     private void transferConverge(int k2) throws JMException, ClassNotFoundException {
@@ -185,26 +190,58 @@ public class MaTBML extends MtoAlgorithm {
             if (groups_[k] < 0 || isFinished_[k])
                 continue;
 
-            // 如果该任务之前失败过，则跳过
-            if (skips[k] > 0){
-                skips[k] -= 1;
-                continue;
-            }
+//            // 如果该任务之前失败过，则跳过
+//            if (skips[k] > 0){
+//                skips[k] -= 1;
+//                continue;
+//            }
 
             double[] tmpIdeal = ideals_.clone();
             double[] tmpNadir = nadirs_.clone();
-            SolutionSet tmpSet = new SolutionSet(populationSize_);
-            for (int i = 0; i < populations_[groups_[k]].size(); i++) {
+            int checkSize = populations_[groups_[k]].size();
+            SolutionSet BSet = new SolutionSet(checkSize);
+            SolutionSet NBSet = new SolutionSet(checkSize);
+            int evaluatedCount = 0;
+            for (int i = 0; i < checkSize; i++) {
+                // 计算中断概率，结合历史和当前信息
+                double stopP;
+                if (lastBetterRate[k][groups_[k]] < 0)
+                    stopP = 0;
+                else if (lastBetterRate[k][groups_[k]] == 0)
+                    stopP = (i - BSet.size()) / checkSize;
+                else
+                    stopP = ((i - BSet.size()) - BSet.size()/lastBetterRate[k][groups_[k]]) / checkSize;
+                // DEBUG
+//                System.out.println("stop P: " + stopP);
+                // 如果触发中断概率，则停止评价。
+                if (PseudoRandom.randDouble() < stopP)
+                    break;
+
                 Solution tmp = new Solution(populations_[groups_[k]].get(i));
                 tmp.setSkillFactor(k);
                 problemSet_.get(k).evaluate(tmp);
                 evaluations_++;
+
+                boolean added = false;
                 for (int j = objStart_[k]; j <= objEnd_[k]; j++) {
-                    tmpIdeal[j] = Math.min(tmpIdeal[j], tmp.getObjective(j));
+                    if (tmp.getObjective(j) < tmpIdeal[j]){
+                        if (!added){
+                            tmp.setFlag(1);
+                            BSet.add(tmp);
+                            added = true;
+                        }
+                        tmpIdeal[j] = tmp.getObjective(j);
+                    }
                     tmpNadir[j] = Math.max(tmpNadir[j], tmp.getObjective(j));
                 }
-                tmpSet.add(tmp);
+                if (!added) {
+                    tmp.setFlag(3);
+                    NBSet.add(tmp);
+                }
+
+                evaluatedCount ++;
             }
+            lastBetterRate[k][groups_[k]] = ((double)BSet.size()) / checkSize;
 
             boolean completelyBetter = true;
             boolean partlyBetter = false;
@@ -222,86 +259,223 @@ public class MaTBML extends MtoAlgorithm {
             }
 
             String key = groups_[k] + "->" + k;
-            if (completelyBetter) {
-//                // apply the whole population
-//                for (int i = 0; i < tmpSet.size(); i++) {
-//                    populations_[k].replace(i, tmpSet.get(i));
-//                }
 
-                // Union and selection
-                SolutionSet union = populations_[k].union(tmpSet);
+            if (partlyBetter) {
+                boolean isImplicitTransfer = false;
+                if (PseudoRandom.randDouble() < implicitTransferP[k][groups_[k]])
+                    isImplicitTransfer = true;
+
+                SolutionSet offspringSet = new SolutionSet(NBSet.size());
+                if (isImplicitTransfer) {
+                    for (int i = 0; i < NBSet.size(); i++) {
+                        int r1 = PseudoRandom.randInt(0, populations_[k].size() - 1);
+                        Solution[] parents = new Solution[2];
+                        parents[0] = new Solution(populations_[k].get(r1));
+                        parents[1] = new Solution(NBSet.get(i));
+                        Solution[] offsprings = (Solution[]) crossover_.execute(parents);
+                        Solution offspring = offsprings[PseudoRandom.randInt(0, 1)];
+                        mutation_.execute(offspring);
+                        offspring.setSkillFactor(k);
+                        problemSet_.get(k).evaluate(offspring);
+                        evaluations_++;
+                        offspring.setFlag(2);
+                        offspringSet.add(offspring);
+                    }
+                }
+
+                SolutionSet union = populations_[k].union(BSet);
+                union = union.union(NBSet);
+                if (isImplicitTransfer)
+                    union = union.union(offspringSet);
+
                 rankSolutionOnTask(union, k, true);
+
+                int etbc = 0;
+                int itbc = 0;
+                int nbc = 0;
+                int other = 0;
                 for (int i = 0; i < populations_[k].size(); i++) {
+                    if (union.get(i).getFlag() == 1)
+                        etbc ++;
+                    else if (union.get(i).getFlag() == 2)
+                        itbc ++;
+                    else if (union.get(i).getFlag() == 3)
+                        nbc ++;
+                    else
+                        other ++;
+                    union.get(i).setFlag(0);
                     populations_[k].replace(i, union.get(i));
                 }
 
-                scores[k][groups_[k]] *= CBRate;
+//                // DEBUG: Explicit & Implicit transfer
+//                System.out.println(
+//                        evaluations_ + "\t" +
+//                        groups_[k] + "\t" +
+//                        k + "\t" +
+//                        etbc + "\t" +
+//                        itbc + "\t" +
+//                        nbc + "\t" +
+//                        other);
+
+                scores[k][groups_[k]] += (((double)(etbc * 2 + itbc + nbc - other))/ populations_[k].size());
+//                if (isImplicitTransfer)
+//                    implicitTransferP[k][groups_[k]] = ((double) itbc) / (offspringSet.size());
+//                else
+//                    implicitTransferP[k][groups_[k]] *= 2;
+
                 fails[k] = 0;
 
-                CBTimes[k][groups_[k]] += 1;
-                if (CBD.containsKey(key))
-                    CBD.put(key, CBD.get(key) + 1);
-                else
-                    CBD.put(key, 1);
-            }
-            else if (partlyBetter) {
-                // Union and selection
-                SolutionSet union = populations_[k].union(tmpSet);
-                rankSolutionOnTask(union, k, true);
-                for (int i = 0; i < populations_[k].size(); i++) {
-                    populations_[k].replace(i, union.get(i));
-                }
-
-                scores[k][groups_[k]] *= PBRate;
-                fails[k] = 0;
-
-                PBTimes[k][groups_[k]] += 1;
+                savedEvalTimes += k2_ * populationSize_;
+                PBTimes += 1;
                 if (PBD.containsKey(key))
                     PBD.put(key, PBD.get(key) + 1);
                 else
                     PBD.put(key, 1);
+
+                proceed[k][proceedIdx] = groups_[k] + 1;
             }
+
             else if (!isWorse){
-                if (PseudoRandom.randDouble() < P_) {
-                    partlyImplicitTransfer(groups_[k], k, implicitTransferNum_);
-                }
-                fails[k] += 1;
-                skips[k] = fails[k] - 1;
+//                ArrayList<Integer> groupMembers = new ArrayList<Integer>();
+//                groupMembers.add(groups_[k]);
+//                for (int i = 0; i < taskNum_; i ++)
+//                    if (groups_[i] == groups_[k])
+//                        groupMembers.add(i);
+//
+//                double[] score = new double[groupMembers.size()];
+//                for (int i = 0; i < score.length; i++){
+//                    double f = groupMembers.get(i) == groups_[k] ? 2 : 1;
+//                    score[i] = scores[k][groupMembers.get(i)] * f;
+//                }
+//                int src = groupMembers.get(Utils.roulette(score));
 
-                if (ND.containsKey(key))
-                    ND.put(key, ND.get(key) + 1);
+//                boolean better = false;
+//                if (PseudoRandom.randDouble() < P_) {
+//                    double[] tmpIdeal2 = ideals_.clone();
+//
+//                    partlyImplicitTransfer(groups_[k], k, implicitTransferNum_);
+//
+//                    for (int i = 0; i < populations_[k].size(); i++)
+//                        for (int j = objStart_[k]; j <= objEnd_[k]; j++) {
+//                            tmpIdeal2[j] = Math.min(tmpIdeal2[j], populations_[k].get(i).getObjective(j));
+//                            if (tmpIdeal[j] < ideals_[j]) {
+//                                better = true;
+//                                break;
+//                        }
+//                    }
+//                }
+//
+//                if (!better) {
+//                    fails[k] += 1;
+//                    skips[k] = fails[k] - 1;
+//
+//                    proceed[k][proceedIdx] = -(groups_[k] + 1.1);
+//                    if (NDW.containsKey(key))
+//                        NDW.put(key, NDW.get(key) + 1);
+//                    else
+//                        NDW.put(key, 1);
+//
+//                }else{
+//                    fails[k] = 1;
+//
+//                    proceed[k][proceedIdx] = groups_[k] + 1.1;
+//                    if (NDB.containsKey(key))
+//                        NDB.put(key, NDB.get(key) + 1);
+//                    else
+//                        NDB.put(key, 1);
+//                }
+
+//                SolutionSet offspringSet = new SolutionSet(populations_[k].size());
+//                for (int i = 0; i < offspringSet.size(); i++){
+//                    int r1 = PseudoRandom.randInt(0, populations_[k].size() - 1);
+//                    Solution[] parents = new Solution[2];
+//                    parents[0] = new Solution(populations_[k].get(r1));
+//                    parents[1] = new Solution(populations_[groups_[k]].get(i));
+//                    Solution[] offsprings = (Solution[]) crossover_.execute(parents);
+//                    Solution offspring = offsprings[PseudoRandom.randInt(0, 1)];
+//                    mutation_.execute(offspring);
+//                    offspring.setSkillFactor(k);
+//                    problemSet_.get(k).evaluate(offspring);
+//                    evaluations_ ++;
+//                    offspring.setFlag(2);
+//                    offspringSet.add(offspring);
+//                }
+//
+//                SolutionSet union = populations_[k].union(offspringSet);
+//
+//                rankSolutionOnTask(union, k, true);
+//
+//                int etbc = 0;
+//                int itbc = 0;
+//                int nbc = 0;
+//                int other = 0;
+//                for (int i = 0; i < populations_[k].size(); i++) {
+//                    if (union.get(i).getFlag() == 1)
+//                        etbc ++;
+//                    else if (union.get(i).getFlag() == 2)
+//                        itbc ++;
+//                    else if (union.get(i).getFlag() == 3)
+//                        nbc ++;
+//                    else
+//                        other ++;
+//                    union.get(i).setFlag(0);
+//                    populations_[k].replace(i, union.get(i));
+//                }
+
+                savedEvalTimes -= evaluatedCount;
+                NDTimes += 1;
+                if (NDB.containsKey(key))
+                    NDB.put(key, NDB.get(key) + 1);
                 else
-                    ND.put(key, 1);
-
-                scores[k][groups_[k]] /= CBRate;
+                    NDB.put(key, 1);
+                scores[k][groups_[k]] = Math.max(0, scores[k][groups_[k]] - 1);
             }
             else{
                 fails[k] += 1;
                 skips[k] = fails[k] - 1;
 
+                savedEvalTimes -= evaluatedCount;
+                WDTimes += 1;
                 if (WD.containsKey(key))
                     WD.put(key, WD.get(key) + 1);
                 else
                     WD.put(key, 1);
 
                 scores[k][groups_[k]] = 0;
+
+                proceed[k][proceedIdx] = -(groups_[k] + 1);
             }
         }
+
+        proceedIdx ++;
 
         updateIdealPoint();
         updateNadirPoint();
     }
 
-    void partlyImplicitTransfer(int src, int trg, int num) throws JMException {
-        SolutionSet transferPopulation = new SolutionSet(num);
-        // use selector to pick a number of individuals.
-        for (int i = 0; i < num; i++) {
-            Solution newOne = new Solution((Solution) selection_.execute(populations_[src]));
-            transferPopulation.add(newOne);
+    private void UpdateDistances() throws JMException {
+        // Wasserstein Distance (psedo)
+        for (int i = 0; i < taskNum_ - 1; i++){
+            for (int j = i + 1; j < taskNum_; j++){
+                double d1 = WassersteinDistance.getWD(populations_[i].getMat(), populations_[j].getMat());
+                distances[i][j] = distances[j][i] = d1;
+            }
         }
+
+//        // KL Diversity
+//        KLD kld = new KLD(problemSet_, populations_);
+//        for (int i = 0; i < taskNum_; i++)
+//            distances[i] = kld.getKDL(i);
+
+//        // random
+//        for (int i = 0; i < taskNum_; i++)
+//            Arrays.fill(distances[i], 0);
+    }
+
+    void partlyImplicitTransfer(int src, int trg, int num) throws JMException {
         // produce offspring
         SolutionSet offspring = new SolutionSet(populationSize_);
-        for (int i = 0; i < populations_[src].size(); i++){
+        for (int i = 0; i < num; i++){
             Solution[] parents = new Solution[2];
             parents[0] = populations_[trg].get(i);
             parents[1] = populations_[src].get(i);
@@ -474,33 +648,40 @@ public class MaTBML extends MtoAlgorithm {
 
         scores = new double[taskNum_][taskNum_];
         distances = new double[taskNum_][taskNum_];
+        implicitTransferP = new double[taskNum_][taskNum_];
+        lastBetterRate = new double[taskNum_][taskNum_];
 
         fails = new int[taskNum_];
         skips = new int[taskNum_];
 
+        leaders_ = new int[minGroupNum_];
         groups_ = new int[taskNum_];
 
 //        Arrays.fill(isFinished_, false);
         Arrays.fill(ideals_, Double.MAX_VALUE);
 //        Arrays.fill(nadirs_, 0);
 
+
         for (int k = 0; k < taskNum_; k++){
             objStart_[k] = problemSet_.get(k).getStartObjPos();
             objEnd_[k] = problemSet_.get(k).getEndObjPos();
 
-            Arrays.fill(scores[k], 1);
+            Arrays.fill(scores[k], 3);
+            Arrays.fill(lastBetterRate[k], -1);
+            Arrays.fill(implicitTransferP[k], 1);
         }
-
-        CBRate = 1.2;
-        PBRate = 1.1;
 
         // DEBUG
         leaderTimes = new int[taskNum_];
         transferredTimes = new int[taskNum_];
-        CBTimes = new int[taskNum_][taskNum_];
-        PBTimes = new int[taskNum_][taskNum_];
-        NDTImes = new int[taskNum_][taskNum_];
-        WDTimes = new int[taskNum_][taskNum_];
+        CBTimes = 0;
+        PBTimes = 0;
+        NDTimes = 0;
+        NDTimes = 0;
+        WDTimes = 0;
+        savedEvalTimes = 0;
+        proceed = new double[taskNum_][maxEvaluations_/populationSize_/taskNum_/k1_];
+        proceedIdx = 0;
     }
 
     private void initPopulations() throws JMException, ClassNotFoundException {

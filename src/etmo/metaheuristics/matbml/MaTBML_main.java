@@ -23,17 +23,25 @@ public class MaTBML_main {
         Operator selection;
         HashMap parameters;
 
-        int problemStart = 28;
-        int problemEnd = 31;
-        int times = 5;
+        int problemStart = 1;
+        int problemEnd = 10;
+        int times = 1;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML.");
 
+        if (problemEnd < problemStart)
+            problemEnd = problemStart;
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
-            // CEC2021
+//            // CEC2021
+//            problemSet = (ProblemSet) Class
+//                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//                    .getMethod("getProblem")
+//                    .invoke(null, null);
+
+            // WCCI 2020
             problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                    .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
                     .getMethod("getProblem")
                     .invoke(null, null);
 
@@ -52,10 +60,10 @@ public class MaTBML_main {
             algorithm = new MaTBML(problemSet);
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
-            algorithm.setInputParameter("k1", 1);
-            algorithm.setInputParameter("k2", 3);
+            algorithm.setInputParameter("k1", 3);
+            algorithm.setInputParameter("k2", 10);
             algorithm.setInputParameter("P_", 0.5);
-            algorithm.setInputParameter("implicitTransferNum", 10);
+            algorithm.setInputParameter("implicitTransferNum", 50);
             algorithm.setInputParameter("algoName", "MaOEAC");
 
 //            // Randomly DE
@@ -88,7 +96,7 @@ public class MaTBML_main {
             algorithm.addOperator("selection", selection);
 
             // DEBUG
-            double[][] igds = new double[times][taskNum];
+            double[][] igds = new double[taskNum][times];
             for (int t = 0; t < times; t++) {
                 SolutionSet population[] = algorithm.execute();
                 SolutionSet resPopulation[] = new SolutionSet[taskNum];
@@ -107,8 +115,8 @@ public class MaTBML_main {
 
                         resPopulation[k].add(newSolution);
                     }
-                    resPopulation[k].printObjectivesToFile("MaTBML_" + problemSet.get(k).getNumberOfObjectives() + "Obj_" +
-                            problemSet.get(k).getName() + "_" + problemSet.get(k).getNumberOfVariables() + "D_run_" + t + ".txt");
+//                    resPopulation[k].printObjectivesToFile("MaTBML_" + problemSet.get(k).getNumberOfObjectives() + "Obj_" +
+//                            problemSet.get(k).getName() + "_" + problemSet.get(k).getNumberOfVariables() + "D_run_" + t + ".txt");
 
                 }
                 double igd;
@@ -120,15 +128,16 @@ public class MaTBML_main {
                     igd = indicator.getIGD(resPopulation[k]);
 //                    ave[k] += igd;
                     // DEBUG
-                    igds[t][k] = igd;
+                    igds[k][t] = igd;
                 }
 //                // DEBUG
 //                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
+            LogIGD.LogIGD("MaTBML", pCase, igds);
             for(int i=0;i<taskNum;i++) {
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){
-                    tmp[t] = igds[t][i];
+                    tmp[t] = igds[i][t];
                 }
 //                Arrays.sort(tmp);
                 double best, worst, mean, median, std = 0;

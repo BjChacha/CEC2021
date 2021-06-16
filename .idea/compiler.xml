@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="MTO-cec2021-" />
+        <module name="CEC2021" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="15">
-      <module name="MTO-cec2021-" target="10" />
+    <bytecodeTargetLevel>
+      <module name="CEC2021" target="10" />
     </bytecodeTargetLevel>
   </component>
 </project>

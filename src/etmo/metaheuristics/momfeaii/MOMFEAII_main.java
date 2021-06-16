@@ -30,18 +30,24 @@ public class MOMFEAII_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 25;
-		int taskEnd = 32;
+		int taskStart = 1;
+		int taskEnd = 10;
 
-		int times = 21;
+		int times = 1;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
 		System.out.println("Algo: MOMFEAII.");
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++ ){
+//			problemSet = (ProblemSet) Class
+//					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//					.getMethod("getProblem")
+//					.invoke(null, null);
+
+			// WCCI 2020
 			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
 

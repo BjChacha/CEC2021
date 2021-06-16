@@ -99,14 +99,16 @@ public class DominanceComparator implements Comparator {
 		int objStart = 0;
 		int objCnt = solution1.getNumberOfObjectives();
 
-		if (solution1.getProblemSet() != null){
-			objCnt = solution1.getProblemSet().get(solution1.getSkillFactor()).getNumberOfObjectives();
-			objStart = solution1.getProblemSet().get(solution1.getSkillFactor()).getStartObjPos();
-		}
+//		if (solution1.getProblemSet() != null){
+//			objCnt = solution1.getProblemSet().get(solution1.getSkillFactor()).getNumberOfObjectives();
+//			objStart = solution1.getProblemSet().get(solution1.getSkillFactor()).getStartObjPos();
+//		}
 
 		for (int i = 0; i < objCnt; i++) {
-			value1 = solution1.getObjective(i+objStart);
-			value2 = solution2.getObjective(i+objStart);
+			value1 = solution1.getObjective(i);
+			value2 = solution2.getObjective(i);
+			if (Double.isInfinite(value1) || Double.isInfinite(value2))
+				continue;
 
 //			if (Double.isInfinite(value1) || Double.isInfinite(value2))
 //				continue;

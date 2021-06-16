@@ -114,3 +114,4 @@ fabric.properties
 *.class
 /target/
 /data/
+/~$Algo_Compare.xlsx

@@ -92,6 +92,7 @@ public class MaTDE extends MtoAlgorithm {
             archives[k] = new SolutionSet(archiveSize);
             for (int i = 0; i < populationSize; i++){
                 Solution newSolution = new Solution(problemSet_);
+                newSolution.setSkillFactor(k);
                 problemSet_.get(k).evaluate(newSolution);
                 evaluations ++;
                 population[k].add(newSolution);
@@ -121,7 +122,7 @@ public class MaTDE extends MtoAlgorithm {
                     parents[1] = new Solution(population[k].get(i));
                     parents[2] = new Solution(population[k].get(i));
                     offSpring = (Solution) crossover1.execute(new Object[] {population[k].get(i), parents});
-
+                    offSpring.setSkillFactor(k);
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
 
@@ -152,7 +153,7 @@ public class MaTDE extends MtoAlgorithm {
                     parents[1] = new Solution(population[k].get(i));
                     Solution[] offSprings = (Solution[]) crossover2.execute(parents);
                     Solution offSpring = offSprings[PseudoRandom.randInt(0,1)];
-
+                    offSpring.setSkillFactor(k);
                     problemSet_.get(k).evaluate(offSpring);
                     evaluations ++;
 

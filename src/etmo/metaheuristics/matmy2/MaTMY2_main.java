@@ -168,8 +168,6 @@ public class MaTMY2_main {
                     // DEBUG
                     igds[t][k] = igd;
                 }
-                // DEBUG
-                LogIGD.LogIGD("MaTMY2_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
 //                System.out.println("Times: " + t + " finished.");
             }
             for(int i=0;i<taskNum;i++) {
