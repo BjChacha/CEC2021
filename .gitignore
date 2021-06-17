@@ -119,3 +119,4 @@ fabric.properties
 /.settings/
 /.vscode/
 /.idea/
+.idea/workspace.xml
