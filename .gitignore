@@ -115,8 +115,5 @@ fabric.properties
 /target/
 /data/
 /~$Algo_Compare.xlsx
-/.idea/
 /.settings/
 /.vscode/
-/.idea/
-.idea/workspace.xml
