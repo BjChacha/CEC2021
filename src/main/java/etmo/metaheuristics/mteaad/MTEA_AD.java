@@ -224,7 +224,7 @@ public class MTEA_AD extends Algorithm {
 
 
                 double transRand = PseudoRandom.randDouble();
-                if (transRand <= 0.1){
+                if (transRand <= 0){
                     // init ad model
                     int vNum = problemSet_.get(t).getNumberOfVariables();
                     double[][] v = new double[populationSize][vNum];

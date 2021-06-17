@@ -16,7 +16,6 @@ import java.util.HashMap;
 public class MTEA_AD_main {
     public static void main(String[] args) throws IOException, JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         ProblemSet problemSet; // The problem to solve
-        ProblemSet problemSet2;
         Algorithm algorithm; // The algorithm to use
         Crossover crossover; // Crossover operator
         Operator mutation; // Mutation operator
