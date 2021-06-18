@@ -28,8 +28,6 @@ public class MTEA_AD extends Algorithm {
         int populationSize;
         int maxEvaluations;
         int evaluations;
-        int taskNum;
-
 
         SolutionSet population;
         SolutionSet offspringPopulation;
