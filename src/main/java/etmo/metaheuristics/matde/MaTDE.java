@@ -247,15 +247,13 @@ public class MaTDE extends MtoAlgorithm {
         double p = PseudoRandom.randDouble();
         int idx;
         // 轮盘赌算法
-        for (idx = 0; idx < problemSet_.size(); idx++) {
+        for (idx = 0; idx < problemSet_.size() - 1; idx++) {
             if (idx == task)
                 continue;
             s += probability[task][idx] / sum;
             if (s >= p)
                 break;
         }
-        if (idx >= problemSet_.size())
-            idx = problemSet_.size() - 1;
         return idx;
     }
 

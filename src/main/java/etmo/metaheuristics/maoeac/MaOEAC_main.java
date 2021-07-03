@@ -25,10 +25,10 @@ public class MaOEAC_main {
 
         HashMap parameters;
 
-        int taskStart = 28;
-        int taskEnd = 28;
+        int taskStart = 25;
+        int taskEnd = 32;
 
-        int times = 1;
+        int times = 10;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -86,7 +86,8 @@ public class MaOEAC_main {
                     double igd =  indicator.getIGD(population);
                     ave[tsk] += igd;
                 }
-                System.out.println("T" + (tsk+1) + "\t" + form.format(ave[tsk] / times));
+                // System.out.println("T" + (tsk+1) + "\t" + form.format(ave[tsk] / times));
+                System.out.println(form.format(ave[tsk] / times));
             }
             System.out.println();
             // for briefly summarization

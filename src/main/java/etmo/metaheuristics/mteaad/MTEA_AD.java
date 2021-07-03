@@ -45,7 +45,6 @@ public class MTEA_AD extends Algorithm {
 
         // Initialize the variables
         population = new SolutionSet(populationSize);
-        taskNum = problemSet_.size();
         evaluations = 0;
 
 

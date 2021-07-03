@@ -1,17 +1,23 @@
 package etmo.metaheuristics.matde;
 
-import etmo.core.*;
-import etmo.operators.crossover.CrossoverFactory;
-import etmo.qualityIndicator.QualityIndicator;
-import etmo.util.JMException;
-import etmo.util.logging.LogIGD;
-
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
+import etmo.core.MtoAlgorithm;
+import etmo.core.Operator;
+import etmo.core.ProblemSet;
+import etmo.core.Solution;
+import etmo.core.SolutionSet;
+import etmo.operators.crossover.CrossoverFactory;
+import etmo.problems.benchmarks.*;
+import etmo.qualityIndicator.QualityIndicator;
+import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
+
 public class MaTDE_main {
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
         Operator crossover1;
@@ -19,10 +25,10 @@ public class MaTDE_main {
 
         HashMap parameters;
 
-        int problemStart = 1;
-        int problemEnd = 10;
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        int times = 5;
+        int times = 10;
 
         String benchmark_name;
         DecimalFormat form = new DecimalFormat("#.####E0");
@@ -30,19 +36,35 @@ public class MaTDE_main {
         System.out.println("Algo: MaTDE.");
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
-//            // CEC 2021
-//            benchmark_name = "CEC2021";
-//            problemSet = (ProblemSet) Class
-//                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-//                    .getMethod("getProblem")
-//                    .invoke(null, null);
+           // CEC 2021
+           benchmark_name = "CEC2021";
+           problemSet = (ProblemSet) Class
+                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                   .getMethod("getProblem")
+                   .invoke(null, null);
 
-            // WCCI 2020
-            benchmark_name = "WCCI2020";
-            problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
-                    .getMethod("getProblem")
-                    .invoke(null, null);
+            // // WCCI 2020
+            // benchmark_name = "WCCI2020";
+            // problemSet = (ProblemSet) Class
+            //         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+            //         .getMethod("getProblem")
+            //         .invoke(null, null);
+
+            // // CEC2017
+            // benchmark_name = "CEC2017";
+            // ProblemSet[] cec2017 = {
+            //     CIHS.getProblem(),
+            //     CIMS.getProblem(),
+            //     CILS.getProblem(),
+            //     PIHS.getProblem(),
+            //     PIMS.getProblem(),
+            //     PILS.getProblem(),
+            //     NIHS.getProblem(),
+            //     NIMS.getProblem(),
+            //     NILS.getProblem()
+            // };
+            // problemSet = cec2017[pCase-1];
+
 
             int taskNum = problemSet.size();
             double[] ave = new double[taskNum];

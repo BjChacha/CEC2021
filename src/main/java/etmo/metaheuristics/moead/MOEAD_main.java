@@ -23,10 +23,10 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 28;
-		int taskEnd = 28;
+		int taskStart = 25;
+		int taskEnd = 32;
 
-		int times = 1;
+		int times = 10;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 

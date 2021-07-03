@@ -1,6 +1,15 @@
 package etmo.metaheuristics.matbml;
 
-import etmo.core.*;
+import java.lang.reflect.InvocationTargetException;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.HashMap;
+
+import etmo.core.MtoAlgorithm;
+import etmo.core.Operator;
+import etmo.core.ProblemSet;
+import etmo.core.Solution;
+import etmo.core.SolutionSet;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
@@ -8,11 +17,6 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.logging.LogIGD;
-
-import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.HashMap;
 
 public class MaTBML_main {
     public static void main(String[] args) throws JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -23,9 +27,9 @@ public class MaTBML_main {
         Operator selection;
         HashMap parameters;
 
-        int problemStart = 1;
-        int problemEnd = 10;
-        int times = 1;
+        int problemStart = 25;
+        int problemEnd = 32;
+        int times = 5;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML.");
@@ -33,17 +37,17 @@ public class MaTBML_main {
         if (problemEnd < problemStart)
             problemEnd = problemStart;
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
-//            // CEC2021
-//            problemSet = (ProblemSet) Class
-//                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-//                    .getMethod("getProblem")
-//                    .invoke(null, null);
+           // CEC2021
+           problemSet = (ProblemSet) Class
+                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                   .getMethod("getProblem")
+                   .invoke(null, null);
 
-            // WCCI 2020
-            problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
-                    .getMethod("getProblem")
-                    .invoke(null, null);
+            // // WCCI 2020
+            // problemSet = (ProblemSet) Class
+            //         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+            //         .getMethod("getProblem")
+            //         .invoke(null, null);
 
 
             int taskNum = problemSet.size();
@@ -60,8 +64,8 @@ public class MaTBML_main {
             algorithm = new MaTBML(problemSet);
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
-            algorithm.setInputParameter("k1", 3);
-            algorithm.setInputParameter("k2", 10);
+            algorithm.setInputParameter("k1", 5);
+            algorithm.setInputParameter("k2", 1);
             algorithm.setInputParameter("P_", 0.5);
             algorithm.setInputParameter("implicitTransferNum", 50);
             algorithm.setInputParameter("algoName", "MaOEAC");
@@ -131,9 +135,9 @@ public class MaTBML_main {
                     igds[k][t] = igd;
                 }
 //                // DEBUG
-//                LogIGD.LogIGD("MaTBML_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
+            //    LogIGD.LogIGD("MaTBML(MaOEAC-10-1)_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
-            LogIGD.LogIGD("MaTBML", pCase, igds);
+            LogIGD.LogIGD("MaTBML(MaOEAC-5-1)_", pCase, igds);
             for(int i=0;i<taskNum;i++) {
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){
