@@ -1,6 +1,7 @@
 package etmo.metaheuristics.matbml;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.stream.IntStream;
 
@@ -16,8 +17,10 @@ import etmo.metaheuristics.matbml.libs.NSGAII;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
-import etmo.util.JMException;
-import etmo.util.PseudoRandom;
+import etmo.util.*;
+import etmo.util.comparators.CrowdingComparator;
+import etmo.util.comparators.DominanceComparator;
+import etmo.util.comparators.LocationComparator;
 import etmo.util.sorting.SortingIdx;
 
 public class MaTBMLx extends MtoAlgorithm{
@@ -53,6 +56,10 @@ public class MaTBMLx extends MtoAlgorithm{
     int implicitTransferNum;
     int explicitTransferNum;
 
+    boolean isExplicit;
+    boolean isImplicit;
+    boolean isNS;
+
     String algoName;
     
     public MaTBMLx(ProblemSet problemSet){
@@ -60,7 +67,7 @@ public class MaTBMLx extends MtoAlgorithm{
     }
 
     @Override
-    public SolutionSet[] execute(){
+    public SolutionSet[] execute() throws JMException, ClassNotFoundException {
         initState();
         initPopulations();
         initOptimizers();
@@ -72,9 +79,9 @@ public class MaTBMLx extends MtoAlgorithm{
         return populations;
     }
 
-    private void solelyConverge(int k1) throws JMException, ClassNotFoundException {
+    private void solelyConverge(int times) throws JMException, ClassNotFoundException {
         double[] oldIdeal = ideals.clone();
-        Converge(k1);
+        Converge(times);
         updateIdealPoint();
         updateNadirPoint();
 
@@ -122,19 +129,17 @@ public class MaTBMLx extends MtoAlgorithm{
         }
     }
 
-    private void transferConverge(int k2) throws JMException, ClassNotFoundException {
+    private void transferConverge(int times) throws JMException, ClassNotFoundException {
         // Leader先收敛k2代。
         int[] runTimes = new int[taskNum];
         for (int leader: leaders)
             if (leader >= 0)
-                runTimes[leader] = k2;
+                runTimes[leader] = times;
         Converge(runTimes);
 
         for (int k = 0; k < taskNum; k++){
             if (groups[k] < 0 || isFinished[k])
                 continue;
-            
-            
             transfer(k, groups[k]);
         }
 
@@ -151,6 +156,10 @@ public class MaTBMLx extends MtoAlgorithm{
         implicitTransferNum = (Integer) getInputParameter("implicitTransferNum");
         explicitTransferNum = (Integer) getInputParameter("explicitTransferNum");
         algoName = (String) getInputParameter("algoName");
+
+        isImplicit = (Boolean) getInputParameter("isImplicit");
+        isExplicit = (Boolean) getInputParameter("isExplicit");
+        isNS = (Boolean) getInputParameter("isNS");
 
         crossover = operators_.get("crossover");
         mutation = operators_.get("mutation");
@@ -187,7 +196,7 @@ public class MaTBMLx extends MtoAlgorithm{
         }
     }
 
-    private void initPopulations(){
+    private void initPopulations() throws ClassNotFoundException, JMException {
         populations = new SolutionSet[taskNum];
         for (int k = 0; k < taskNum; k++){
             populations[k] = new SolutionSet(populationSize);
@@ -203,7 +212,7 @@ public class MaTBMLx extends MtoAlgorithm{
         updateNadirPoint();
     }
 
-    private void initOptimizers(){
+    private void initOptimizers() throws JMException, ClassNotFoundException {
         optimizers = new MaTAlgorithm[taskNum];
         if (algoName.equalsIgnoreCase("MOEAD")){
             Operator crossover;
@@ -365,7 +374,93 @@ public class MaTBMLx extends MtoAlgorithm{
     }
 
 
-    private void transfer(int targetTask, int sourceTask){
-        
+    private void transfer(int targetTask, int sourceTask) throws JMException {
+        int totalSize = 0;
+        if (isExplicit)
+            totalSize += explicitTransferNum;
+        if (isImplicit)
+            totalSize += implicitTransferNum;
+        SolutionSet toTransfer = new SolutionSet(totalSize);
+
+        if (isExplicit) {
+            int[] toTransferIdx = new int[explicitTransferNum];
+            etmo.metaheuristics.matmy2.Utils.randomPermutation(toTransferIdx, explicitTransferNum, populations[sourceTask].size());
+            for (int i = 0; i < explicitTransferNum; i++) {
+                Solution toTransferSolution = new Solution(populations[sourceTask].get(toTransferIdx[i]));
+                toTransferSolution.setSkillFactor(targetTask);
+                toTransferSolution.resetObjective();
+                problemSet_.get(targetTask).evaluate(toTransferSolution);
+
+                if (isNS) {
+                    toTransfer.add(toTransferSolution);
+                }else{
+                    int flag = (new DominanceComparator()).compare(toTransferSolution, populations[targetTask].get(toTransferIdx[i]));
+                    if (flag == -1){
+                        populations[targetTask].replace(toTransferIdx[i], toTransferSolution);
+                    }
+                }
+            }
+        }
+        if (isImplicit){
+            int[] toTransferIdx = new int[explicitTransferNum];
+            etmo.metaheuristics.matmy2.Utils.randomPermutation(toTransferIdx, explicitTransferNum, populations[sourceTask].size());
+            for (int i = 0; i < explicitTransferNum; i++) {
+                Solution[] parent = new Solution[2];
+                parent[0] = populations[targetTask].get(i);
+                parent[1] = populations[sourceTask].get(toTransferIdx[i]);
+                Solution toTransferSolution = ((Solution[]) crossover.execute(parent))[0];
+                toTransferSolution.setSkillFactor(targetTask);
+                toTransferSolution.resetObjective();
+                problemSet_.get(targetTask).evaluate(toTransferSolution);
+
+                if (isNS) {
+                    toTransfer.add(toTransferSolution);
+                }else{
+                    int flag = (new DominanceComparator()).compare(toTransferSolution, populations[targetTask].get(toTransferIdx[i]));
+                    if (flag == -1){
+                        populations[targetTask].replace(toTransferIdx[i], toTransferSolution);
+                    }
+                }
+            }
+        }
+
+        if (isNS) {
+            SolutionSet union = populations[targetTask].union(toTransfer);
+            rankSolutionOnTask(populations[targetTask], targetTask, true);
+
+            for (int i = 0; i < populations[targetTask].size(); i++) {
+                populations[targetTask].replace(i, union.get(i));
+            }
+        }
+    }
+
+    private void rankSolutionOnTask(SolutionSet pop, int taskId, boolean sorting) {
+        for (int i = 0; i < pop.size(); i++)
+            pop.get(i).setLocation(Integer.MAX_VALUE);
+
+        boolean selec[] = new boolean[problemSet_.getTotalNumberOfObjs()];
+
+        for (int i = 0; i < selec.length; i++) {
+            if (i < objStart[taskId] || i > objEnd[taskId])
+                selec[i] = false;
+            else
+                selec[i] = true;
+        }
+        Distance distance = new Distance();
+        PORanking pr = new PORanking(pop, selec);
+        int loc = 0;
+        for (int i = 0; i < pr.getNumberOfSubfronts(); i++) {
+            SolutionSet front = pr.getSubfront(i);
+            distance.crowdingDistanceAssignment(front, problemSet_.getTotalNumberOfObjs(), selec);
+            front.sort(new CrowdingComparator());
+            for (int j = 0; j < front.size(); j++) {
+                if (loc < front.get(j).getLocation())
+                    front.get(j).setLocation(loc);
+                loc++;
+            }
+        }
+
+        if (sorting)
+            pop.sort(new LocationComparator());
     }
 }
