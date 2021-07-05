@@ -186,5 +186,14 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:2.0.0-alpha1" level="project" />
     <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.13.5" level="project" />
+    <orderEntry type="library" name="Maven: com.github.haifengl:smile-core:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: com.github.haifengl:smile-data:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: com.github.haifengl:smile-math:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: com.github.haifengl:smile-graph:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: com.github.haifengl:smile-plot:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.swinglabs:swingx:1.6.1" level="project" />
+    <orderEntry type="library" name="Maven: com.jhlabs:filters:2.0.235" level="project" />
+    <orderEntry type="library" name="Maven: org.swinglabs:swing-worker:1.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jfree:jfreechart:1.5.3" level="project" />
   </component>
 </module>

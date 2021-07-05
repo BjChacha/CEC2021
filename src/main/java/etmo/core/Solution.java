@@ -24,6 +24,7 @@
 package etmo.core;
 import etmo.util.JMException;
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Class representing a solution for a problem.
@@ -446,6 +447,9 @@ public class Solution implements Serializable {
 		return sum;
 	}
 
+	public void resetObjective(){
+		Arrays.fill(objective_, Double.POSITIVE_INFINITY);
+	}
 
 	/**
 	 * Returns the number of objectives.

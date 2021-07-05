@@ -7,9 +7,9 @@ import java.util.Arrays;
 
 public class LogIGD {
     public static void LogIGD(String algoName, int problemNum, double[][] igds){
-        String folderPath = "D:\\_r\\EA\\ETMO\\MTO-cec2021-\\data\\IGDs\\" + algoName;
+        String folderPath = ".\\data\\IGDs\\" + algoName;
         File folder = new File(folderPath);
-        if (!folder.exists() && !folder.isDirectory()) {
+        if (!folder.exists()){
             folder.mkdirs();
         }
 
