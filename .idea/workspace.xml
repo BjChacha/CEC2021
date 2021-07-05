@@ -4,25 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3785e055-dd78-403a-bdac-4cda1bf08803" name="Default Changelist" comment="Update directory structure: maven norm">
-      <change afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml/libs/MaTBMLx_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Algo_Compare.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Algo_Compare.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CEC2021.iml" beforeDir="false" afterPath="$PROJECT_DIR$/CEC2021.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/core/Solution.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/core/Solution.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml/MaTBML_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml/MaTBML_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml/MaTBMLx.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml/MaTBMLx.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/test/Test_Plot.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/errorcheck/Check.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/errorcheck/JMetalException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/errorcheck/exception/EmptyCollectionException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/errorcheck/exception/InvalidConditionException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/errorcheck/exception/InvalidProbabilityValueException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/errorcheck/exception/NullParameterException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/errorcheck/exception/ValueOutOfRangeException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/logging/LogIGD.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/util/logging/LogIGD.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/util/plot/Plotter.java" beforeDir="false" />
-    </list>
+    <list default="true" id="3785e055-dd78-403a-bdac-4cda1bf08803" name="Default Changelist" comment="add MaTBML experiments" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -113,7 +95,21 @@
       <option name="project" value="LOCAL" />
       <updated>1623891998071</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="removed unused method.">
+      <created>1625489562986</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1625489562986</updated>
+    </task>
+    <task id="LOCAL-00003" summary="add MaTBML experiments">
+      <created>1625489581776</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1625489581776</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -130,7 +126,9 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Update directory structure: maven norm" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update directory structure: maven norm" />
+    <MESSAGE value="removed unused method." />
+    <MESSAGE value="add MaTBML experiments" />
+    <option name="LAST_COMMIT_MESSAGE" value="add MaTBML experiments" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

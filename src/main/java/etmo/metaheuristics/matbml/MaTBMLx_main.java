@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matbml.libs;
+package etmo.metaheuristics.matbml;
 
 import etmo.core.*;
 import etmo.metaheuristics.matbml.MaTBML;
