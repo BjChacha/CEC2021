@@ -526,6 +526,10 @@ public class MaOEAC extends MaTAlgorithm {
 				min2CenterLineId = i;
 			}
 		}
+
+		// 保险措施：老是会等于-1
+		min2CenterLineId = Math.max(0, min2CenterLineId);
+
 		//System.out.println(min2CenterLineId);
 		double minS2CenterLine = 1.0e+30;
 		int minId = -1;
@@ -541,6 +545,10 @@ public class MaOEAC extends MaTAlgorithm {
 				minId = i;
 			}
 		}
+
+		// 保险措施：老是会等于-1
+		minId = Math.max(0, minId);
+
 		if (PseudoRandom.randDouble() < 0.5) {
 			population_.add(list.get(min2CenterLineId).get(minId));
 			list.remove(min2CenterLineId);

@@ -29,21 +29,25 @@ public class MaTBML_main {
 
         int problemStart = 25;
         int problemEnd = 32;
-        int times = 5;
+        int times = 10;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML.");
+
+        String benchmark_name;
 
         if (problemEnd < problemStart)
             problemEnd = problemStart;
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
            // CEC2021
+           benchmark_name = "CEC2021";
            problemSet = (ProblemSet) Class
                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
                    .getMethod("getProblem")
                    .invoke(null, null);
 
             // // WCCI 2020
+            // benchmark_name = "WCCI2020";
             // problemSet = (ProblemSet) Class
             //         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
             //         .getMethod("getProblem")
@@ -137,7 +141,7 @@ public class MaTBML_main {
 //                // DEBUG
             //    LogIGD.LogIGD("MaTBML(MaOEAC-10-1)_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
-            LogIGD.LogIGD("MaTBML(MaOEAC-5-1)_", pCase, igds);
+            LogIGD.LogIGD("MaTBML(MaOEAC-5-1)" + "_" + benchmark_name, pCase, igds);
             for(int i=0;i<taskNum;i++) {
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){

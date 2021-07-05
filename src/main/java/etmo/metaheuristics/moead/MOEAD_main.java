@@ -23,7 +23,7 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 25;
+		int taskStart = 32;
 		int taskEnd = 32;
 
 		int times = 10;
