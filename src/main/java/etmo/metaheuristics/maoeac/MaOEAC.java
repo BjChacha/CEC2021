@@ -497,6 +497,9 @@ public class MaOEAC extends Algorithm{
 			   minSolution2AxisID = j;
 		   }
 	   }//for
+	   // 保险措施：老是会等于-1
+	   minSolution2AxisID = Math.max(0, minSolution2AxisID);
+
 	   population_.add(list.get(minClustering2AxisID).get(minSolution2AxisID));
 	   list.remove(minClustering2AxisID);
 
@@ -521,6 +524,10 @@ public class MaOEAC extends Algorithm{
 			   min2CenterLineId = i;
 		   }
 	   }
+
+	   // 保险措施：老是会等于-1
+	   min2CenterLineId = Math.max(0, min2CenterLineId);
+
 	   //System.out.println(min2CenterLineId);
 	   double minS2CenterLine = 1.0e+30;
 	   int minId = -1;
@@ -536,6 +543,10 @@ public class MaOEAC extends Algorithm{
 			   minId = i;
 		   }
 	   }
+
+	   // 保险措施：老是会等于-1
+	   minId = Math.max(0, minId);
+
 	   if (PseudoRandom.randDouble() < 0.5) {
 		   population_.add(list.get(min2CenterLineId).get(minId));
 		   list.remove(min2CenterLineId);

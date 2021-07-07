@@ -9,6 +9,7 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -25,18 +26,26 @@ public class MaOEAC_main {
 
         HashMap parameters;
 
-        int taskStart = 25;
-        int taskEnd = 32;
+        int taskStart = 1;
+        int taskEnd = 10;
 
         int times = 10;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
-
+        String benchmark_name;
         for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-            problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-                    .getMethod("getProblem")
-                    .invoke(null, null);
+//            benchmark_name = "CEC2021";
+//            problemSet = (ProblemSet) Class
+//                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//                    .getMethod("getProblem")
+//                    .invoke(null, null);
+
+             // WCCI 2020
+             benchmark_name = "WCCI2020";
+             problemSet = (ProblemSet) Class
+                     .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+                     .getMethod("getProblem")
+                     .invoke(null, null);
 
             int taskNum = problemSet.size();
 
@@ -47,6 +56,7 @@ public class MaOEAC_main {
             pSName = pSName.substring(0, pSName.length()-2);
             System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
 
+            double[][] igds = new double[taskNum][times];
             for (int tsk = 0; tsk < taskNum; tsk++){
                 ProblemSet pS = problemSet.getTask(tsk);
 //                System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
@@ -84,11 +94,13 @@ public class MaOEAC_main {
                     population.printObjectivesToFile("MaOEAC_"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
                             problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
                     double igd =  indicator.getIGD(population);
+                    igds[tsk][t-1] = igd;
                     ave[tsk] += igd;
                 }
                 // System.out.println("T" + (tsk+1) + "\t" + form.format(ave[tsk] / times));
                 System.out.println(form.format(ave[tsk] / times));
             }
+            LogIGD.LogIGD("MaOEAC" + "_" + benchmark_name, pCase, igds);
             System.out.println();
             // for briefly summarization
 //			for(int i=0;i<taskNum;i++) {
