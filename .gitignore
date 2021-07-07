@@ -110,10 +110,8 @@ fabric.properties
 /.ipynb_checkpoints/
 /gifs/
 /out/
-/datas/
 *.class
 /target/
-/data/
 /~$Algo_Compare.xlsx
 /.settings/
 /.vscode/
