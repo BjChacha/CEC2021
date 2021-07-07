@@ -21,7 +21,7 @@ import etmo.util.logging.LogIGD;
 public class MaTBML_main {
     public static void main(String[] args) throws JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         int K1 = 5;
-        int K2 = 10;
+        int K2 = 5;
         String ALGO_NAME = "MaOEAC";
 
         ProblemSet problemSet;
@@ -33,7 +33,7 @@ public class MaTBML_main {
 
         int problemStart = 25;
         int problemEnd = 32;
-        int times = 10;
+        int times = 1;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML_exp.");
@@ -145,7 +145,7 @@ public class MaTBML_main {
 //                // DEBUG
             //    LogIGD.LogIGD("MaTBML(MaOEAC-10-1)_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
-            LogIGD.LogIGD("MaTBML("+ALGO_NAME+"-"+K1+"-"+K2+")" + "_" + benchmark_name, pCase, igds);
+//            LogIGD.LogIGD("MaTBML("+ALGO_NAME+"-"+K1+"-"+K2+")" + "_" + benchmark_name, pCase, igds);
             for(int i=0;i<taskNum;i++) {
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){

@@ -185,6 +185,7 @@ public class MaTBML extends MtoAlgorithm {
                 runTimes[leader] = k2;
         Converge(runTimes);
 
+        // 开始迁移
         for (int k = 0; k < taskNum_; k++){
             // 如果该任务是leader或者已经收敛完成，则跳过
             if (groups_[k] < 0 || isFinished_[k])
@@ -201,6 +202,7 @@ public class MaTBML extends MtoAlgorithm {
             int checkSize = populations_[groups_[k]].size();
             SolutionSet BSet = new SolutionSet(checkSize);
             SolutionSet NBSet = new SolutionSet(checkSize);
+
             int evaluatedCount = 0;
             for (int i = 0; i < checkSize; i++) {
                 // 计算中断概率，结合历史和当前信息
@@ -219,6 +221,7 @@ public class MaTBML extends MtoAlgorithm {
 
                 Solution tmp = new Solution(populations_[groups_[k]].get(i));
                 tmp.setSkillFactor(k);
+                tmp.resetObjective();
                 problemSet_.get(k).evaluate(tmp);
                 evaluations_++;
 
