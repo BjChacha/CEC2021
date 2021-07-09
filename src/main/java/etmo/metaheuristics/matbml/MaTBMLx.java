@@ -396,7 +396,8 @@ public class MaTBMLx extends MtoAlgorithm{
         int betterCount = 0;
 
         for (int i = 0; i < populations[sourceTask].size(); i++) {
-            if (betterPreviously || PseudoRandom.randDouble() < transferProbability[sourceTask][targetTask]) {
+//            if (betterPreviously || PseudoRandom.randDouble() < transferProbability[sourceTask][targetTask]) {
+            if (PseudoRandom.randDouble() < 0.1) {
                 Solution toTransferSolution = new Solution(populations[sourceTask].get(toTransferIdx[i]));
                 toTransferSolution.setSkillFactor(targetTask);
                 toTransferSolution.resetObjective();

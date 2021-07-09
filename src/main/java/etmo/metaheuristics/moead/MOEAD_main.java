@@ -8,6 +8,7 @@ import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -23,16 +24,24 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 32;
-		int taskEnd = 32;
+		int taskStart = 1;
+		int taskEnd = 10;
 
 		int times = 10;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
-
+		String benchmark_name;
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
+//			benchmark_name = "CEC2021";
+//			problemSet = (ProblemSet) Class
+//					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//					.getMethod("getProblem")
+//					.invoke(null, null);
+
+			// WCCI 2020
+			benchmark_name = "WCCI2020";
 			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
 
@@ -45,6 +54,7 @@ public class MOEAD_main {
 			pSName = pSName.substring(0, pSName.length()-2);
 			System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
 
+			double[][] igds = new double[taskNum][times];
 			for (int tsk = 0; tsk < taskNum; tsk++){
 				ProblemSet pS = problemSet.getTask(tsk);
 
@@ -85,10 +95,12 @@ public class MOEAD_main {
 							problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
 					double igd =  indicator.getIGD(population);
 					ave[tsk] += igd;
+					igds[tsk][t-1] = igd;
 				}
 				System.out.println("T" + (tsk+1) + "\t" + form.format(ave[tsk] / times));
 //				System.out.println("Average IGD for " + problemSet.get(tsk).getName() + ": " + form.format(ave[tsk] / times));
 			}
+			LogIGD.LogIGD("MOEAD" + "_" + benchmark_name, pCase, igds);
 			System.out.println();
 			// for briefly summarization
 //			for(int i=0;i<taskNum;i++) {

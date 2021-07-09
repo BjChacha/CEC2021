@@ -25,8 +25,8 @@ public class MaTDE_main {
 
         HashMap parameters;
 
-        int problemStart = 25;
-        int problemEnd = 32;
+        int problemStart = 1;
+        int problemEnd = 10;
 
         int times = 10;
 
@@ -36,19 +36,19 @@ public class MaTDE_main {
         System.out.println("Algo: MaTDE.");
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
-           // CEC 2021
-           benchmark_name = "CEC2021";
-           problemSet = (ProblemSet) Class
-                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-                   .getMethod("getProblem")
-                   .invoke(null, null);
+//           // CEC 2021
+//           benchmark_name = "CEC2021";
+//           problemSet = (ProblemSet) Class
+//                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//                   .getMethod("getProblem")
+//                   .invoke(null, null);
 
-            // // WCCI 2020
-            // benchmark_name = "WCCI2020";
-            // problemSet = (ProblemSet) Class
-            //         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
-            //         .getMethod("getProblem")
-            //         .invoke(null, null);
+             // WCCI 2020
+             benchmark_name = "WCCI2020";
+             problemSet = (ProblemSet) Class
+                     .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+                     .getMethod("getProblem")
+                     .invoke(null, null);
 
             // // CEC2017
             // benchmark_name = "CEC2017";

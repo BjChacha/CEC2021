@@ -144,7 +144,7 @@ public class MaTBMLx_main {
             }
 
             if (LOG_IGD) {
-                LogIGD.LogIGD("MaTBMLx(improve1)" + "_" + benchmark_name, pCase, igds);
+                LogIGD.LogIGD("MaTBMLx(improve2)" + "_" + benchmark_name, pCase, igds);
             }
             //            for(int i=0;i<taskNum;i++) {
             //                double[] tmp = new double[times];

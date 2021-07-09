@@ -9,6 +9,7 @@ import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.sorting.SortingIdx;
+import scala.Array;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -67,6 +68,11 @@ public class MaTBML extends MtoAlgorithm {
     int WDTimes;
     int savedEvalTimes;
 
+    ArrayList<Integer> originalIndividualCount = new ArrayList<>();
+    ArrayList<Integer> explicitTransferCount = new ArrayList<>();
+    ArrayList<Integer> implicitTransferCount = new ArrayList<>();
+    ArrayList<Integer> otherTransferCount = new ArrayList<>();
+
     public MaTBML(ProblemSet problemSet){
         super(problemSet);
     }
@@ -84,9 +90,14 @@ public class MaTBML extends MtoAlgorithm {
             transferConverge(k2_);
         }
 
-//        //DEBUG
-//        for (int i = 0; i < taskNum_; i++)
+        //DEBUG
+//        for (int i = 0; i < taskNum_; i++) {
 //            System.out.println(i + ": " + Arrays.toString(proceed[i]));
+//        }
+        System.out.println("origin individual: " + originalIndividualCount.toString());
+        System.out.println("explicit transfer: " + explicitTransferCount.toString());
+        System.out.println("implicit transfer: " + implicitTransferCount.toString());
+        System.out.println("other  individual: " + otherTransferCount.toString());
 
         return populations_;
     }
@@ -206,18 +217,18 @@ public class MaTBML extends MtoAlgorithm {
             int evaluatedCount = 0;
             for (int i = 0; i < checkSize; i++) {
                 // 计算中断概率，结合历史和当前信息
-                double stopP;
-                if (lastBetterRate[k][groups_[k]] < 0)
-                    stopP = 0;
-                else if (lastBetterRate[k][groups_[k]] == 0)
-                    stopP = (i - BSet.size()) / checkSize;
-                else
-                    stopP = ((i - BSet.size()) - BSet.size()/lastBetterRate[k][groups_[k]]) / checkSize;
-                // DEBUG
-//                System.out.println("stop P: " + stopP);
-                // 如果触发中断概率，则停止评价。
-                if (PseudoRandom.randDouble() < stopP)
-                    break;
+//                double stopP;
+//                if (lastBetterRate[k][groups_[k]] < 0)
+//                    stopP = 0;
+//                else if (lastBetterRate[k][groups_[k]] == 0)
+//                    stopP = (i - BSet.size()) / checkSize;
+//                else
+//                    stopP = ((i - BSet.size()) - BSet.size()/lastBetterRate[k][groups_[k]]) / checkSize;
+//                // DEBUG
+////                System.out.println("stop P: " + stopP);
+//                // 如果触发中断概率，则停止评价。
+//                if (PseudoRandom.randDouble() < stopP)
+//                    break;
 
                 Solution tmp = new Solution(populations_[groups_[k]].get(i));
                 tmp.setSkillFactor(k);
@@ -264,9 +275,10 @@ public class MaTBML extends MtoAlgorithm {
             String key = groups_[k] + "->" + k;
 
             if (partlyBetter) {
-                boolean isImplicitTransfer = false;
-                if (PseudoRandom.randDouble() < implicitTransferP[k][groups_[k]])
-                    isImplicitTransfer = true;
+//                boolean isImplicitTransfer = false;
+//                if (PseudoRandom.randDouble() < implicitTransferP[k][groups_[k]])
+//                    isImplicitTransfer = true;
+                boolean isImplicitTransfer = true;
 
                 SolutionSet offspringSet = new SolutionSet(NBSet.size());
                 if (isImplicitTransfer) {
@@ -309,6 +321,11 @@ public class MaTBML extends MtoAlgorithm {
                     union.get(i).setFlag(0);
                     populations_[k].replace(i, union.get(i));
                 }
+                System.out.println("显式迁移存活率：" + ((double)etbc / BSet.size()));
+                originalIndividualCount.add(other);
+                explicitTransferCount.add(etbc);
+                implicitTransferCount.add(itbc);
+                otherTransferCount.add(nbc);
 
 //                // DEBUG: Explicit & Implicit transfer
 //                System.out.println(
