@@ -1,12 +1,16 @@
 package etmo.metaheuristics.matde;
 
 import etmo.core.*;
+import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.DominanceComparator;
+import etmo.util.logging.LogIGD;
 import etmo.util.logging.LogPopulation;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,6 +20,7 @@ public class MaTDE extends MtoAlgorithm {
     private SolutionSet[] population;
     private SolutionSet[] archives;
 
+    private int taskNum;
     private int evaluations;
     private int maxEvaluations;
 
@@ -31,6 +36,10 @@ public class MaTDE extends MtoAlgorithm {
     double[][] probability;
     double[][] reward;
 
+    // IGD
+    ArrayList<Double>[] igds;
+    String[] pf;
+    QualityIndicator[] indicators;
 
     /**
      * Constructor
@@ -61,16 +70,32 @@ public class MaTDE extends MtoAlgorithm {
         dominance = new DominanceComparator();
 
         evaluations = 0;
+        taskNum = problemSet_.size();
+
+        // IGD
+        pf = new String[taskNum];
+        igds = new ArrayList[taskNum];
+        indicators = new QualityIndicator[taskNum];
+        for (int k = 0; k < pf.length; k++){
+            pf[k] = "PF/StaticPF/" + problemSet_.get(k).getHType() + "_" + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
+            igds[k] = new ArrayList<>();
+            indicators[k] = new QualityIndicator(problemSet_.get(k), pf[k]);
+        }
 
         initPopulation();
-        LogPopulation.LogPopulation("MaTDE",population, problemSet_,evaluations);
+        saveIGD();
         while (evaluations < maxEvaluations){
             createOffspringPopulation();
             updateArchives();
-            if (evaluations % (problemSet_.size() * populationSize * 20) == 0){
-                LogPopulation.LogPopulation("MaTDE",population, problemSet_,evaluations);
-            }
+            saveIGD();
         }
+
+        double[][] IGD = new double[taskNum][];
+        for (int k = 0; k < taskNum; k++){
+            IGD[k] = igds[k].stream().mapToDouble(Double::doubleValue).toArray();
+        }
+        LogIGD.MarkLog("MaTDE_", problemSet_.get(0).getName(), IGD);
+
         return population;
     }
 
@@ -264,6 +289,31 @@ public class MaTDE extends MtoAlgorithm {
         else{
             int idx = PseudoRandom.randInt(0, archiveSize - 1);
             archives[task].replace(idx, p);
+        }
+    }
+
+    private SolutionSet[] splitPopulation() {
+        SolutionSet[] resPopulation = new SolutionSet[taskNum];
+        for (int k = 0; k < taskNum; k++) {
+            resPopulation[k] = new SolutionSet();
+            for (int i = 0; i < population[k].size(); i++) {
+                Solution sol = population[k].get(i);
+                int start = problemSet_.get(k).getStartObjPos();
+                int end = problemSet_.get(k).getEndObjPos();
+                Solution newSolution = new Solution(end - start + 1);
+                for (int kk = start; kk <= end; kk++)
+                    newSolution.setObjective(kk - start, sol.getObjective(kk));
+
+                resPopulation[k].add(newSolution);
+            }
+        }
+        return resPopulation;
+    }
+
+    private void saveIGD(){
+        SolutionSet[] resPopulation = splitPopulation();
+        for (int k = 0; k < taskNum; k++){
+            igds[k].add(indicators[k].getIGD(resPopulation[k]));
         }
     }
 }

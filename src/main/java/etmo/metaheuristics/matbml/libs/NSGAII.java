@@ -213,6 +213,8 @@ public class NSGAII extends MaTAlgorithm {
 				problemSet_.get(taskIdx_).evaluateConstraints(offSpring[0]);
 				problemSet_.get(taskIdx_).evaluate(offSpring[1]);
 				problemSet_.get(taskIdx_).evaluateConstraints(offSpring[1]);
+				offSpring[0].setFlag(parents[0].getFlag());
+				offSpring[1].setFlag(parents[1].getFlag());
 				offspringPopulation.add(offSpring[0]);
 				offspringPopulation.add(offSpring[1]);
 				evaluations += 2;

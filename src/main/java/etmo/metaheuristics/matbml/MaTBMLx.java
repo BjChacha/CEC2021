@@ -1,7 +1,6 @@
 package etmo.metaheuristics.matbml;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.stream.IntStream;
 
@@ -22,7 +21,6 @@ import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.DominanceComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.sorting.SortingIdx;
-import static etmo.metaheuristics.matmy2.Utils.randomPermutation;
 
 public class MaTBMLx extends MtoAlgorithm{
     MaTAlgorithm[] optimizers;
@@ -47,6 +45,9 @@ public class MaTBMLx extends MtoAlgorithm{
     double[] improvements;
     double[][] transferProbability;
 
+    int initScore;
+    double betterThreshold;
+
     int[] groups;
     int[] leaders;
     int[] fails;
@@ -55,13 +56,8 @@ public class MaTBMLx extends MtoAlgorithm{
     int minGroupNum;
     int solelyConvergeTimes;
     int transferConvergeTimes;
-    int implicitTransferNum;
-    int explicitTransferNum;
 
-    boolean isExplicit;
-    boolean isImplicit;
-    boolean isNS;
-
+    double transferScale;
     int distanceType;
 
     String algoName;
@@ -96,8 +92,6 @@ public class MaTBMLx extends MtoAlgorithm{
         for (int k = 0; k < taskNum; k++){
             for (int j = objStart[k]; j <= objEnd[k]; j++)
                 improvements[k] += (oldIdeal[j] - ideals[j]);
-            if (improvements[k] < 1e-4)
-                improvements[k] = 0;
         }
 
         if (Arrays.stream(improvements).sum() > 0) {
@@ -112,7 +106,7 @@ public class MaTBMLx extends MtoAlgorithm{
                     continue;
                 double[] finalScore = new double[leaders.length];
                 for (int i = 0; i < finalScore.length; i++) {
-                    finalScore[i] = 0.5 * scores[k][leaders[i]] * Math.exp(1 / (1 + distances[k][leaders[i]]) - 1);
+                    finalScore[i] = scores[k][leaders[i]] * Math.exp(1 / (1 + distances[k][leaders[i]]) - 1);
                 }
 
                 if (Arrays.stream(finalScore).sum() == 0)
@@ -151,20 +145,85 @@ public class MaTBMLx extends MtoAlgorithm{
         updateNadirPoint();
     }
 
+    private void transfer(int targetTask, int sourceTask) throws JMException {
+        SolutionSet transferSet = new SolutionSet(populationSize);
+        Solution transferIndividual = null;
+        int[] perm = Utils.permutation(populations[sourceTask].size(), populations[sourceTask].size());
+
+        for (int i = 0; i < populations[sourceTask].size() * transferScale; i++) {
+            int flag = populations[sourceTask].get(i).getFlag();
+            int r1 = perm[i];
+
+//            // 标记法
+//            if (flag == 1) {
+//                // Implicit
+//                Solution[] parents = new Solution[2];
+//                parents[0] = new Solution(populations[targetTask].get(i));
+//                parents[1] = new Solution(populations[sourceTask].get(r1));
+//                Solution[] offsprings = (Solution[]) crossover.execute(parents);
+//                transferIndividual = offsprings[PseudoRandom.randInt(0, 1)];
+//                mutation.execute(transferIndividual);
+//                transferIndividual.setFlag(flag * 10);
+//            }
+//            else if (flag == 2){
+//                //Explicit
+//                transferIndividual = new Solution(populations[sourceTask].get(r1));
+//                transferIndividual.setFlag(flag * 10);
+//            }
+
+            // 平均法
+            populations[sourceTask].get(i).setFlag(0);
+            if (i < populations[sourceTask].size() * transferScale / 2) {
+                // Implicit
+                Solution[] parents = new Solution[2];
+                parents[0] = new Solution(populations[targetTask].get(i));
+                parents[1] = new Solution(populations[sourceTask].get(r1));
+                Solution[] offsprings = (Solution[]) crossover.execute(parents);
+                transferIndividual = offsprings[PseudoRandom.randInt(0, 1)];
+                mutation.execute(transferIndividual);
+                transferIndividual.setFlag(1);
+            }
+            else{
+                //Explicit
+                transferIndividual = new Solution(populations[sourceTask].get(r1));
+                transferIndividual.setFlag(1);
+            }
+
+            transferIndividual.setSkillFactor(targetTask);
+            transferIndividual.resetObjective();
+            problemSet_.get(targetTask).evaluate(transferIndividual);
+            evaluations++;
+            transferSet.add(transferIndividual);
+        }
+        SolutionSet union = populations[targetTask].union(transferSet);
+        rankSolutionOnTask(union, targetTask, true);
+
+        int betterCount = 0;
+        for (int i = 0; i < populations[targetTask].size(); i++) {
+            if (union.get(i).getFlag() == 1) {
+                betterCount += 1;
+            }
+            populations[targetTask].replace(i, union.get(i));
+        }
+
+        if (betterCount < populationSize * betterThreshold)
+            scores[targetTask][sourceTask] = 0;
+
+//        System.out.println("Explicit: " + eCount + "\tImplicit: " + iCount);
+    }
+
     private void initState() {
         evaluations = 0;
         populationSize = (Integer) getInputParameter("populationSize");
         maxEvaluations = (Integer) getInputParameter("maxEvaluations");
         solelyConvergeTimes = (Integer) getInputParameter("solelyConvergeTimes");
         transferConvergeTimes = (Integer) getInputParameter("transferConvergeTimes");
-        implicitTransferNum = (Integer) getInputParameter("implicitTransferNum");
-        explicitTransferNum = (Integer) getInputParameter("explicitTransferNum");
+        distanceType = (Integer) getInputParameter("distanceType");
+        transferScale = (Double) getInputParameter("transferScale");
         algoName = (String) getInputParameter("algoName");
 
-        isImplicit = (Boolean) getInputParameter("isImplicit");
-        isExplicit = (Boolean) getInputParameter("isExplicit");
-        isNS = (Boolean) getInputParameter("isNS");
-        distanceType = (Integer) getInputParameter("distanceType");
+        initScore = (Integer) getInputParameter("initScore");
+        betterThreshold = (Double) getInputParameter("betterThreshold");
 
         crossover = operators_.get("crossover");
         mutation = operators_.get("mutation");
@@ -199,7 +258,7 @@ public class MaTBMLx extends MtoAlgorithm{
             objStart[k] = problemSet_.get(k).getStartObjPos();
             objEnd[k] = problemSet_.get(k).getEndObjPos();
 
-            Arrays.fill(scores[k], 3);
+            Arrays.fill(scores[k], initScore);
             Arrays.fill(transferProbability[k], 1);
         }
     }
@@ -210,6 +269,8 @@ public class MaTBMLx extends MtoAlgorithm{
             populations[k] = new SolutionSet(populationSize);
             for (int i = 0; i < populationSize; i++){
                 Solution individual = new Solution(problemSet_);
+//                int flag = i < populationSize / 2 ? 1 : 2;
+//                individual.setFlag(flag);
                 individual.setSkillFactor(k);
                 problemSet_.get(k).evaluate(individual);
                 evaluations ++;
@@ -363,7 +424,6 @@ public class MaTBMLx extends MtoAlgorithm{
     }
 
     private void UpdateDistances() throws JMException {
-
         switch (distanceType) {
             case 0:
                 // random
@@ -386,38 +446,6 @@ public class MaTBMLx extends MtoAlgorithm{
                     distances[i] = kld.getKDL(i);
                 break;
         }
-    }
-
-    private void transfer(int targetTask, int sourceTask) throws JMException {
-        int[] toTransferIdx;
-        toTransferIdx = new int[populations[sourceTask].size()];
-        randomPermutation(toTransferIdx, populations[sourceTask].size());
-        boolean betterPreviously = true;
-        int betterCount = 0;
-
-        for (int i = 0; i < populations[sourceTask].size(); i++) {
-//            if (betterPreviously || PseudoRandom.randDouble() < transferProbability[sourceTask][targetTask]) {
-            if (PseudoRandom.randDouble() < 0.1) {
-                Solution toTransferSolution = new Solution(populations[sourceTask].get(toTransferIdx[i]));
-                toTransferSolution.setSkillFactor(targetTask);
-                toTransferSolution.resetObjective();
-                problemSet_.get(targetTask).evaluate(toTransferSolution);
-
-                int flag = (new DominanceComparator()).compare(toTransferSolution, populations[targetTask].get(toTransferIdx[i]));
-                if (flag == -1) {
-                    populations[targetTask].replace(toTransferIdx[i], toTransferSolution);
-                    betterPreviously = true;
-                    betterCount += 1;
-                } else {
-                    betterPreviously = false;
-                }
-            }
-        }
-        transferProbability[sourceTask][targetTask] = 0.2 * transferProbability[sourceTask][targetTask] + 0.8 * (double)betterCount / populationSize;
-        if (transferProbability[sourceTask][targetTask] < 0.05) {
-            transferProbability[sourceTask][targetTask] = 0;
-        }
-//        System.out.println(sourceTask + " -> " + targetTask + ": " + transferProbability[sourceTask][targetTask]);
     }
 
     private void rankSolutionOnTask(SolutionSet pop, int taskId, boolean sorting) {

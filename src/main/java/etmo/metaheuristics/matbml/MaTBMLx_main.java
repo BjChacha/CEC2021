@@ -16,14 +16,12 @@ import java.util.HashMap;
 public class MaTBMLx_main {
     static int SOLELY_CONVERGE_TIMES = 5;
     static int TRANSFER_CONVERGE_TIMES = 5;
-    static int IMPLICIT_TRANSFER_NUM = 10;
-    static int EXPLICIT_TRANSFER_NUM = 10;
+    // 0: random; 1: WD; 2: KL;
     static int DISTANCE_TPYE = 1;
+    static int INIT_SCORE = 1;
+    static double BETTER_THRESHOLD = 0.1;
 
-    static boolean IS_IMPLICIT = true;
-    static boolean IS_EXPLICIT = true;
-    static boolean IS_NS = false;
-
+    static double TRANSFER_SCALE = 1;
     static final String ALGO_NAME = "MaOEAC";
     static final boolean LOG_IGD = true;
 
@@ -79,13 +77,12 @@ public class MaTBMLx_main {
             algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
             algorithm.setInputParameter("solelyConvergeTimes", SOLELY_CONVERGE_TIMES);
             algorithm.setInputParameter("transferConvergeTimes", TRANSFER_CONVERGE_TIMES);
-            algorithm.setInputParameter("implicitTransferNum", IMPLICIT_TRANSFER_NUM);
-            algorithm.setInputParameter("explicitTransferNum", EXPLICIT_TRANSFER_NUM);
+            algorithm.setInputParameter("transferScale", TRANSFER_SCALE);
             algorithm.setInputParameter("algoName", ALGO_NAME);
-            algorithm.setInputParameter("isImplicit", IS_IMPLICIT);
-            algorithm.setInputParameter("isExplicit", IS_EXPLICIT);
-            algorithm.setInputParameter("isNS", IS_NS);
             algorithm.setInputParameter("distanceType", DISTANCE_TPYE);
+            algorithm.setInputParameter("initScore", INIT_SCORE);
+            algorithm.setInputParameter("betterThreshold", BETTER_THRESHOLD);
+
 //            // Randomly DE
 //            parameters = new HashMap();
 //            parameters.put("CR_LB", 0.1);
@@ -94,11 +91,18 @@ public class MaTBMLx_main {
 //            parameters.put("F_UB", 2.0);
 //            crossover = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
 
-            // SBX
+//            // SBX
+//            parameters = new HashMap();
+//            parameters.put("probability", 0.9);
+//            parameters.put("distributionIndex", 20.0);
+//            crossover =
+
+            // Random SBX
             parameters = new HashMap();
-            parameters.put("probability", 0.9);
-            parameters.put("distributionIndex", 20.0);
-            crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
+            parameters.put("CR_LB", 0.1);
+            parameters.put("CR_UB", 0.9);
+            crossover = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
+
             // Mutation operator
             parameters = new HashMap();
             parameters.put("probability", 1.0 / problemSet.getMaxDimension());
@@ -144,7 +148,7 @@ public class MaTBMLx_main {
             }
 
             if (LOG_IGD) {
-                LogIGD.LogIGD("MaTBMLx(improve2)" + "_" + benchmark_name, pCase, igds);
+                LogIGD.LogIGD("MaTBMLx(IEMIX_RNSBX)" + "_" + benchmark_name, pCase, igds);
             }
             //            for(int i=0;i<taskNum;i++) {
             //                double[] tmp = new double[times];
@@ -157,5 +161,6 @@ public class MaTBMLx_main {
             //            }
             //            System.out.println();
         }
+
     }
 }

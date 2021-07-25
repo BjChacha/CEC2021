@@ -25,10 +25,10 @@ public class MaTDE_main {
 
         HashMap parameters;
 
-        int problemStart = 1;
-        int problemEnd = 10;
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        int times = 10;
+        int times = 1;
 
         String benchmark_name;
         DecimalFormat form = new DecimalFormat("#.####E0");
@@ -36,19 +36,19 @@ public class MaTDE_main {
         System.out.println("Algo: MaTDE.");
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
-//           // CEC 2021
-//           benchmark_name = "CEC2021";
-//           problemSet = (ProblemSet) Class
-//                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-//                   .getMethod("getProblem")
-//                   .invoke(null, null);
+           // CEC 2021
+           benchmark_name = "CEC2021";
+           problemSet = (ProblemSet) Class
+                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                   .getMethod("getProblem")
+                   .invoke(null, null);
 
-             // WCCI 2020
-             benchmark_name = "WCCI2020";
-             problemSet = (ProblemSet) Class
-                     .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
-                     .getMethod("getProblem")
-                     .invoke(null, null);
+//             // WCCI 2020
+//             benchmark_name = "WCCI2020";
+//             problemSet = (ProblemSet) Class
+//                     .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+//                     .getMethod("getProblem")
+//                     .invoke(null, null);
 
             // // CEC2017
             // benchmark_name = "CEC2017";
@@ -82,7 +82,7 @@ public class MaTDE_main {
 
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("archiveSize", 300);
-            algorithm.setInputParameter("maxEvaluations", 1000 * taskNum * 100);
+            algorithm.setInputParameter("maxEvaluations", 2000 * taskNum * 100);
 
             // 迁移交叉概率
             algorithm.setInputParameter("alpha", 0.1);
@@ -133,8 +133,8 @@ public class MaTDE_main {
 
                         resPopulation[k].add(newSolution);
                     }
-                    resPopulation[k].printObjectivesToFile("MaTDE_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
-                            problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D_run_"+t+".txt");
+//                    resPopulation[k].printObjectivesToFile("MaTDE_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
+//                            problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D_run_"+t+".txt");
                 }
                 double igd;
                 for (int k = 0; k < taskNum; k++){
@@ -147,7 +147,7 @@ public class MaTDE_main {
                     ave[k] += igd;
                 }
             }
-            LogIGD.LogIGD("MaTDE" + "_" + benchmark_name, pCase, IGDs);
+//            LogIGD.LogIGD("MaTDE" + "_e2000" + benchmark_name, pCase, IGDs);
             for(int i=0;i<taskNum;i++)
                 System.out.println(form.format(ave[i] / times));
             System.out.println();

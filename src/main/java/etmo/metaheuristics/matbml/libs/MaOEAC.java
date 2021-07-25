@@ -167,6 +167,9 @@ public class MaOEAC extends MaTAlgorithm {
 
 				mutation_.execute(offSpring[0]);
 
+				int flag = PseudoRandom.randDouble() < 0.5 ? parents[0].getFlag() : parents[1].getFlag();
+				offSpring[0].setFlag(flag);
+
 				problemSet_.get(taskIdx_).evaluate(offSpring[0]);
 				problemSet_.get(taskIdx_).evaluateConstraints(offSpring[0]);
 				offspringPopulation_.add(offSpring[0]);

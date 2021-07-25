@@ -94,13 +94,14 @@ public class Utils {
 
 	public static void randomPermutation(int[] perm, int size, int range){
 		if (size > range){
-			System.out.println("randomPermutation error: size should be less than range.");
-			return;
+			System.out.println("Warning: randomPermutation error: size("+size+") should be less than range("+range+").");
+			size = range;
 		}
+
 		int[] index = new int[range];
 		randomPermutation(index, range);
 
-		for (int i = 0; i < perm.length; i++){
+		for (int i = 0; i < size; i++){
 			perm[i] = index[i];
 		}
 	}

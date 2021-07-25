@@ -33,7 +33,7 @@ public class MaTBML_main {
 
         int problemStart = 25;
         int problemEnd = 32;
-        int times = 1;
+        int times = 10;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
         System.out.println("Algo: MaTBML_exp.");
@@ -71,7 +71,7 @@ public class MaTBML_main {
 
             algorithm = new MaTBML(problemSet);
             algorithm.setInputParameter("populationSize", 100);
-            algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
+            algorithm.setInputParameter("maxEvaluations", 1500 * 100 * taskNum);
             algorithm.setInputParameter("k1", K1);
             algorithm.setInputParameter("k2", K2);
             algorithm.setInputParameter("P_", 0.5);
@@ -145,7 +145,7 @@ public class MaTBML_main {
 //                // DEBUG
             //    LogIGD.LogIGD("MaTBML(MaOEAC-10-1)_" + problemSet.get(0).getName() + "D_run_" + t + ".txt", igds[t]);
             }
-//            LogIGD.LogIGD("MaTBML("+ALGO_NAME+"-"+K1+"-"+K2+")" + "_" + benchmark_name, pCase, igds);
+            LogIGD.LogIGD("MaTBML("+ALGO_NAME+"-"+K1+"-"+K2+")_e1500" + "_" + benchmark_name, pCase, igds);
             for(int i=0;i<taskNum;i++) {
                 double[] tmp = new double[times];
                 for (int t = 0; t < times; t++){

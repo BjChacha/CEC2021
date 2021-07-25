@@ -196,6 +196,9 @@ public class MOEAD extends MaTAlgorithm {
 				// Apply mutation
 				mutation_.execute(child);
 
+				int flag = PseudoRandom.randDouble() < 0.5 ? parents[0].getFlag() : parents[1].getFlag();
+				child.setFlag(flag);
+
 				// Evaluation
 				problemSet_.get(0).evaluate(child);
 
@@ -259,6 +262,9 @@ public class MOEAD extends MaTAlgorithm {
 				parents[1] = population_.get(n);
 				// Apply SBX crossover
 				child = (Solution) crossover_.execute(parents);*/
+
+				int flag = PseudoRandom.randDouble() < 0.5 ? parents[0].getFlag() : parents[1].getFlag();
+				child.setFlag(flag);
 
 				// Apply mutation
 				mutation_.execute(child);
@@ -435,7 +441,7 @@ public class MOEAD extends MaTAlgorithm {
 					StringTokenizer st = new StringTokenizer(aux);
 					j = 0;
 					while (st.hasMoreTokens()) {
-						double value = new Double(st.nextToken());
+						double value = Double.parseDouble(st.nextToken());
 						lambda_[i][j] = value;
 						j++;
 					}

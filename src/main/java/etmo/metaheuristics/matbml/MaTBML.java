@@ -5,10 +5,13 @@ import etmo.metaheuristics.matbml.libs.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
+import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.LocationComparator;
+import etmo.util.logging.LogIGD;
 import etmo.util.sorting.SortingIdx;
+import org.apache.commons.lang3.ArrayUtils;
 import scala.Array;
 
 import java.util.*;
@@ -94,10 +97,10 @@ public class MaTBML extends MtoAlgorithm {
 //        for (int i = 0; i < taskNum_; i++) {
 //            System.out.println(i + ": " + Arrays.toString(proceed[i]));
 //        }
-        System.out.println("origin individual: " + originalIndividualCount.toString());
-        System.out.println("explicit transfer: " + explicitTransferCount.toString());
-        System.out.println("implicit transfer: " + implicitTransferCount.toString());
-        System.out.println("other  individual: " + otherTransferCount.toString());
+//        System.out.println("origin individual: " + originalIndividualCount.toString());
+//        System.out.println("explicit transfer: " + explicitTransferCount.toString());
+//        System.out.println("implicit transfer: " + implicitTransferCount.toString());
+//        System.out.println("other  individual: " + otherTransferCount.toString());
 
         return populations_;
     }
@@ -216,7 +219,7 @@ public class MaTBML extends MtoAlgorithm {
 
             int evaluatedCount = 0;
             for (int i = 0; i < checkSize; i++) {
-                // 计算中断概率，结合历史和当前信息
+//                 计算中断概率，结合历史和当前信息
 //                double stopP;
 //                if (lastBetterRate[k][groups_[k]] < 0)
 //                    stopP = 0;
@@ -224,9 +227,9 @@ public class MaTBML extends MtoAlgorithm {
 //                    stopP = (i - BSet.size()) / checkSize;
 //                else
 //                    stopP = ((i - BSet.size()) - BSet.size()/lastBetterRate[k][groups_[k]]) / checkSize;
-//                // DEBUG
-////                System.out.println("stop P: " + stopP);
-//                // 如果触发中断概率，则停止评价。
+                // DEBUG
+//                System.out.println("stop P: " + stopP);
+                // 如果触发中断概率，则停止评价。
 //                if (PseudoRandom.randDouble() < stopP)
 //                    break;
 
@@ -321,7 +324,7 @@ public class MaTBML extends MtoAlgorithm {
                     union.get(i).setFlag(0);
                     populations_[k].replace(i, union.get(i));
                 }
-                System.out.println("显式迁移存活率：" + ((double)etbc / BSet.size()));
+//                System.out.println("显式迁移存活率：" + ((double)etbc / BSet.size()));
                 originalIndividualCount.add(other);
                 explicitTransferCount.add(etbc);
                 implicitTransferCount.add(itbc);
@@ -631,14 +634,14 @@ public class MaTBML extends MtoAlgorithm {
     private void Converge(int[] times) throws JMException, ClassNotFoundException {
         for (int k = 0; k < taskNum_; k++) {
             for (int t = 0; t < times[k]; t++) {
-                if (!isFinished_[k]) {
+//                if (!isFinished_[k]) {
                     isFinished_[k] = !optimizers_[k].step();
                     evaluations_ += populationSize_;
 
 //                    if (((evaluations_ / 100) * 100) % (20 * taskNum_ * populationSize_) == 0) {
 //                        LogPopulation.LogPopulation("MaTBML", populations_, problemSet_, evaluations_);
 //                    }
-                }
+//                }
             }
         }
     }
