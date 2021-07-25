@@ -4,7 +4,7 @@ clc;
 
 %% 定义参数
 basePath = ".\IGDs";
-baseAlgoIdx = 1;
+baseAlgoIdx = 2;
 
 %% 读取数据
 srcList = dir(basePath);
