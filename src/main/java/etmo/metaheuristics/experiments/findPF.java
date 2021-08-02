@@ -61,8 +61,10 @@ public class findPF extends MtoAlgorithm {
                     idx[++id]++;
                 }
 
-                System.out.println(Arrays.toString(idx));
-                System.out.println("archive size: " + archive.size());
+                if (idx[len-1] % 2 == 1) {
+                    System.out.println(Arrays.toString(idx));
+                    System.out.println("archive size: " + archive.size());
+                }
             }
             archive.printVariablesToFile(".\\data\\findPF\\" + problemSet_.get(k).getName() + ".txt");
             LogPopulation.LogPopulation("findPF", archive, problemSet_, k, false);

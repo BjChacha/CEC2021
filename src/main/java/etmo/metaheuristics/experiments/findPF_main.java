@@ -21,6 +21,7 @@ public class findPF_main {
         int problemStart = 25;
         int problemEnd = 32;
         for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
+            System.out.println("Processing Task " + pCase + " ...");
             problemSet = (ProblemSet) Class
                     .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
                     .getMethod("getProblem")
