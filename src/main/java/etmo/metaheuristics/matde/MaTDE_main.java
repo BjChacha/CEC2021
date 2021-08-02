@@ -11,10 +11,8 @@ import etmo.core.ProblemSet;
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
 import etmo.operators.crossover.CrossoverFactory;
-import etmo.problems.benchmarks.*;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
-import etmo.util.logging.LogIGD;
 
 public class MaTDE_main {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException {
@@ -82,7 +80,7 @@ public class MaTDE_main {
 
             algorithm.setInputParameter("populationSize", 100);
             algorithm.setInputParameter("archiveSize", 300);
-            algorithm.setInputParameter("maxEvaluations", 2000 * taskNum * 100);
+            algorithm.setInputParameter("maxEvaluations", 1000 * taskNum * 100);
 
             // 迁移交叉概率
             algorithm.setInputParameter("alpha", 0.1);
