@@ -18,14 +18,21 @@ public class findPF_main {
         ProblemSet problemSet;
         MtoAlgorithm algorithm;
 
-        problemSet = ETMOF25.getProblem();
+        int problemStart = 25;
+        int problemEnd = 32;
+        for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
+            problemSet = (ProblemSet) Class
+                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                    .getMethod("getProblem")
+                    .invoke(null, null);
 
-        int taskNum = problemSet.size();
-        String[] pf = new String[taskNum];
-        for (int k = 0; k < pf.length; k++) {
-            pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+            int taskNum = problemSet.size();
+            String[] pf = new String[taskNum];
+            for (int k = 0; k < pf.length; k++) {
+                pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+            }
+            algorithm = new findPF(problemSet);
+            algorithm.execute();
         }
-        algorithm = new findPF(problemSet);
-        algorithm.execute();
     }
 }
