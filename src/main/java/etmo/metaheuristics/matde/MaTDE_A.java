@@ -1,6 +1,7 @@
 package etmo.metaheuristics.matde;
 
 import etmo.core.*;
+import etmo.metaheuristics.matbml.Utils;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
@@ -9,8 +10,10 @@ import etmo.util.logging.LogIGD;
 import etmo.util.sorting.SortingIdx;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class MaTDE_A extends MtoAlgorithm {
     private int populationSize;
@@ -32,8 +35,13 @@ public class MaTDE_A extends MtoAlgorithm {
     double shrinkRate;
     double replaceRate;
 
+    int convergeStep;
+    double stepShrinkRate;
+    double transferConvergeStep;
+
     double[][] probability;
     double[][] reward;
+
 
     // IGD
     ArrayList<Double>[] igds;
@@ -56,50 +64,99 @@ public class MaTDE_A extends MtoAlgorithm {
         initPopulation();
         saveIGD();
 
+        // original
 //        while (evaluations < maxEvaluations){
 //            createOffspringPopulation();
 //            updateArchives();
 //        }
 
+        // A1
         while (evaluations < maxEvaluations){
             // 单独收敛5次，并收集各个任务的提升度
             for (int k = 0; k < taskNum; k++){
-                for (int i = 0; i < 5; i++){
+                for (int i = 0; i < convergeStep; i++){
                     normalReproduce(k);
                     unionAndRankSelection(k);
+                    updateArchives(k);
                     saveIGD(k);
                 }
             }
             // 迁移，迁移源任务额外收敛5次
             for (int k = 0; k < taskNum; k++){
                 int assist = findAssistTask(k);
-                for (int i = 0; i < 5; i++){
+                for (int i = 0; i < transferConvergeStep; i++){
                     normalReproduce(assist);
                     unionAndRankSelection(assist);
-                    saveIGD(k);
+                    updateArchives(assist);
+                    saveIGD(assist);
                 }
-
                 transferReproduce(k, assist);
                 unionAndRankSelection(k);
+                updateArchives(k);
                 saveIGD(k);
             }
+            transferConvergeStep *= stepShrinkRate;
         }
 
-        double[][] IGD = new double[taskNum][];
-        for (int k = 0; k < taskNum; k++){
-            IGD[k] = igds[k].stream().mapToDouble(Double::doubleValue).toArray();
-        }
-        LogIGD.MarkLog("MaTDE_A_", problemSet_.get(0).getName(), IGD);
+//        // A2
+//        while (evaluations < maxEvaluations){
+//            solelyConverge(convergeStep);
+//            for (int k = 0; k < taskNum; k++){
+//                int assist = findAssistTask(k);
+//                transferReproduce(k, assist);
+//                unionAndRankSelection(k);
+//                updateArchives(k);
+//                saveIGD(k);
+//            }
+//        }
+
+//        double[][] IGD = new double[taskNum][];
+//        for (int k = 0; k < taskNum; k++){
+//            IGD[k] = igds[k].stream().mapToDouble(Double::doubleValue).toArray();
+//        }
+//        LogIGD.MarkLog("MaTDE_A_", problemSet_.get(0).getName(), IGD);
 
         return population;
     }
 
+    private void solelyConverge(int times) throws JMException, ClassNotFoundException {
+        double[] improvements = new double[taskNum];
+        for (int k = 0; k < taskNum; k++){
+            double[] oldIdeal = getIdealPoint(k);
+            for (int t = 0; t < times; t++){
+                normalReproduce(k);
+                unionAndRankSelection(k);
+                updateArchives(k);
+                saveIGD(k);
+            }
+            double[] newIdeal = getIdealPoint(k);
+            for (int i = 0; i < newIdeal.length; i++){
+                improvements[k] += (oldIdeal[i] - newIdeal[i]);
+            }
+        }
+
+        int[] idxs = SortingIdx.SortingIdx(improvements, true);
+        for (int i = 0; i < (int) Math.sqrt(taskNum); i++){
+            for (int t = 0; t < times; t++){
+                normalReproduce(idxs[i]);
+                unionAndRankSelection(idxs[i]);
+                updateArchives(idxs[i]);
+                saveIGD(idxs[i]);
+            }
+        }
+    }
+
+
     private void updateArchives() {
         for (int k = 0; k < problemSet_.size(); k++) {
-            for (int i = 0; i < populationSize; i++){
-                if (PseudoRandom.randDouble() < replaceRate)
-                    putArchive(k, population[k].get(i));
-            }
+            updateArchives(k);
+        }
+    }
+
+    private void updateArchives(int task) {
+        for (int i = 0; i < populationSize; i++){
+            if (PseudoRandom.randDouble() < replaceRate)
+                putArchive(task, population[task].get(i));
         }
     }
 
@@ -112,6 +169,10 @@ public class MaTDE_A extends MtoAlgorithm {
         ro = (Double) getInputParameter("ro");
         shrinkRate = (Double) getInputParameter("shrinkRate");
         replaceRate = (Double) getInputParameter("replaceRate");
+        convergeStep = (Integer) getInputParameter("convergeStep");
+
+        stepShrinkRate = 0.99;
+        transferConvergeStep = 2 * convergeStep;
 
         probability = new double[problemSet_.size()][problemSet_.size()];
         reward = new double[problemSet_.size()][problemSet_.size()];
