@@ -3,6 +3,7 @@ package etmo.metaheuristics.experiments;
 import etmo.core.*;
 import etmo.util.*;
 import etmo.util.comparators.DominanceComparator;
+import etmo.util.logging.LogPopulation;
 
 import java.util.Arrays;
 
@@ -52,7 +53,7 @@ public class findPF extends MtoAlgorithm {
                 }
             }
             if (!added)
-                archive.add(s);
+                archive.add(new Solution(s));
 
             int id = 0;
             idx[id] += 1;
@@ -62,7 +63,10 @@ public class findPF extends MtoAlgorithm {
             }
 
             System.out.println(Arrays.toString(idx));
+            System.out.println("archive size: " + archive.size());
         }
+        archive.printVariablesToFile(".\\data\\findPF\\" + problemSet_.get(0).getName() + ".txt");
+        LogPopulation.LogPopulation("findPF", archive, problemSet_, 0, false);
         return population;
     }
 
