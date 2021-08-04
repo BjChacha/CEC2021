@@ -10,7 +10,7 @@ import java.io.File;
 public class LogPopulation {
     // Single Population
     public static void LogPopulation(String algoName, SolutionSet population, ProblemSet problemSet, int eval, boolean isMulTask){
-        File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\data\\" + algoName);
+        File folder = new File(".\\data\\findPF\\" + algoName);
         if (!folder.exists() && !folder.isDirectory()) {
             folder.mkdirs();
         }
@@ -72,8 +72,6 @@ public class LogPopulation {
                     problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D" + eval + ".txt");
         }
     }
-
-
 //    // Specific Task
 //    public static void LogPopulation(String algoName, SolutionSet population, Problem problem, int eval, int srcTask, int targetTask) throws JMException {
 //        File folder = new File("D:\\_r\\EA\\ETMO\\MTO-cec2021-\\DEBUG\\" + algoName);

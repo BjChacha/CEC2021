@@ -18,10 +18,12 @@ public class MaTBMLx_main {
     static int TRANSFER_CONVERGE_TIMES = 5;
     // 0: random; 1: WD; 2: KL;
     static int DISTANCE_TPYE = 1;
-    static int INIT_SCORE = 1;
+    static int INIT_SCORE = 3;
     static double BETTER_THRESHOLD = 0.1;
-
+    // 1: ns; 2: dr
+    static int ENVIRONMENT_SELECTION_TYPE = 1;
     static double TRANSFER_SCALE = 1;
+
     static final String ALGO_NAME = "MaOEAC";
     static final boolean LOG_IGD = true;
 
@@ -46,42 +48,42 @@ public class MaTBMLx_main {
             problemEnd = problemStart;
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
-            // CEC2021
-            benchmark_name = "CEC2021";
-            problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-                    .getMethod("getProblem")
-                    .invoke(null, null);
+                // CEC2021
+                benchmark_name = "CEC2021";
+                problemSet = (ProblemSet) Class
+                        .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                        .getMethod("getProblem")
+                        .invoke(null, null);
 
-            // // WCCI 2020
-            // benchmark_name = "WCCI2020";
-            // problemSet = (ProblemSet) Class
-            //         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
-            //         .getMethod("getProblem")
-            //         .invoke(null, null);
+                // // WCCI 2020
+                // benchmark_name = "WCCI2020";
+                // problemSet = (ProblemSet) Class
+                //         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+                //         .getMethod("getProblem")
+                //         .invoke(null, null);
 
 
-            int taskNum = problemSet.size();
-            double[] ave = new double[taskNum];
+                int taskNum = problemSet.size();
 
-            String[] pf = new String[taskNum];
-            for (int k = 0; k < taskNum; k++) {
-                pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
-            }
+                String[] pf = new String[taskNum];
+                for (int k = 0; k < taskNum; k++) {
+                    pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+                }
 
-            String pSName = problemSet.get(0).getName();
-            System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
+                String pSName = problemSet.get(0).getName();
+                System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
 
-            algorithm = new MaTBMLx(problemSet);
-            algorithm.setInputParameter("populationSize", 100);
-            algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
-            algorithm.setInputParameter("solelyConvergeTimes", SOLELY_CONVERGE_TIMES);
-            algorithm.setInputParameter("transferConvergeTimes", TRANSFER_CONVERGE_TIMES);
-            algorithm.setInputParameter("transferScale", TRANSFER_SCALE);
-            algorithm.setInputParameter("algoName", ALGO_NAME);
-            algorithm.setInputParameter("distanceType", DISTANCE_TPYE);
-            algorithm.setInputParameter("initScore", INIT_SCORE);
-            algorithm.setInputParameter("betterThreshold", BETTER_THRESHOLD);
+                algorithm = new MaTBMLx(problemSet);
+                algorithm.setInputParameter("populationSize", 100);
+                algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
+                algorithm.setInputParameter("solelyConvergeTimes", SOLELY_CONVERGE_TIMES);
+                algorithm.setInputParameter("transferConvergeTimes", TRANSFER_CONVERGE_TIMES);
+                algorithm.setInputParameter("transferScale", TRANSFER_SCALE);
+                algorithm.setInputParameter("algoName", ALGO_NAME);
+                algorithm.setInputParameter("distanceType", DISTANCE_TPYE);
+                algorithm.setInputParameter("initScore", INIT_SCORE);
+                algorithm.setInputParameter("betterThreshold", BETTER_THRESHOLD);
+                algorithm.setInputParameter("environmentSelectionType", ENVIRONMENT_SELECTION_TYPE);
 
 //            // Randomly DE
 //            parameters = new HashMap();
@@ -91,76 +93,75 @@ public class MaTBMLx_main {
 //            parameters.put("F_UB", 2.0);
 //            crossover = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
 
-//            // SBX
-//            parameters = new HashMap();
-//            parameters.put("probability", 0.9);
-//            parameters.put("distributionIndex", 20.0);
-//            crossover =
+                // SBX
+                parameters = new HashMap();
+                parameters.put("probability", 0.9);
+                parameters.put("distributionIndex", 20.0);
+                crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover", parameters);
 
-            // Random SBX
-            parameters = new HashMap();
-            parameters.put("CR_LB", 0.1);
-            parameters.put("CR_UB", 0.9);
-            crossover = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
+//                // Random DE
+//                parameters = new HashMap();
+//                parameters.put("CR_LB", 0.1);
+//                parameters.put("CR_UB", 0.9);
+//                crossover = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
 
-            // Mutation operator
-            parameters = new HashMap();
-            parameters.put("probability", 1.0 / problemSet.getMaxDimension());
-            parameters.put("distributionIndex", 20.0);
-            mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
+                // Mutation operator
+                parameters = new HashMap();
+                parameters.put("probability", 1.0 / problemSet.getMaxDimension());
+                parameters.put("distributionIndex", 20.0);
+                mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 
-            // Selection Operator
-            parameters = new HashMap();
-            parameters.put("comparator", new LocationComparator());
-            selection = SelectionFactory.getSelectionOperator("BinaryTournament",
-                    parameters);
+                // Selection Operator
+                parameters = new HashMap();
+                parameters.put("comparator", new LocationComparator());
+                selection = SelectionFactory.getSelectionOperator("BinaryTournament",
+                        parameters);
 
-            algorithm.addOperator("crossover", crossover);
-            algorithm.addOperator("mutation", mutation);
-            algorithm.addOperator("selection", selection);
+                algorithm.addOperator("crossover", crossover);
+                algorithm.addOperator("mutation", mutation);
+                algorithm.addOperator("selection", selection);
 
-            double[][] igds = new double[taskNum][times];
-            for (int t = 0; t < times; t++) {
-                SolutionSet[] population = algorithm.execute();
+                double[][] igds = new double[taskNum][times];
+                for (int t = 0; t < times; t++) {
+                    SolutionSet[] population = algorithm.execute();
 
-                SolutionSet[] resPopulation = new SolutionSet[taskNum];
-                for (int k = 0; k < taskNum; k++) {
-                    resPopulation[k] = new SolutionSet();
-                    for (int i = 0; i < population[k].size(); i++) {
-                        Solution sol = population[k].get(i);
-                        int start = problemSet.get(k).getStartObjPos();
-                        int end = problemSet.get(k).getEndObjPos();
-                        Solution newSolution = new Solution(end - start + 1);
-                        for (int kk = start; kk <= end; kk++)
-                            newSolution.setObjective(kk - start, sol.getObjective(kk));
-                        resPopulation[k].add(newSolution);
+                    SolutionSet[] resPopulation = new SolutionSet[taskNum];
+                    for (int k = 0; k < taskNum; k++) {
+                        resPopulation[k] = new SolutionSet();
+                        for (int i = 0; i < population[k].size(); i++) {
+                            Solution sol = population[k].get(i);
+                            int start = problemSet.get(k).getStartObjPos();
+                            int end = problemSet.get(k).getEndObjPos();
+                            Solution newSolution = new Solution(end - start + 1);
+                            for (int kk = start; kk <= end; kk++)
+                                newSolution.setObjective(kk - start, sol.getObjective(kk));
+                            resPopulation[k].add(newSolution);
+                        }
+                    }
+                    double igd;
+                    for (int k = 0; k < taskNum; k++) {
+                        QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
+                        if (population[k].size() == 0)
+                            continue;
+
+                        igd = indicator.getIGD(resPopulation[k]);
+                        igds[k][t] = igd;
                     }
                 }
-                double igd;
-                for (int k = 0; k < taskNum; k++) {
-                    QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
-                    if (population[k].size() == 0)
-                        continue;
 
-                    igd = indicator.getIGD(resPopulation[k]);
-                    igds[k][t] = igd;
+                if (LOG_IGD) {
+                    LogIGD.LogIGD("MaTBMLx(MaOEAC_IEMIX_PUNISH_SBX)" + "_" + benchmark_name, pCase, igds);
                 }
+                //            for(int i=0;i<taskNum;i++) {
+                //                double[] tmp = new double[times];
+                //                for (int t = 0; t < times; t++){
+                //                    tmp[t] = igds[i][t];
+                //                }
+                //                double mean = 0;
+                //                mean = Arrays.stream(tmp).sum() / times;
+                //                System.out.println(form.format(mean));
+                //            }
+                //            System.out.println();
             }
-
-            if (LOG_IGD) {
-                LogIGD.LogIGD("MaTBMLx(IEMIX_RNSBX)" + "_" + benchmark_name, pCase, igds);
-            }
-            //            for(int i=0;i<taskNum;i++) {
-            //                double[] tmp = new double[times];
-            //                for (int t = 0; t < times; t++){
-            //                    tmp[t] = igds[i][t];
-            //                }
-            //                double mean = 0;
-            //                mean = Arrays.stream(tmp).sum() / times;
-            //                System.out.println(form.format(mean));
-            //            }
-            //            System.out.println();
-        }
-
     }
 }

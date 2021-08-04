@@ -28,6 +28,7 @@ public class findPF extends MtoAlgorithm {
             int len = s.getDecisionVariables().length;
             int[] idx = new int[len];
             Arrays.fill(idx, 0);
+            int count = 0;
 
             while (idx[len - 1] <= 10) {
                 for (int i = 0; i < len; i++) {
@@ -35,16 +36,16 @@ public class findPF extends MtoAlgorithm {
                 }
 
                 problemSet_.get(0).evaluate(s);
-
+                Solution tmp = new Solution(s);
                 boolean added = false;
                 for (int i = 0; i < archive.size(); i++) {
-                    int flag = new DominanceComparator().compare(s, archive.get(i));
+                    int flag = new DominanceComparator().compare(tmp, archive.get(i));
                     if (flag > 0) {
                         added = true;
                         break;
                     } else if (flag < 0) {
                         if (!added) {
-                            archive.replace(i, s);
+                            archive.replace(i, tmp);
                             added = true;
                         } else {
                             archive.remove(i);
@@ -52,7 +53,7 @@ public class findPF extends MtoAlgorithm {
                     }
                 }
                 if (!added)
-                    archive.add(new Solution(s));
+                    archive.add(tmp);
 
                 int id = 0;
                 idx[id] += 1;
@@ -61,10 +62,11 @@ public class findPF extends MtoAlgorithm {
                     idx[++id]++;
                 }
 
-                if (idx[len-1] % 2 == 1) {
+                if (count == 0) {
                     System.out.println(Arrays.toString(idx));
                     System.out.println("archive size: " + archive.size());
                 }
+                count = (count + 1) % 50000;
             }
             archive.printVariablesToFile(".\\data\\findPF\\" + problemSet_.get(k).getName() + ".txt");
             LogPopulation.LogPopulation("findPF", archive, problemSet_, k, false);

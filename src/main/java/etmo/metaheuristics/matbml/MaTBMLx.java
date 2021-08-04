@@ -14,6 +14,7 @@ import etmo.metaheuristics.matbml.libs.MaOEAC;
 import etmo.metaheuristics.matbml.libs.MaTAlgorithm;
 import etmo.metaheuristics.matbml.libs.NSGAII;
 import etmo.operators.crossover.CrossoverFactory;
+import etmo.operators.crossover.TransferDECrossover;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.util.*;
@@ -54,11 +55,16 @@ public class MaTBMLx extends MtoAlgorithm{
     int[] skips;
 
     int minGroupNum;
+
     int solelyConvergeTimes;
     int transferConvergeTimes;
+    int convergeStep;
+    double stepShrinkRate;
+    double transferConvergeStep;
 
     double transferScale;
     int distanceType;
+    int environmentSelectionType;
 
     String algoName;
     
@@ -72,8 +78,16 @@ public class MaTBMLx extends MtoAlgorithm{
         initPopulations();
         initOptimizers();
         while(evaluations < maxEvaluations){
-            solelyConverge(solelyConvergeTimes);
-            transferConverge(transferConvergeTimes);
+            solelyConverge(convergeStep);
+            transferConverge((int)transferConvergeStep);
+            transferConvergeStep *= stepShrinkRate;
+
+//        // DEBUG
+//        System.out.println("Evaluation: " + evaluations);
+//        System.out.println("std: " + Arrays.toString(populations[0].getStd()));
+//        System.out.println("mean " + Arrays.toString(populations[0].getMean()));
+//        System.out.println("delta mean " + Arrays.toString(populations[1].getMean()));
+//        System.out.println("-------------------------");
         }
 
         return populations;
@@ -133,7 +147,7 @@ public class MaTBMLx extends MtoAlgorithm{
         for (int leader: leaders)
             if (leader >= 0)
                 runTimes[leader] = times;
-        Converge(runTimes);
+//        Converge(runTimes);
 
         for (int k = 0; k < taskNum; k++){
             if (groups[k] < 0 || isFinished[k])
@@ -178,12 +192,13 @@ public class MaTBMLx extends MtoAlgorithm{
                 Solution[] parents = new Solution[2];
                 parents[0] = new Solution(populations[targetTask].get(i));
                 parents[1] = new Solution(populations[sourceTask].get(r1));
-                Solution[] offsprings = (Solution[]) crossover.execute(parents);
-                transferIndividual = offsprings[PseudoRandom.randInt(0, 1)];
+                ((TransferDECrossover) crossover).adaptive(populations[targetTask], populations[sourceTask]);
+//                Solution[] offsprings = (Solution[]) crossover.execute(parents);
+//                transferIndividual = offsprings[PseudoRandom.randInt(0, 1)];
+                transferIndividual = (Solution) crossover.execute(parents);
                 mutation.execute(transferIndividual);
                 transferIndividual.setFlag(1);
-            }
-            else{
+            } else {
                 //Explicit
                 transferIndividual = new Solution(populations[sourceTask].get(r1));
                 transferIndividual.setFlag(1);
@@ -193,17 +208,36 @@ public class MaTBMLx extends MtoAlgorithm{
             transferIndividual.resetObjective();
             problemSet_.get(targetTask).evaluate(transferIndividual);
             evaluations++;
-            transferSet.add(transferIndividual);
-        }
-        SolutionSet union = populations[targetTask].union(transferSet);
-        rankSolutionOnTask(union, targetTask, true);
 
-        int betterCount = 0;
-        for (int i = 0; i < populations[targetTask].size(); i++) {
-            if (union.get(i).getFlag() == 1) {
-                betterCount += 1;
+            // Environment Selection
+            if (environmentSelectionType == 1){
+                // NS
+                transferSet.add(transferIndividual);
+            } else {
+                // DR
+                int betterFlag = new DominanceComparator().compare(populations[targetTask].get(i), transferIndividual);
+                if (betterFlag == 1) {
+                    populations[targetTask].replace(i, transferIndividual);
+                }
             }
-            populations[targetTask].replace(i, union.get(i));
+
+        }
+        int betterCount = 0;
+        if (environmentSelectionType == 1) {
+            SolutionSet union = populations[targetTask].union(transferSet);
+            rankSolutionOnTask(union, targetTask, true);
+            for (int i = 0; i < populations[targetTask].size(); i++) {
+                if (union.get(i).getFlag() == 1) {
+                    betterCount += 1;
+                }
+                populations[targetTask].replace(i, union.get(i));
+            }
+        } else{
+            for (int i = 0; i < populations[targetTask].size(); i++) {
+                if (populations[targetTask].get(i).getFlag() == 1) {
+                    betterCount += 1;
+                }
+            }
         }
 
         if (betterCount < populationSize * betterThreshold)
@@ -219,11 +253,16 @@ public class MaTBMLx extends MtoAlgorithm{
         solelyConvergeTimes = (Integer) getInputParameter("solelyConvergeTimes");
         transferConvergeTimes = (Integer) getInputParameter("transferConvergeTimes");
         distanceType = (Integer) getInputParameter("distanceType");
+        environmentSelectionType = (Integer) getInputParameter("environmentSelectionType");
         transferScale = (Double) getInputParameter("transferScale");
         algoName = (String) getInputParameter("algoName");
 
         initScore = (Integer) getInputParameter("initScore");
         betterThreshold = (Double) getInputParameter("betterThreshold");
+
+        convergeStep = (Integer) getInputParameter("convergeStep");
+        stepShrinkRate = 0.99;
+        transferConvergeStep = 2 * convergeStep;
 
         crossover = operators_.get("crossover");
         mutation = operators_.get("mutation");

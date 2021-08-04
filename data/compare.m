@@ -4,7 +4,7 @@ clc;
 
 %% 定义参数
 basePath = ".\IGDs";
-baseAlgoIdx = 2;
+baseAlgoIdx = 6;
 
 %% 读取数据
 srcList = dir(basePath);
@@ -71,7 +71,7 @@ for i = 1:algoNum
         fprintf('%d/%d/%d\n',sim,wor,bet);
     end
 end
-% 
+
 % %% 打印具体结果
 % fprintf("======== 具体结果 ========\n");
 % for i = 1:algoNum

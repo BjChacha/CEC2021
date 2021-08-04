@@ -463,9 +463,9 @@ public class SolutionSet implements Serializable {
 //	add from moeac
 	public Solution getCentroidVector() {
 		int objectNumb = 0;
-		if(solutionsList_.size() != 0){
+		if (solutionsList_.size() != 0) {
 			objectNumb = solutionsList_.get(0).getNumberOfObjectives();
-		}else{
+		} else {
 			System.out.println("solutionsList size == 0");
 			System.exit(0);
 		}
@@ -488,17 +488,17 @@ public class SolutionSet implements Serializable {
 		}
 
 		double normDistance = 0.0;
-		for(int i=0;i<objectNumb;i++){
+		for (int i = 0; i < objectNumb; i++) {
 			double unitValue = 0.0;
-			normDistance += sol.getNormalizedObjective(i)*sol.getNormalizedObjective(i);
-			unitValue = sol.getNormalizedObjective(i)/sumValue;
+			normDistance += sol.getNormalizedObjective(i) * sol.getNormalizedObjective(i);
+			unitValue = sol.getNormalizedObjective(i) / sumValue;
 			sol.setUnitHyperplaneObjective(i, unitValue);
 		}
 		normDistance = Math.sqrt(normDistance);
 
 		sol.setDistanceToIdealPoint(normDistance);
-	return sol;
-}
+		return sol;
+	}
 
     public double getMeanOfIdx(int idx) throws JMException {
 		double sum = 0;
@@ -506,6 +506,43 @@ public class SolutionSet implements Serializable {
 			sum += solutionsList_.get(i).getDecisionVariables(idx);
 		}
 		return sum / solutionsList_.size();
+	}
+
+	public double getStdOfIdx(int idx) throws JMException {
+		double sum = 0;
+		double mean = getMeanOfIdx(idx);
+		for (int i = 0; i < solutionsList_.size(); i++){
+			sum += Math.pow(solutionsList_.get(i).getDecisionVariables(idx) - mean, 2);
+		}
+		return Math.sqrt(sum / solutionsList_.size());
+	}
+
+	public double[] getMean(){
+		double[] mean = new double[0];
+		try {
+			mean = new double[solutionsList_.get(0).numberOfVariables()];
+			for (int i = 0; i < mean.length; i++){
+				mean[i] = getMeanOfIdx(i);
+			}
+			return mean;
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
+		return mean;
+	}
+
+	public double[] getStd(){
+		double[] std = new double[0];
+		try {
+			std = new double[solutionsList_.get(0).numberOfVariables()];
+			for (int i = 0; i < std.length; i++){
+				std[i] = getStdOfIdx(i);
+			}
+			return std;
+		} catch (JMException e) {
+			e.printStackTrace();
+		}
+		return std;
 	}
 
 	public double[][] getMat() throws JMException {
