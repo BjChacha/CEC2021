@@ -1,20 +1,11 @@
 package etmo.metaheuristics.matbml;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.stream.IntStream;
-
-import etmo.core.MtoAlgorithm;
-import etmo.core.Operator;
-import etmo.core.ProblemSet;
-import etmo.core.Solution;
-import etmo.core.SolutionSet;
+import etmo.core.*;
 import etmo.metaheuristics.matbml.libs.MOEAD;
 import etmo.metaheuristics.matbml.libs.MaOEAC;
 import etmo.metaheuristics.matbml.libs.MaTAlgorithm;
 import etmo.metaheuristics.matbml.libs.NSGAII;
 import etmo.operators.crossover.CrossoverFactory;
-import etmo.operators.crossover.TransferDECrossover;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
 import etmo.util.*;
@@ -23,7 +14,11 @@ import etmo.util.comparators.DominanceComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.sorting.SortingIdx;
 
-public class MaTBMLx extends MtoAlgorithm{
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.IntStream;
+
+public class MaTBMLx_CCSI extends MtoAlgorithm{
     MaTAlgorithm[] optimizers;
     SolutionSet[] populations;
     Operator crossover;
@@ -56,8 +51,6 @@ public class MaTBMLx extends MtoAlgorithm{
 
     int minGroupNum;
 
-    int solelyConvergeTimes;
-    int transferConvergeTimes;
     int convergeStep;
     double stepShrinkRate;
     double transferConvergeStep;
@@ -67,8 +60,8 @@ public class MaTBMLx extends MtoAlgorithm{
     int environmentSelectionType;
 
     String algoName;
-    
-    public MaTBMLx(ProblemSet problemSet){
+
+    public MaTBMLx_CCSI(ProblemSet problemSet){
         super(problemSet);
     }
 
@@ -80,13 +73,6 @@ public class MaTBMLx extends MtoAlgorithm{
         while(evaluations < maxEvaluations){
             solelyConverge(convergeStep);
             transferConverge(convergeStep);
-
-//        // DEBUG
-//        System.out.println("Evaluation: " + evaluations);
-//        System.out.println("std: " + Arrays.toString(populations[0].getStd()));
-//        System.out.println("mean " + Arrays.toString(populations[0].getMean()));
-//        System.out.println("delta mean " + Arrays.toString(populations[1].getMean()));
-//        System.out.println("-------------------------");
         }
 
         return populations;

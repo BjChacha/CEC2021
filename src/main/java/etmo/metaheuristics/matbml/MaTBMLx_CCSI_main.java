@@ -13,7 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
-public class MaTBMLx_main {
+public class MaTBMLx_CCSI_main {
     // 0: random; 1: WD; 2: KL;
     static int DISTANCE_TPYE = 1;
     static int INIT_SCORE = 3;
@@ -21,6 +21,7 @@ public class MaTBMLx_main {
     // 1: ns; 2: dr
     static int ENVIRONMENT_SELECTION_TYPE = 1;
     static double TRANSFER_SCALE = 1;
+    static int CONVERGE_STEP = 5;
 
     static final String ALGO_NAME = "MaOEAC";
     static final boolean LOG_IGD = true;
@@ -33,8 +34,8 @@ public class MaTBMLx_main {
         Operator selection;
         HashMap parameters;
 
-        int problemStart = 25;
-        int problemEnd = 32;
+        int problemStart = 1;
+        int problemEnd = 10;
         int times = 10;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
@@ -46,19 +47,19 @@ public class MaTBMLx_main {
             problemEnd = problemStart;
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
-                // CEC2021
-                benchmark_name = "CEC2021";
-                problemSet = (ProblemSet) Class
-                        .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-                        .getMethod("getProblem")
-                        .invoke(null, null);
+//                // CEC2021
+//                benchmark_name = "CEC2021";
+//                problemSet = (ProblemSet) Class
+//                        .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//                        .getMethod("getProblem")
+//                        .invoke(null, null);
 
-                // // WCCI 2020
-                // benchmark_name = "WCCI2020";
-                // problemSet = (ProblemSet) Class
-                //         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
-                //         .getMethod("getProblem")
-                //         .invoke(null, null);
+                 // WCCI 2020
+                 benchmark_name = "WCCI2020";
+                 problemSet = (ProblemSet) Class
+                         .forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+                         .getMethod("getProblem")
+                         .invoke(null, null);
 
 
                 int taskNum = problemSet.size();
@@ -71,7 +72,7 @@ public class MaTBMLx_main {
                 String pSName = problemSet.get(0).getName();
                 System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
 
-                algorithm = new MaTBMLx(problemSet);
+                algorithm = new MaTBMLx_CCSI(problemSet);
                 algorithm.setInputParameter("populationSize", 100);
                 algorithm.setInputParameter("maxEvaluations", 1000 * 100 * taskNum);
                 algorithm.setInputParameter("transferScale", TRANSFER_SCALE);
@@ -80,7 +81,7 @@ public class MaTBMLx_main {
                 algorithm.setInputParameter("initScore", INIT_SCORE);
                 algorithm.setInputParameter("betterThreshold", BETTER_THRESHOLD);
                 algorithm.setInputParameter("environmentSelectionType", ENVIRONMENT_SELECTION_TYPE);
-                algorithm.setInputParameter("convergeStep", 5);
+                algorithm.setInputParameter("convergeStep", CONVERGE_STEP);
 
 //            // Randomly DE
 //            parameters = new HashMap();
@@ -147,7 +148,7 @@ public class MaTBMLx_main {
                 }
 
                 if (LOG_IGD) {
-                    LogIGD.LogIGD("MaTBMLx(MaOEAC_IEMIX_PUNISHfx_SBX)" + "_" + benchmark_name, pCase, igds);
+                    LogIGD.LogIGD("MaTBMLx_CCSI_release(WCCI_MaOEAC_IEMIX_PUNISH_SBX)" + "_" + benchmark_name, pCase, igds);
                 }
             }
     }

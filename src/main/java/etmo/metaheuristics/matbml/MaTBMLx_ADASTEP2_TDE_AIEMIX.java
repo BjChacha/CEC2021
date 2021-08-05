@@ -1,14 +1,6 @@
 package etmo.metaheuristics.matbml;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.stream.IntStream;
-
-import etmo.core.MtoAlgorithm;
-import etmo.core.Operator;
-import etmo.core.ProblemSet;
-import etmo.core.Solution;
-import etmo.core.SolutionSet;
+import etmo.core.*;
 import etmo.metaheuristics.matbml.libs.MOEAD;
 import etmo.metaheuristics.matbml.libs.MaOEAC;
 import etmo.metaheuristics.matbml.libs.MaTAlgorithm;
@@ -23,12 +15,13 @@ import etmo.util.comparators.DominanceComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.sorting.SortingIdx;
 
-public class MaTBMLx extends MtoAlgorithm{
+import java.util.Arrays;
+import java.util.HashMap;
+
+public class MaTBMLx_ADASTEP2_TDE_AIEMIX extends MtoAlgorithm{
     MaTAlgorithm[] optimizers;
     SolutionSet[] populations;
     Operator crossover;
-    Operator mutation;
-    Operator selection;
 
     int populationSize;
     int maxEvaluations;
@@ -46,8 +39,11 @@ public class MaTBMLx extends MtoAlgorithm{
     double[] improvements;
     double[][] transferProbability;
 
+    double[][] implicitScale;
+
     int initScore;
     double betterThreshold;
+    int baseRunTime;
 
     int[] groups;
     int[] leaders;
@@ -56,19 +52,15 @@ public class MaTBMLx extends MtoAlgorithm{
 
     int minGroupNum;
 
-    int solelyConvergeTimes;
-    int transferConvergeTimes;
-    int convergeStep;
-    double stepShrinkRate;
-    double transferConvergeStep;
+    boolean[] isAllocated;
 
     double transferScale;
     int distanceType;
     int environmentSelectionType;
 
     String algoName;
-    
-    public MaTBMLx(ProblemSet problemSet){
+
+    public MaTBMLx_ADASTEP2_TDE_AIEMIX(ProblemSet problemSet){
         super(problemSet);
     }
 
@@ -78,34 +70,57 @@ public class MaTBMLx extends MtoAlgorithm{
         initPopulations();
         initOptimizers();
         while(evaluations < maxEvaluations){
-            solelyConverge(convergeStep);
-            transferConverge(convergeStep);
-
-//        // DEBUG
-//        System.out.println("Evaluation: " + evaluations);
-//        System.out.println("std: " + Arrays.toString(populations[0].getStd()));
-//        System.out.println("mean " + Arrays.toString(populations[0].getMean()));
-//        System.out.println("delta mean " + Arrays.toString(populations[1].getMean()));
-//        System.out.println("-------------------------");
+            solelyConverge();
+            transferConverge();
         }
 
         return populations;
     }
 
-    private void solelyConverge(int times) throws JMException, ClassNotFoundException {
+    private void solelyConverge() throws JMException, ClassNotFoundException {
+        resourcesAllocating(baseRunTime);
+        grouping();
+    }
+
+    private void resourcesAllocating(int times) throws JMException, ClassNotFoundException {
         double[] oldIdeal = ideals.clone();
         Converge(times);
         updateIdealPoint();
         updateNadirPoint();
 
-        Arrays.fill(leaders, -1);
-        Arrays.fill(groups, -1);
-
         improvements = new double[taskNum];
         for (int k = 0; k < taskNum; k++){
-            for (int j = objStart[k]; j <= objEnd[k]; j++)
-                improvements[k] += (oldIdeal[j] - ideals[j]);
+            for (int j = objStart[k]; j <= objEnd[k]; j++) {
+                improvements[k] += ((oldIdeal[j] - ideals[j]) / oldIdeal[j] / times);
+//                improvements[k] += (oldIdeal[j] - ideals[j]);
+            }
         }
+
+        isAllocated = new boolean[taskNum];
+        double[] improvementsClone = improvements.clone();
+        Arrays.sort(improvementsClone);
+        double improvementThreshold = improvementsClone[improvementsClone.length / 2];
+        for (int k = 0; k < taskNum; k++){
+            double improvement = improvements[k];
+            // DEBUG
+            int cTime = 0;
+            while (improvement > improvementThreshold){
+                double[] thisOldIdeal = ideals.clone();
+                improvement = 0;
+                Converge(1, k);
+                updateIdealPoint();
+                for (int j = objStart[k]; j <= objEnd[k]; j++) {
+                    improvement += ((thisOldIdeal[j] - ideals[j]) / thisOldIdeal[j]);
+                }
+                cTime ++;
+            }
+//            System.out.println(evaluations + "\tTask " + k + " run more " + cTime + " times.");
+        }
+    }
+
+    private void grouping() throws JMException {
+        Arrays.fill(leaders, -1);
+        Arrays.fill(groups, -1);
 
         if (Arrays.stream(improvements).sum() > 0) {
             int[] idxs = SortingIdx.SortingIdx(improvements, true);
@@ -113,21 +128,30 @@ public class MaTBMLx extends MtoAlgorithm{
                 leaders[i] = idxs[i];
 
             UpdateDistances();
-            for (int k = 0; k < taskNum; k++) {
-                int finalK = k;
-                if (IntStream.of(leaders).anyMatch(x -> x == finalK))
-                    continue;
-                double[] finalScore = new double[leaders.length];
-                for (int i = 0; i < finalScore.length; i++) {
-                    finalScore[i] = scores[k][leaders[i]] * Math.exp(1 / (1 + distances[k][leaders[i]]) - 1);
-                }
 
-                if (Arrays.stream(finalScore).sum() == 0)
-                    continue;
-                else {
-                    groups[k] = leaders[Utils.rouletteExceptZero(finalScore)];
+            for (int k = 0; k < taskNum; k++) {
+//                int finalK = k;
+//                if (IntStream.of(leaders).anyMatch(x -> x == finalK))
+//                    continue;
+//                double[] finalScore = new double[leaders.length];
+//                for (int i = 0; i < finalScore.length; i++) {
+//                    finalScore[i] = scores[k][leaders[i]] * Math.exp(1 / (1 + distances[k][leaders[i]]) - 1);
+//                }
+//
+//                if (Arrays.stream(finalScore).sum() == 0)
+//                    continue;
+//                else {
+//                    groups[k] = leaders[Utils.rouletteExceptZero(finalScore)];
+//                }
+
+                double[] finalScore = new double[taskNum];
+                for (int i = 0; i < taskNum; i++){
+                    if (i == k) continue;
+                    finalScore[i] = scores[k][i] / distances[k][i];
                 }
+                groups[k] = Utils.rouletteExceptZero(finalScore);
             }
+
         }else{
             for (int k = 0; k < taskNum; k++){
                 if (PseudoRandom.randDouble() < 0.1){
@@ -140,16 +164,9 @@ public class MaTBMLx extends MtoAlgorithm{
         }
     }
 
-    private void transferConverge(int times) throws JMException, ClassNotFoundException {
-        // Leader先收敛k2代。
-        int[] runTimes = new int[taskNum];
-        for (int leader: leaders)
-            if (leader >= 0)
-                runTimes[leader] = times;
-//        Converge(runTimes);
-
+    private void transferConverge() throws JMException, ClassNotFoundException {
         for (int k = 0; k < taskNum; k++){
-            if (groups[k] < 0 || isFinished[k])
+            if (groups[k] < 0 || isFinished[k] || isAllocated[k])
                 continue;
             transfer(k, groups[k]);
         }
@@ -163,44 +180,32 @@ public class MaTBMLx extends MtoAlgorithm{
         Solution transferIndividual = null;
         int[] perm = Utils.permutation(populations[sourceTask].size(), populations[sourceTask].size());
 
-        for (int i = 0; i < populations[sourceTask].size() * transferScale; i++) {
+        int transferCount = (int)(populations[sourceTask].size() * transferScale);
+        for (int i = 0; i < transferCount; i++) {
             int flag = populations[sourceTask].get(i).getFlag();
-            int r1 = perm[i];
+            int j = perm[i];
+            int r1 = PseudoRandom.randInt(0, populations[sourceTask].size() - 1);
+            int r2 = PseudoRandom.randInt(0, populations[sourceTask].size() - 1);
+            int r3 = PseudoRandom.randInt(0, populations[targetTask].size() - 1);
+            int r4 = PseudoRandom.randInt(0, populations[targetTask].size() - 1);
 
-//            // 标记法
-//            if (flag == 1) {
-//                // Implicit
-//                Solution[] parents = new Solution[2];
-//                parents[0] = new Solution(populations[targetTask].get(i));
-//                parents[1] = new Solution(populations[sourceTask].get(r1));
-//                Solution[] offsprings = (Solution[]) crossover.execute(parents);
-//                transferIndividual = offsprings[PseudoRandom.randInt(0, 1)];
-//                mutation.execute(transferIndividual);
-//                transferIndividual.setFlag(flag * 10);
-//            }
-//            else if (flag == 2){
-//                //Explicit
-//                transferIndividual = new Solution(populations[sourceTask].get(r1));
-//                transferIndividual.setFlag(flag * 10);
-//            }
-
-            // 平均法
             populations[sourceTask].get(i).setFlag(0);
-            if (i < populations[sourceTask].size() * transferScale / 2) {
+            if (i < transferCount * implicitScale[targetTask][sourceTask]) {
                 // Implicit
-                Solution[] parents = new Solution[2];
+                Solution[] parents = new Solution[6];
                 parents[0] = new Solution(populations[targetTask].get(i));
-                parents[1] = new Solution(populations[sourceTask].get(r1));
-//                ((TransferDECrossover) crossover).adaptive(populations[targetTask], populations[sourceTask]);
-                Solution[] offsprings = (Solution[]) crossover.execute(parents);
-                transferIndividual = offsprings[PseudoRandom.randInt(0, 1)];
-//                transferIndividual = (Solution) crossover.execute(parents);
-                mutation.execute(transferIndividual);
+                parents[1] = new Solution(populations[sourceTask].get(j));
+                parents[2] = new Solution(populations[sourceTask].get(r1));
+                parents[3] = new Solution(populations[sourceTask].get(r2));
+                parents[4] = new Solution(populations[targetTask].get(r3));
+                parents[5] = new Solution(populations[targetTask].get(r4));
+                ((TransferDECrossover) crossover).adaptive(populations[targetTask], populations[sourceTask]);
+                transferIndividual = (Solution) crossover.execute(parents);
                 transferIndividual.setFlag(1);
             } else {
                 //Explicit
                 transferIndividual = new Solution(populations[sourceTask].get(r1));
-                transferIndividual.setFlag(1);
+                transferIndividual.setFlag(2);
             }
 
             transferIndividual.setSkillFactor(targetTask);
@@ -221,25 +226,39 @@ public class MaTBMLx extends MtoAlgorithm{
             }
 
         }
-        int betterCount = 0;
+        int implicitCount = 0;
+        int explicitCount = 0;
         if (environmentSelectionType == 1) {
             SolutionSet union = populations[targetTask].union(transferSet);
             rankSolutionOnTask(union, targetTask, true);
             for (int i = 0; i < populations[targetTask].size(); i++) {
                 if (union.get(i).getFlag() == 1) {
-                    betterCount += 1;
+                    implicitCount ++;
+                }
+                else if (union.get(i).getFlag() == 2){
+                    explicitCount ++;
                 }
                 populations[targetTask].replace(i, union.get(i));
             }
         } else{
             for (int i = 0; i < populations[targetTask].size(); i++) {
                 if (populations[targetTask].get(i).getFlag() == 1) {
-                    betterCount += 1;
+                    implicitCount ++;
+                }
+                else if (populations[targetTask].get(i).getFlag() == 2){
+                    explicitCount ++;
                 }
             }
         }
 
-        if (betterCount < populationSize * betterThreshold)
+        if (implicitCount / implicitScale[targetTask][sourceTask] > explicitCount / (1 - implicitScale[targetTask][sourceTask]))
+            implicitScale[targetTask][sourceTask] = Math.min(0.9, implicitScale[targetTask][sourceTask] / 0.9);
+        else if (implicitCount / implicitScale[targetTask][sourceTask] < explicitCount / (1 - implicitScale[targetTask][sourceTask]))
+            implicitScale[targetTask][sourceTask] = Math.max(0.1, implicitScale[targetTask][sourceTask] * 0.9);
+
+//        System.out.println(sourceTask + " -> " + targetTask + ": " + implicitScale[targetTask][sourceTask]);
+
+        if ((implicitCount + explicitCount) < transferCount * betterThreshold)
             scores[targetTask][sourceTask] = Math.max(0, scores[targetTask][sourceTask] - 1);
 
 //        System.out.println("Explicit: " + eCount + "\tImplicit: " + iCount);
@@ -256,14 +275,9 @@ public class MaTBMLx extends MtoAlgorithm{
 
         initScore = (Integer) getInputParameter("initScore");
         betterThreshold = (Double) getInputParameter("betterThreshold");
-
-        convergeStep = (Integer) getInputParameter("convergeStep");
-        stepShrinkRate = 0.99;
-        transferConvergeStep = 2 * convergeStep;
+        baseRunTime = (Integer) getInputParameter("baseRunTime");
 
         crossover = operators_.get("crossover");
-        mutation = operators_.get("mutation");
-        selection = operators_.get("selection");
 
         taskNum = problemSet_.size();
         objNum= problemSet_.getTotalNumberOfObjs();
@@ -278,6 +292,8 @@ public class MaTBMLx extends MtoAlgorithm{
         distances = new double[taskNum][taskNum];
 
         transferProbability = new double[taskNum][taskNum];
+
+        implicitScale = new double[taskNum][taskNum];
 
         fails = new int[taskNum];
         skips = new int[taskNum];
@@ -294,6 +310,7 @@ public class MaTBMLx extends MtoAlgorithm{
             objStart[k] = problemSet_.get(k).getStartObjPos();
             objEnd[k] = problemSet_.get(k).getEndObjPos();
 
+            Arrays.fill(implicitScale[k], 0.5);
             Arrays.fill(scores[k], initScore);
             Arrays.fill(transferProbability[k], 1);
         }
@@ -305,8 +322,6 @@ public class MaTBMLx extends MtoAlgorithm{
             populations[k] = new SolutionSet(populationSize);
             for (int i = 0; i < populationSize; i++){
                 Solution individual = new Solution(problemSet_);
-//                int flag = i < populationSize / 2 ? 1 : 2;
-//                individual.setFlag(flag);
                 individual.setSkillFactor(k);
                 problemSet_.get(k).evaluate(individual);
                 evaluations ++;
@@ -440,6 +455,12 @@ public class MaTBMLx extends MtoAlgorithm{
                 }
             }
         }
+    }
+
+    private void Converge(int times, int taskId) throws JMException, ClassNotFoundException {
+        int[] tmpTimes = new int[taskNum];
+        tmpTimes[taskId] = times;
+        Converge(tmpTimes);
     }
 
     private void Converge(int times) throws JMException, ClassNotFoundException {

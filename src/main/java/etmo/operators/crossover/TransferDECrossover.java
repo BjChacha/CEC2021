@@ -16,14 +16,14 @@ public class TransferDECrossover extends Crossover{
     /**
      * DEFAULT_CR defines a default CR (crossover operation control) value
      */
-    private static final double DEFAULT_CR_UB = 0.9;
-    private static final double DEFAULT_CR_LB = 0.1;
+    private static final double DEFAULT_CR = 0.9;
 
     /**
      * DEFAULT_F defines the default F (Scaling factor for mutation) value
      */
-    private static final double DEFAULT_F_UB = 2.0;
-    private static final double DEFAULT_F_LB = 0.1;
+    private static final double DEFAULT_F1_ = 0.5;
+    private static final double DEFAULT_F2_ = 0.5;
+    private static final double DEFAULT_F3_ = 0.5;
 
     /**
      * DEFAULT_K defines a default K value used in variants current-to-rand/1
@@ -42,15 +42,13 @@ public class TransferDECrossover extends Crossover{
      */
     private static final List VALID_TYPES = Arrays.asList(RealSolutionType.class);
 
-    private double CR_UB_;
-    private double CR_LB_;
-    private double F_UB_;
-    private double F_LB_;
     private double K_;
     private String DE_Variant_; // DE variant (rand/1/bin, rand/1/exp, etc.)
 
     private double[] CR_;
-    private double[] F_;
+    private double[] F1_;
+    private double[] F2_;
+    private double[] F3_;
 
     /**
      * Constructor
@@ -58,21 +56,9 @@ public class TransferDECrossover extends Crossover{
     public TransferDECrossover(HashMap<String, Object> parameters) {
         super(parameters);
 
-        CR_UB_ = DEFAULT_CR_UB;
-        CR_LB_ = DEFAULT_CR_LB;
-        F_UB_ = DEFAULT_F_UB;
-        F_LB_ = DEFAULT_F_LB;
         K_ = DEFAULT_K;
         DE_Variant_ = DEFAULT_DE_VARIANT;
 
-        if (parameters.get("CR_UB") != null)
-            CR_UB_ = (Double) parameters.get("CR_UB");
-        if (parameters.get("CR_LB") != null)
-            CR_LB_ = (Double) parameters.get("CR_LB");
-        if (parameters.get("F_UB") != null)
-            F_UB_ = (Double) parameters.get("F_UB");
-        if (parameters.get("F_LB") != null)
-            F_LB_ = (Double) parameters.get("F_LB");
         if (parameters.get("K") != null)
             K_ = (Double) parameters.get("K");
         if (parameters.get("DE_VARIANT") != null)
@@ -103,43 +89,16 @@ public class TransferDECrossover extends Crossover{
             deltaMean[i] = Math.abs(meanTarget[i] - meanSource[i]);
         }
 
-        F_ = new double[len];
-        CR_ = new double[len];
-
         // adaptive
+        CR_ = new double[len];
+        F1_ = new double[len];
+        F2_ = new double[len];
+        F3_ = new double[len];
         for (int i = 0; i < len; i++) {
-            double f_lb = F_LB_;
-            double f_ub = F_UB_;
-            if (stdSource[i] < 0.01)
-                f_lb += (f_ub - f_lb) * 0.5;
-            else if (stdSource[i] > 0.1)
-                f_ub -= (f_ub - f_lb) * 0.5;
-
-            if (deltaMean[i] < 0.01)
-                f_lb += (f_ub - f_lb) * 0.5;
-            else if (deltaMean[i] > 0.1)
-                f_ub -= (f_ub - f_lb) * 0.5;
-
-            F_[i] = PseudoRandom.randDouble(f_lb, f_ub);
-
-            double cr_lb = CR_LB_;
-            double cr_ub = CR_UB_;
-            if (stdSource[i] < 0.01)
-                cr_lb += (cr_ub - cr_lb) * 0.5;
-            else if (stdSource[i] > 0.1)
-                cr_ub -= (cr_ub - cr_lb) * 0.5;
-
-            if (stdTarget[i] > 0.1)
-                cr_lb += (cr_ub - cr_lb) * 0.5;
-            else if (stdTarget[i] < 0.01)
-                cr_ub -= (cr_ub - cr_lb) * 0.5;
-
-            if (deltaMean[i] < 0.01)
-                cr_lb += (cr_ub - cr_lb) * 0.5;
-            else if (deltaMean[i] > 0.1)
-                cr_ub -= (cr_ub - cr_lb) * 0.5;
-
-            CR_[i] = PseudoRandom.randDouble(cr_lb, cr_ub);
+            CR_[i] = 0.9 - Math.sqrt(2 * deltaMean[i]);
+            F1_[i] = 2 * Math.sqrt(deltaMean[i]);
+            F2_[i] = stdSource[i];
+            F3_[i] = stdTarget[i];
         }
     }
 
@@ -155,145 +114,39 @@ public class TransferDECrossover extends Crossover{
         Solution current = parent[0];
 
         Solution child;
-
-        if (!(VALID_TYPES.contains(parent[0].getType().getClass())
-                && VALID_TYPES.contains(parent[1].getType().getClass()))) {
-
-            Configuration.logger_.severe("RandomDECrossover.execute: " + " the solutions "
-                    + "are not of the right type. The type should be 'Real' or 'ArrayReal', but " + parent[0].getType()
-                    + " and " + parent[1].getType() + " are obtained");
-
-            Class cls = String.class;
-            String name = cls.getName();
-            throw new JMException("Exception in " + name + ".execute()");
-        }
-
-        int jrand;
+        int jRand;
 
         child = new Solution(current);
-
-        XReal xParent0 = new XReal(parent[0]);
-        XReal xParent1 = new XReal(parent[1]);
-        XReal xParent2 = new XReal(parent[0]);
+        XReal x_target = new XReal(parent[0]);      // x_target
+        XReal x_source = new XReal(parent[1]);      // x_source
+        XReal x_source_r1 = new XReal(parent[2]);   // x_source_r1
+        XReal x_source_r2 = new XReal(parent[3]);   // x_source_r2
+        XReal x_target_r1 = new XReal(parent[4]);   // x_target_r1
+        XReal x_target_r2 = new XReal(parent[5]);   // x_target_r2
         XReal xCurrent = new XReal(current);
         XReal xChild = new XReal(child);
 
-        int numberOfVariables = xParent0.getNumberOfDecisionVariables();
-        jrand = PseudoRandom.randInt(0, numberOfVariables - 1);
+        int numberOfVariables = x_target.getNumberOfDecisionVariables();
+        jRand = PseudoRandom.randInt(0, numberOfVariables - 1);
 
-        // STEP 4. Checking the DE variant
-        if ((DE_Variant_.compareTo("rand/1/bin") == 0) || (DE_Variant_.compareTo("best/1/bin") == 0)) {
-            for (int j = 0; j < numberOfVariables; j++) {
-                if (PseudoRandom.randDouble(0, 1) < CR_[j] || j == jrand) {
-                    double value;
-                    value = xParent2.getValue(j) - F_[j] * (xParent0.getValue(j) - xParent1.getValue(j));
-                    if (value < xChild.getLowerBound(j))
-                        value = xChild.getLowerBound(j);
-                    if (value > xChild.getUpperBound(j))
-                        value = xChild.getUpperBound(j);
-                    /*
-                     * if (value < xChild.getLowerBound(j)) { double rnd =
-                     * PseudoRandom.randDouble(0, 1) ; value =
-                     * xChild.getLowerBound(j) + rnd *(xParent2.getValue(j) -
-                     * xChild.getLowerBound(j)) ; } if (value >
-                     * xChild.getUpperBound(j)) { double rnd =
-                     * PseudoRandom.randDouble(0, 1) ; value =
-                     * xChild.getUpperBound(j) -
-                     * rnd*(xChild.getUpperBound(j)-xParent2.getValue(j)) ; }
-                     */
-                    xChild.setValue(j, value);
-                } else {
-                    double value;
-                    value = xCurrent.getValue(j);
-                    xChild.setValue(j, value);
-                } // else
-            } // for
-        } // if
-        else if ((DE_Variant_.compareTo("rand/1/exp") == 0) || (DE_Variant_.compareTo("best/1/exp") == 0)) {
-            for (int j = 0; j < numberOfVariables; j++) {
-                if (PseudoRandom.randDouble(0, 1) < CR_[j] || j == jrand) {
-                    double value;
-                    value = xParent2.getValue(j) + F_[j] * (xParent0.getValue(j) - xParent1.getValue(j));
-
-                    if (value < xChild.getLowerBound(j))
-                        value = xChild.getLowerBound(j);
-                    if (value > xChild.getUpperBound(j))
-                        value = xChild.getUpperBound(j);
-
-                    xChild.setValue(j, value);
-                } else {
-                    CR_[j] = 0.0;
-                    double value;
-                    value = xCurrent.getValue(j);
-                    xChild.setValue(j, value);
-                } // else
-            } // for
-        } // if
-        else if ((DE_Variant_.compareTo("current-to-rand/1") == 0)
-                || (DE_Variant_.compareTo("current-to-best/1") == 0)) {
-            for (int j = 0; j < numberOfVariables; j++) {
+        for (int j = 0; j < numberOfVariables; j++) {
+            if (PseudoRandom.randDouble(0, 1) < CR_[j] || j == jRand) {
                 double value;
-                value = xCurrent.getValue(j) + K_ * (xParent2.getValue(j) - xCurrent.getValue(j))
-                        + F_[j] * (xParent0.getValue(j) - xParent1.getValue(j));
-
+                value = x_source_r1.getValue(j) + F1_[j] * (x_source.getValue(j) - x_target.getValue(j))
+                                                + F2_[j] * (x_source_r1.getValue(j) - x_source_r2.getValue(j))
+                                                + F3_[j] * (x_target_r1.getValue(j) - x_target_r2.getValue(j));
                 if (value < xChild.getLowerBound(j))
                     value = xChild.getLowerBound(j);
                 if (value > xChild.getUpperBound(j))
                     value = xChild.getUpperBound(j);
-
                 xChild.setValue(j, value);
-            } // for
-        } // if
-        else if ((DE_Variant_.compareTo("current-to-rand/1/bin") == 0)
-                || (DE_Variant_.compareTo("current-to-best/1/bin") == 0)) {
-            for (int j = 0; j < numberOfVariables; j++) {
-                if (PseudoRandom.randDouble(0, 1) < CR_[j] || j == jrand) {
-                    double value;
-                    value = xCurrent.getValue(j) + K_ * (xParent2.getValue(j) - xCurrent.getValue(j))
-                            + F_[j] * (xParent0.getValue(j) - xParent1.getValue(j));
+            } else {
+                double value;
+                value = xCurrent.getValue(j);
+                xChild.setValue(j, value);
+            } // else
+        } // for
 
-                    if (value < xChild.getLowerBound(j))
-                        value = xChild.getLowerBound(j);
-                    if (value > xChild.getUpperBound(j))
-                        value = xChild.getUpperBound(j);
-
-                    xChild.setValue(j, value);
-                } else {
-                    double value;
-                    value = xCurrent.getValue(j);
-                    xChild.setValue(j, value);
-                } // else
-            } // for
-        } // if
-        else if ((DE_Variant_.compareTo("current-to-rand/1/exp") == 0)
-                || (DE_Variant_.compareTo("current-to-best/1/exp") == 0)) {
-            for (int j = 0; j < numberOfVariables; j++) {
-                if (PseudoRandom.randDouble(0, 1) < CR_[j] || j == jrand) {
-                    double value;
-                    value = xCurrent.getValue(j) + K_ * (xParent2.getValue(j) - xCurrent.getValue(j))
-                            + F_[j] * (xParent0.getValue(j) - xParent1.getValue(j));
-
-                    if (value < xChild.getLowerBound(j))
-                        value = xChild.getLowerBound(j);
-                    if (value > xChild.getUpperBound(j))
-                        value = xChild.getUpperBound(j);
-
-                    xChild.setValue(j, value);
-                } else {
-                    CR_[j] = 0.0;
-                    double value;
-                    value = xCurrent.getValue(j);
-                    xChild.setValue(j, value);
-                } // else
-            } // for
-        } // if
-        else {
-            Configuration.logger_
-                    .severe("RandomDECrossover.execute: " + " unknown DE variant (" + DE_Variant_ + ")");
-            Class<String> cls = String.class;
-            String name = cls.getName();
-            throw new JMException("Exception in " + name + ".execute()");
-        } // else
         return child;
     }
 }

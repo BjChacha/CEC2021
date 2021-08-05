@@ -1,14 +1,6 @@
 package etmo.metaheuristics.matbml;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.stream.IntStream;
-
-import etmo.core.MtoAlgorithm;
-import etmo.core.Operator;
-import etmo.core.ProblemSet;
-import etmo.core.Solution;
-import etmo.core.SolutionSet;
+import etmo.core.*;
 import etmo.metaheuristics.matbml.libs.MOEAD;
 import etmo.metaheuristics.matbml.libs.MaOEAC;
 import etmo.metaheuristics.matbml.libs.MaTAlgorithm;
@@ -23,7 +15,11 @@ import etmo.util.comparators.DominanceComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.sorting.SortingIdx;
 
-public class MaTBMLx extends MtoAlgorithm{
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.IntStream;
+
+public class MaTBMLx_TDE extends MtoAlgorithm{
     MaTAlgorithm[] optimizers;
     SolutionSet[] populations;
     Operator crossover;
@@ -56,19 +52,15 @@ public class MaTBMLx extends MtoAlgorithm{
 
     int minGroupNum;
 
-    int solelyConvergeTimes;
-    int transferConvergeTimes;
     int convergeStep;
-    double stepShrinkRate;
-    double transferConvergeStep;
 
     double transferScale;
     int distanceType;
     int environmentSelectionType;
 
     String algoName;
-    
-    public MaTBMLx(ProblemSet problemSet){
+
+    public MaTBMLx_TDE(ProblemSet problemSet){
         super(problemSet);
     }
 
@@ -165,7 +157,11 @@ public class MaTBMLx extends MtoAlgorithm{
 
         for (int i = 0; i < populations[sourceTask].size() * transferScale; i++) {
             int flag = populations[sourceTask].get(i).getFlag();
-            int r1 = perm[i];
+            int j = perm[i];
+            int r1 = PseudoRandom.randInt(0, populations[sourceTask].size() - 1);
+            int r2 = PseudoRandom.randInt(0, populations[sourceTask].size() - 1);
+            int r3 = PseudoRandom.randInt(0, populations[targetTask].size() - 1);
+            int r4 = PseudoRandom.randInt(0, populations[targetTask].size() - 1);
 
 //            // 标记法
 //            if (flag == 1) {
@@ -188,14 +184,18 @@ public class MaTBMLx extends MtoAlgorithm{
             populations[sourceTask].get(i).setFlag(0);
             if (i < populations[sourceTask].size() * transferScale / 2) {
                 // Implicit
-                Solution[] parents = new Solution[2];
+                Solution[] parents = new Solution[6];
                 parents[0] = new Solution(populations[targetTask].get(i));
-                parents[1] = new Solution(populations[sourceTask].get(r1));
-//                ((TransferDECrossover) crossover).adaptive(populations[targetTask], populations[sourceTask]);
-                Solution[] offsprings = (Solution[]) crossover.execute(parents);
-                transferIndividual = offsprings[PseudoRandom.randInt(0, 1)];
-//                transferIndividual = (Solution) crossover.execute(parents);
-                mutation.execute(transferIndividual);
+                parents[1] = new Solution(populations[sourceTask].get(j));
+                parents[2] = new Solution(populations[sourceTask].get(r1));
+                parents[3] = new Solution(populations[sourceTask].get(r2));
+                parents[4] = new Solution(populations[targetTask].get(r3));
+                parents[5] = new Solution(populations[targetTask].get(r4));
+//                if (evaluations > maxEvaluations / 2){
+//                    System.out.println("DEBUG");
+//                }
+                ((TransferDECrossover) crossover).adaptive(populations[targetTask], populations[sourceTask]);
+                transferIndividual = (Solution) crossover.execute(parents);
                 transferIndividual.setFlag(1);
             } else {
                 //Explicit
@@ -240,7 +240,7 @@ public class MaTBMLx extends MtoAlgorithm{
         }
 
         if (betterCount < populationSize * betterThreshold)
-            scores[targetTask][sourceTask] = Math.max(0, scores[targetTask][sourceTask] - 1);
+            scores[targetTask][sourceTask] = 0;
 
 //        System.out.println("Explicit: " + eCount + "\tImplicit: " + iCount);
     }
@@ -256,10 +256,7 @@ public class MaTBMLx extends MtoAlgorithm{
 
         initScore = (Integer) getInputParameter("initScore");
         betterThreshold = (Double) getInputParameter("betterThreshold");
-
         convergeStep = (Integer) getInputParameter("convergeStep");
-        stepShrinkRate = 0.99;
-        transferConvergeStep = 2 * convergeStep;
 
         crossover = operators_.get("crossover");
         mutation = operators_.get("mutation");
