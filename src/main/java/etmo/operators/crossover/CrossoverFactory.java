@@ -53,6 +53,9 @@ public class CrossoverFactory {
 			return new RandomUniformCrossover(parameters);
 		else if (name.equalsIgnoreCase("TransferDECrossover"))
 			return new TransferDECrossover(parameters);
+		else if (name.equalsIgnoreCase("UniformCrossover")){
+			return new UniformCrossover(parameters);
+		}
 		else {
 			Configuration.logger_
 					.severe("CrossoverFactory.getCrossoverOperator. " + "Operator '" + name + "' not found ");

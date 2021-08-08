@@ -24,26 +24,26 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 1;
-		int taskEnd = 10;
+		int taskStart = 25;
+		int taskEnd = 32;
 
 		int times = 10;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 		String benchmark_name;
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-//			benchmark_name = "CEC2021";
-//			problemSet = (ProblemSet) Class
-//					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-//					.getMethod("getProblem")
-//					.invoke(null, null);
-
-			// WCCI 2020
-			benchmark_name = "WCCI2020";
+			benchmark_name = "CEC2021";
 			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
+
+//			// WCCI 2020
+//			benchmark_name = "WCCI2020";
+//			problemSet = (ProblemSet) Class
+//					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+//					.getMethod("getProblem")
+//					.invoke(null, null);
 
 			int taskNum = problemSet.size();
 
@@ -91,8 +91,8 @@ public class MOEAD_main {
 					QualityIndicator indicator = new QualityIndicator(problemSet.get(tsk), pf[tsk]);
 
 					SolutionSet population = algorithm.execute();
-					population.printObjectivesToFile("MOEAD_"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
-							problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
+//					population.printObjectivesToFile("MOEAD_"+problemSet.get(tsk).getNumberOfObjectives()+"Obj_"+
+//							problemSet.get(tsk).getName()+ "_" + problemSet.get(tsk).getNumberOfVariables() + "D_run"+t+".txt");
 					double igd =  indicator.getIGD(population);
 					ave[tsk] += igd;
 					igds[tsk][t-1] = igd;

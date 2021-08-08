@@ -13,6 +13,8 @@ import etmo.core.SolutionSet;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.problems.CEC2017.*;
+import etmo.util.logging.LogIGD;
 
 public class MaTDE_main {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException {
@@ -23,10 +25,10 @@ public class MaTDE_main {
 
         HashMap parameters;
 
-        int problemStart = 25;
-        int problemEnd = 32;
+        int problemStart = 1;
+        int problemEnd = 9;
 
-        int times = 1;
+        int times = 20;
 
         String benchmark_name;
         DecimalFormat form = new DecimalFormat("#.####E0");
@@ -34,12 +36,12 @@ public class MaTDE_main {
         System.out.println("Algo: MaTDE.");
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
-           // CEC 2021
-           benchmark_name = "CEC2021";
-           problemSet = (ProblemSet) Class
-                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-                   .getMethod("getProblem")
-                   .invoke(null, null);
+//           // CEC 2021
+//           benchmark_name = "CEC2021";
+//           problemSet = (ProblemSet) Class
+//                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//                   .getMethod("getProblem")
+//                   .invoke(null, null);
 
 //             // WCCI 2020
 //             benchmark_name = "WCCI2020";
@@ -48,20 +50,20 @@ public class MaTDE_main {
 //                     .getMethod("getProblem")
 //                     .invoke(null, null);
 
-            // // CEC2017
-            // benchmark_name = "CEC2017";
-            // ProblemSet[] cec2017 = {
-            //     CIHS.getProblem(),
-            //     CIMS.getProblem(),
-            //     CILS.getProblem(),
-            //     PIHS.getProblem(),
-            //     PIMS.getProblem(),
-            //     PILS.getProblem(),
-            //     NIHS.getProblem(),
-            //     NIMS.getProblem(),
-            //     NILS.getProblem()
-            // };
-            // problemSet = cec2017[pCase-1];
+             // CEC2017
+             benchmark_name = "CEC2017";
+             ProblemSet[] cec2017 = {
+                 CIHS.getProblem(),
+                 CIMS.getProblem(),
+                 CILS.getProblem(),
+                 PIHS.getProblem(),
+                 PIMS.getProblem(),
+                 PILS.getProblem(),
+                 NIHS.getProblem(),
+                 NIMS.getProblem(),
+                 NILS.getProblem()
+             };
+             problemSet = cec2017[pCase-1];
 
 
             int taskNum = problemSet.size();
@@ -69,7 +71,7 @@ public class MaTDE_main {
 
             String[] pf = new String[taskNum];
             for (int k = 0; k < pf.length; k++){
-                pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+                pf[k] = "resources/PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
             }
 
             String pSName = problemSet.get(0).getName();
@@ -145,7 +147,7 @@ public class MaTDE_main {
                     ave[k] += igd;
                 }
             }
-//            LogIGD.LogIGD("MaTDE" + "_e2000" + benchmark_name, pCase, IGDs);
+            LogIGD.LogIGD("MaTDE_" + "x" + times + "_" + benchmark_name, pCase, IGDs);
             for(int i=0;i<taskNum;i++)
                 System.out.println(form.format(ave[i] / times));
             System.out.println();

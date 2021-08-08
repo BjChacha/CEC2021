@@ -35,8 +35,7 @@ import java.util.Vector;
 public class MOEAD extends Algorithm {
 
 	private int populationSize_;
-	
-	private int H_;
+
 	/**
 	 * Stores the population
 	 */
@@ -121,11 +120,6 @@ public class MOEAD extends Algorithm {
 		crossover_ = operators_.get("crossover"); // default: DE crossover
 		mutation_ = operators_.get("mutation"); // default: polynomial mutation
 
-		H_= 0;
-
-		while ((H_+3) * (H_+2) / 2 < populationSize_)
-			H_++;
-
 		// STEP 1. Initialization
 		// STEP 1.1. Compute euclidean distances between weight vectors and find
 		// T
@@ -197,9 +191,9 @@ public class MOEAD extends Algorithm {
 				// STEP 2.5. Update of solutions
 				updateProblem(child, n, type);
 
-				if (evaluations_ % (populationSize_ * 20) == 0){
-					LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
-				}
+//				if (evaluations_ % (populationSize_ * 20) == 0){
+//					LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
+//				}
 			} // for
 		} while (evaluations_ < maxEvaluations);
 
@@ -274,23 +268,6 @@ public class MOEAD extends Algorithm {
 				nw++;
 			} // for
 		} // if
-		else if(problemSet_.get(0).getNumberOfObjectives() == 3) {
-			int i, j;
-			for (i = 0; i <= H_; i++) {
-				for (j = 0; j <= H_ - i; j++) {
-					lambda_[nw][0] = (1.0 * i) / H_;
-					lambda_[nw][1] = (1.0 * j) / H_;
-					lambda_[nw][2] = 1.0 * (H_ - i - j) / H_;
-					nw++;
-				} // for
-			} // for
-			/*if (nw != populationSize_) {
-			System.out.println(nw + "---" + (populationSize_));
-			System.out.println("ERROR: population size <> #weights");
-			System.exit(0);
-			
-		}*/
-		}
 		else{
 			String dataFileName;
 			dataFileName = "W" + problemSet_.get(0).getNumberOfObjectives() + "D_"
@@ -304,13 +281,13 @@ public class MOEAD extends Algorithm {
 				BufferedReader br = new BufferedReader(isr);
 
 				int i = 0;
-				int j = 0;
+				int j;
 				String aux = br.readLine();
 				while (aux != null) {
 					StringTokenizer st = new StringTokenizer(aux);
 					j = 0;
 					while (st.hasMoreTokens()) {
-						double value = (new Double(st.nextToken())).doubleValue();
+						double value = Double.parseDouble(st.nextToken());
 						lambda_[i][j] = value;
 						j++;
 					}

@@ -3,7 +3,7 @@ package etmo.metaheuristics.matmy2;
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.operators.selection.SelectionFactory;
-import etmo.problems.benchmarks_ETMO.*;
+import etmo.problems.benchmarks_CEC2021.*;
 import etmo.util.JMException;
 
 import java.io.BufferedReader;

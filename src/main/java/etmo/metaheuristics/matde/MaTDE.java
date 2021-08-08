@@ -72,29 +72,11 @@ public class MaTDE extends MtoAlgorithm {
         evaluations = 0;
         taskNum = problemSet_.size();
 
-        // IGD
-        pf = new String[taskNum];
-        igds = new ArrayList[taskNum];
-        indicators = new QualityIndicator[taskNum];
-        for (int k = 0; k < pf.length; k++){
-            pf[k] = "PF/StaticPF/" + problemSet_.get(k).getHType() + "_" + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
-            igds[k] = new ArrayList<>();
-            indicators[k] = new QualityIndicator(problemSet_.get(k), pf[k]);
-        }
-
         initPopulation();
-        saveIGD();
         while (evaluations < maxEvaluations){
             createOffspringPopulation();
             updateArchives();
-            saveIGD();
         }
-
-        double[][] IGD = new double[taskNum][];
-        for (int k = 0; k < taskNum; k++){
-            IGD[k] = igds[k].stream().mapToDouble(Double::doubleValue).toArray();
-        }
-        LogIGD.MarkLog("MaTDE_", problemSet_.get(0).getName(), IGD);
 
         return population;
     }

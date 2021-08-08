@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
+import etmo.problems.CEC2017.*;
 import etmo.util.comparators.LocationComparator;
 import etmo.core.Algorithm;
 import etmo.core.Operator;
@@ -31,9 +32,9 @@ public class MOMFEA_main {
 		HashMap parameters; // Operator parameters
 
 		int taskStart = 1;
-		int taskEnd = 10;
+		int taskEnd = 9;
 
-		int times = 1;
+		int times = 20;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -45,18 +46,32 @@ public class MOMFEA_main {
 //					.getMethod("getProblem")
 //					.invoke(null, null);
 
-			// WCCI 2020
-			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
-					.getMethod("getProblem")
-					.invoke(null, null);
+//			// WCCI 2020
+//			problemSet = (ProblemSet) Class
+//					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+//					.getMethod("getProblem")
+//					.invoke(null, null);
+
+			// CEC2017
+			ProblemSet[] cec2017 = {
+					CIHS.getProblem(),
+					CIMS.getProblem(),
+					CILS.getProblem(),
+					PIHS.getProblem(),
+					PIMS.getProblem(),
+					PILS.getProblem(),
+					NIHS.getProblem(),
+					NIMS.getProblem(),
+					NILS.getProblem()
+			};
+			problemSet = cec2017[pCase-1];
 
 			int taskNum = problemSet.size();
 			double ave[] = new double[taskNum];
 
 			String[] pf = new String[taskNum];
 			for (int i = 0; i < pf.length; i++){
-				pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
+				pf[i] = "resources/PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
 			}
 
 			String pSName = problemSet.get(0).getName();
@@ -129,7 +144,7 @@ public class MOMFEA_main {
 					ave[i] += igd;
 				}
 			}
-			LogIGD.LogIGD("MOMFEA", pCase, IGDs);
+			LogIGD.LogIGD("MOMFEA_x" + times + "_CEC2017", pCase, IGDs);
 			for(int i=0;i<taskNum;i++)
 				System.out.println("T" + (i+1) + "\t" + form.format(ave[i] / times));
 			System.out.println();

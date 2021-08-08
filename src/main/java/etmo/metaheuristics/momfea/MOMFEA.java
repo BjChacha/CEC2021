@@ -14,7 +14,6 @@ import etmo.util.comparators.LocationComparator;
 import etmo.util.logging.LogPopulation;
 
 public class MOMFEA extends Algorithm {
-
 	private int populationSize;
 	
 	private SolutionSet population;
@@ -49,13 +48,9 @@ public class MOMFEA extends Algorithm {
 		evaluations = 0;
 
 		initPopulation();
-		LogPopulation.LogPopulation("MOMFEA", population, problemSet_, evaluations, true);
 		while (evaluations < maxEvaluations) {
 			createOffspringPopulation();
 			getNextPopulation();
-			if (evaluations % (populationSize * 20) == 0){
-				LogPopulation.LogPopulation("MOMFEA", population, problemSet_, evaluations, true);
-			}
 		}
 		
 		return population;
