@@ -54,9 +54,9 @@ public class MATP8 {
 		prob.setHType("convex");
 				
 		
-		double[][] matrix = IO.readMatrixFromFile("MData/WCCI2020/benchmark_8/matrix_"+(taskID+1));
+		double[][] matrix = IO.readMatrixFromFile("resources/MData/WCCI2020/benchmark_8/matrix_"+(taskID+1));
 		
-		double shiftValues[] = IO.readShiftValuesFromFile("MData/WCCI2020/benchmark_8/bias_"+(taskID+1));
+		double shiftValues[] = IO.readShiftValuesFromFile("resources/MData/WCCI2020/benchmark_8/bias_"+(taskID+1));
 		
 		prob.setRotationMatrix(matrix);
 		prob.setShiftValues(shiftValues);		

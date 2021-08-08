@@ -1496,8 +1496,9 @@ public class GFunctions {
 	
 	
 	protected static void shiftVariables(double x[]) {
-		for (int i = 0; i < x.length; i++) {
-			x[i] -= shiftValues_[i];
+		double[] tmpShiftValues = shiftValues_.clone();
+		for (int i = 0; i < x.length && i < tmpShiftValues.length; i++) {
+			x[i] -= tmpShiftValues[i];
 		}
 	}
 
@@ -1510,11 +1511,13 @@ public class GFunctions {
 		int len = x.length;
 		double res[] = new double[len];
 
-		for (int i = 0; i < len; i++) {
-			double[] y = rotationMatrix_[i];
+		double[][] tmpShiftValues = rotationMatrix_.clone();
+
+		for (int i = 0; i < len && i < tmpShiftValues.length; i++) {
+			double[] y = tmpShiftValues[i];
 
 			double sum = 0;
-			for (int j = 0; j < len; j++)
+			for (int j = 0; j < len && j < y.length; j++)
 				sum += x[j] * y[j];
 			res[i] = sum;
 //			res[i] = x[i];

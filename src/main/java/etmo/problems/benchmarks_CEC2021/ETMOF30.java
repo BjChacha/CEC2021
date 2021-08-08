@@ -1,17 +1,18 @@
-package etmo.problems.benchmarks_WCCI2020;
+package etmo.problems.benchmarks_CEC2021;
 
 import etmo.core.Problem;
 import etmo.core.ProblemSet;
 import etmo.problems.base.staticBase.IO;
 import etmo.problems.base.staticBase.MMZDT;
+
 import java.io.IOException;
 
 
-public class MATP10 {
+public class ETMOF30 {
 	
 	public static ProblemSet getProblem() throws IOException {
 		
-		int taskNumber=50;
+		int taskNumber=40;
 		
 		ProblemSet problemSet = new ProblemSet(taskNumber);
 		
@@ -22,35 +23,30 @@ public class MATP10 {
 
 	}
 	
-	
 	public static ProblemSet getT(int taskID) throws IOException {
 		ProblemSet problemSet = new ProblemSet(1);
 		MMZDT prob;
 		
-		switch(taskID%6){
+		switch(taskID%5){
 		case 0:
-			prob = new MMZDT(50, 1,  -100,100);
-			prob.setGType("sphere");
+			prob = new MMZDT(50, 1,  -50,50);
+			prob.setGType("F5");
 			break;
 		case 1:
 			prob = new MMZDT(50, 1,  -50,50);
-			prob.setGType("rosenbrock");
-			break;
+			prob.setGType("F6");
+			break;		
 		case 2:
 			prob = new MMZDT(50, 1,  -50,50);
-			prob.setGType("ackley");
-			break;		
+			prob.setGType("F9");
+			break;
 		case 3:
-			prob = new MMZDT(50, 1,  -50,50);
-			prob.setGType("rastrigin");
+			prob = new MMZDT(50, 1,  -100,100);
+			prob.setGType("F7");
 			break;
 		case 4:
-			prob = new MMZDT(50, 1,  -100,100);
-			prob.setGType("griewank");
-			break;
-		case 5:
 			prob = new MMZDT(50, 1, -0.5, 0.5);
-			prob.setGType("weierstrass");
+			prob.setGType("F8");
 			break;					
 		default:
 			prob = new MMZDT(50, 1, -100,100);
@@ -58,14 +54,14 @@ public class MATP10 {
 		prob.setHType("convex");
 				
 		
-		double[][] matrix = IO.readMatrixFromFile("resources/MData/WCCI2020/benchmark_10/matrix_"+(taskID+1));
+		double[][] matrix = IO.readMatrixFromFile("resources/MData/CEC2021/benchmark_30/matrix_"+(taskID+1));
 		
-		double shiftValues[] = IO.readShiftValuesFromFile("resources/MData/WCCI2020/benchmark_10/bias_"+(taskID+1));
+		double shiftValues[] = IO.readShiftValuesFromFile("resources/MData/CEC2021/benchmark_30/bias_"+(taskID+1));
 		
 		prob.setRotationMatrix(matrix);
-		prob.setShiftValues(shiftValues);		
+		prob.setShiftValues(shiftValues);			
 		
-		((Problem)prob).setName("MATP10-"+(taskID+1));
+		((Problem)prob).setName("ETMOF30_"+(taskID+1));
 		
 		problemSet.add(prob);
 		

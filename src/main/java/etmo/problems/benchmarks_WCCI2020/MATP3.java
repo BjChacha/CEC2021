@@ -30,9 +30,9 @@ public class MATP3 {
 		prob.setGType("griewank");
 				
 		
-		double[][] matrix = IO.readMatrixFromFile("MData/WCCI2020/benchmark_3/matrix_"+(taskID+1));
+		double[][] matrix = IO.readMatrixFromFile("resources/MData/WCCI2020/benchmark_3/matrix_"+(taskID+1));
 		
-		double shiftValues[] = IO.readShiftValuesFromFile("MData/WCCI2020/benchmark_3/bias_"+(taskID+1));
+		double shiftValues[] = IO.readShiftValuesFromFile("resources/MData/WCCI2020/benchmark_3/bias_"+(taskID+1));
 		
 		prob.setRotationMatrix(matrix);
 		prob.setShiftValues(shiftValues);		

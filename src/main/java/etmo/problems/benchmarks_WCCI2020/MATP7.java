@@ -46,9 +46,9 @@ public class MATP7 {
 		prob.setHType("concave");
 				
 		
-		double[][] matrix = IO.readMatrixFromFile("MData/WCCI2020/benchmark_7/matrix_"+(taskID+1));
+		double[][] matrix = IO.readMatrixFromFile("resources/MData/WCCI2020/benchmark_7/matrix_"+(taskID+1));
 		
-		double shiftValues[] = IO.readShiftValuesFromFile("MData/WCCI2020/benchmark_7/bias_"+(taskID+1));
+		double shiftValues[] = IO.readShiftValuesFromFile("resources/MData/WCCI2020/benchmark_7/bias_"+(taskID+1));
 		
 		prob.setRotationMatrix(matrix);
 		prob.setShiftValues(shiftValues);		
