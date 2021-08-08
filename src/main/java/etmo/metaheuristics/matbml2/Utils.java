@@ -21,6 +21,8 @@
 
 package etmo.metaheuristics.matbml2;
 
+import etmo.util.PseudoRandom;
+
 /**
  * Utilities methods to used by MOEA/D
  */
@@ -30,7 +32,7 @@ public class Utils {
 		int dim = vector1.length;
 		double sum = 0;
 		for (int n = 0; n < dim; n++) {
-			sum += (vector1[n] - vector2[n]) * (vector1[n] - vector2[n]);
+			sum += Math.pow(vector1[n] - vector2[n], 2);
 		}
 		return Math.sqrt(sum);
 	} // distVector
@@ -95,6 +97,7 @@ public class Utils {
 			}
 		} // while
 	} // randomPermutation
+
 	static void QuickSort(double[] array, int[] idx, int from, int to) {
 		if (from < to) {
 			double temp = array[to];
@@ -118,5 +121,65 @@ public class Utils {
 			QuickSort(array, idx, from, i);
 			QuickSort(array, idx, i + 1, to);
 		}
+	}
+
+	public static int roulette(double[] arr){
+		double[] sm = softmax(arr);
+
+		double s = 0;
+		double p = PseudoRandom.randDouble();
+		int idx;
+
+		for (idx = 0; idx < sm.length - 1; idx++) {
+			s += sm[idx];
+			if (s >= p) break;
+		}
+		return idx;
+	}
+
+	public static int rouletteExceptZero(double[] arr){
+		double[] sm = softmaxExceptZero(arr);
+
+		double s = 0;
+		double p = PseudoRandom.randDouble();
+		int idx;
+
+		for (idx = 0; idx < sm.length - 1; idx++) {
+			s += sm[idx];
+			if (s >= p) break;
+		}
+		return idx;
+	}
+
+	public static double[] softmax(double[] arr){
+		double[] res = new double[arr.length];
+		double sum = 0;
+
+		for (int i = 0; i < res.length; i++){
+			res[i] = Math.exp(arr[i]);
+			sum += res[i];
+		}
+
+		for (int i = 0; i < res.length; i++) {
+			res[i] /= sum;
+		}
+		return res;
+	}
+
+	public static double[] softmaxExceptZero(double[] arr){
+		double[] res = new double[arr.length];
+		double sum = 0;
+
+		for (int i = 0; i < res.length; i++){
+			if (arr[i] > 0) {
+				res[i] = Math.exp(arr[i]);
+				sum += res[i];
+			}
+		}
+
+		for (int i = 0; i < res.length; i++) {
+			res[i] /= sum;
+		}
+		return res;
 	}
 }

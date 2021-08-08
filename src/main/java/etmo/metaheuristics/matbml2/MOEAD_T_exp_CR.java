@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class MOEAD_T extends MtoAlgorithm {
+public class MOEAD_T_exp_CR extends MtoAlgorithm {
 	private int populationSize_;
 	private SolutionSet[] population_;
 
@@ -61,7 +61,7 @@ public class MOEAD_T extends MtoAlgorithm {
 
 	int taskNum_;
 
-	public MOEAD_T(ProblemSet problemSet) {
+	public MOEAD_T_exp_CR(ProblemSet problemSet) {
 		super(problemSet);
 
 		functionType_ = "_TCHE1";
@@ -210,7 +210,7 @@ public class MOEAD_T extends MtoAlgorithm {
 
 			// 0: I; 1: E
 			int transferMode;
-			if (PseudoRandom.randDouble() < 1) {
+			if (PseudoRandom.randDouble() < implicitP[targetTaskId][sourceTaskId]) {
 				// 隐式
 				transferMode = 0;
 				child = transferReproduce(targetTaskId, sourceTaskId, i);
