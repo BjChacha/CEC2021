@@ -114,4 +114,5 @@ fabric.properties
 /target/
 /~$Algo_Compare.xlsx
 /.settings/
-/.vscode/
+.vscode/
+data/
