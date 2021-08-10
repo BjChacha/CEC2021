@@ -90,7 +90,7 @@ public class MOEAD_T_DRA_main {
 		// System.out.println("Algo:" + algorithmName + ".");
 
 		System.out.println();
-		String fileName = "MOEAD_T(rnd(1.0)_DE(CR0.6)_SBX_A(1)_RA(5)" + "_x" + times + "_" + benchmarkName;
+		String fileName = "MOEAD_T(rnd(1.0)_DE(CR0.6)_SBX_A(1)_RA(1)" + "_x" + times + "_" + benchmarkName;
 		System.out.println("Experiment started -> " + fileName);
 
 		long startTime = System.currentTimeMillis();
@@ -172,12 +172,12 @@ public class MOEAD_T_DRA_main {
 		ProblemSet ps;
 		if (problemName.equalsIgnoreCase("CEC2021")){
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + problemId)
+					.forName("etmo.problems.CEC2021.ETMOF" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		} else if (problemName.equalsIgnoreCase("WCCI2020")){
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + problemId)
+					.forName("etmo.problems.WCCI2020.MATP" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		} else if (problemName.equalsIgnoreCase("CEC2017")){
@@ -193,7 +193,7 @@ public class MOEAD_T_DRA_main {
 		} else {
 			System.out.println("Error: unknown benchmark type: " + problemName);
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + problemId)
+					.forName("etmo.problems.CEC2021.ETMOF" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		}

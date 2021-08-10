@@ -42,13 +42,13 @@ public class MOMFEAII_main {
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++ ){
 //			problemSet = (ProblemSet) Class
-//					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
+//					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
 //					.getMethod("getProblem")
 //					.invoke(null, null);
 
 //			// WCCI 2020
 //			problemSet = (ProblemSet) Class
-//					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + pCase)
+//					.forName("etmo.problems.WCCI2020.MATP" + pCase)
 //					.getMethod("getProblem")
 //					.invoke(null, null);
 

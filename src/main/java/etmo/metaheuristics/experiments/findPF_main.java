@@ -16,7 +16,7 @@ public class findPF_main {
         for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
             System.out.println("Processing Task " + pCase + " ...");
             problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
+                    .forName("etmo.problems.CEC2021.ETMOF" + pCase)
                     .getMethod("getProblem")
                     .invoke(null, null);
 

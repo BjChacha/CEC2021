@@ -158,12 +158,12 @@ public class MOEAD_TA_pamExp_main {
 		ProblemSet ps;
 		if (problemName.equalsIgnoreCase("CEC2021")){
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + problemId)
+					.forName("etmo.problems.CEC2021.ETMOF" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		} else if (problemName.equalsIgnoreCase("WCCI2020")){
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_WCCI2020.MATP" + problemId)
+					.forName("etmo.problems.WCCI2020.MATP" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		} else if (problemName.equalsIgnoreCase("CEC2017")){
@@ -179,7 +179,7 @@ public class MOEAD_TA_pamExp_main {
 		} else {
 			System.out.println("Error: unknown benchmark type: " + problemName);
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + problemId)
+					.forName("etmo.problems.CEC2021.ETMOF" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		}

@@ -39,7 +39,7 @@ public class AKT_main {
 
 		for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
 //			problemSet = (ProblemSet) Class
-//					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
+//					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
 //					.getMethod("getProblem")
 //					.invoke(null, null);
 			// CEC2017

@@ -31,7 +31,7 @@ public class MaTMY2_main {
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
             // CEC2021
             problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
+                    .forName("etmo.problems.CEC2021.ETMOF" + pCase)
                     .getMethod("getProblem")
                     .invoke(null, null);
 

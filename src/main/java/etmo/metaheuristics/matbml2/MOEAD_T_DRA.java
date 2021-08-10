@@ -142,7 +142,7 @@ public class MOEAD_T_DRA extends MtoAlgorithm {
 			int assistTask = getSourceTaskId(taskId, "random");
 			if (PseudoRandom.randDouble() < 1 && taskId != assistTask){
 				int t = 0;
-				while (steps[assistTask] > steps[taskId] && t < 5){
+				while (steps[assistTask] > steps[taskId] && t < 1){
 					steps[assistTask] = solelyConverge(assistTask, 1);
 					t ++;
 				}
