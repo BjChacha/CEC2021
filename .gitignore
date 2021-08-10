@@ -116,3 +116,5 @@ fabric.properties
 /.settings/
 .vscode/
 data/
+/~$Algo_Develop.xlsx
+*.log
