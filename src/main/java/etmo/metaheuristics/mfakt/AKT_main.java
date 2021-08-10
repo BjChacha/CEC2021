@@ -4,6 +4,7 @@ import etmo.core.*;
 import etmo.operators.adaCrossover.CrossoverFactory;
 import etmo.operators.mutation.MutationFactory;
 import etmo.operators.selection.SelectionFactory;
+import etmo.problems.CEC2017.*;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.comparators.LocationComparator;
@@ -27,27 +28,40 @@ public class AKT_main {
 
 		HashMap parameters; // Operator parameters	
 
-		int problemStart = 25;
-		int problemEnd = 32;
+		int problemStart = 1;
+		int problemEnd = 9;
 
-		int times = 21;
+		int times = 20;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
 		System.out.println("Algo: MFEA_AKT.");
 
 		for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
-			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-					.getMethod("getProblem")
-					.invoke(null, null);
+//			problemSet = (ProblemSet) Class
+//					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
+//					.getMethod("getProblem")
+//					.invoke(null, null);
+			// CEC2017
+			ProblemSet[] cec2017 = {
+					CIHS.getProblem(),
+					CIMS.getProblem(),
+					CILS.getProblem(),
+					PIHS.getProblem(),
+					PIMS.getProblem(),
+					PILS.getProblem(),
+					NIHS.getProblem(),
+					NIMS.getProblem(),
+					NILS.getProblem()
+			};
+			problemSet = cec2017[pCase-1];
 
 			int taskNum = problemSet.size();
 			double[] ave = new double[taskNum];
 
 			String[] pf = new String[taskNum];
 			for (int k = 0; k < pf.length; k++)
-				pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+				pf[k] = "resources/PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
 
 			String pSName = problemSet.get(0).getName();
 			pSName = pSName.substring(0, pSName.length() - 2);
@@ -82,7 +96,7 @@ public class AKT_main {
 			algorithm.addOperator("selection", selection);
 
 			double[][] IGDs = new double[taskNum][times];
-			for (int t = 0; t <= times; t++) {
+			for (int t = 0; t < times; t++) {
 				long startTime = System.currentTimeMillis();
 				SolutionSet population = algorithm.execute();
 				long endTime = System.currentTimeMillis();
@@ -118,7 +132,7 @@ public class AKT_main {
 					ave[i] += igd;
 				}
 			}
-			LogIGD.LogIGD("MFEA_AKT", pCase, IGDs);
+			LogIGD.LogIGD("MFEA_AKT_CEC2017_x" + times, pCase, IGDs);
 			for (int i = 0; i < taskNum; i++)
 				System.out.println("T" + (i + 1) + "\t" + form.format(ave[i] / times));
 			System.out.println();

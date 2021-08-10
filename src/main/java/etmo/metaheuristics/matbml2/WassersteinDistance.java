@@ -56,28 +56,21 @@ class WassersteinDistance {
     }
 
     public static double getWD2(double[][] p1, double[][] p2){
-        INDArray P1 = new NDArray(p1);
-        INDArray P2 = new NDArray(p2);
+        int size = p1.length;
+        double[][] distanceMat = new double[size][size];
+        for (int i = 0; i < size - 1; i++){
+            distanceMat[i][i] = Double.MAX_VALUE;
+            for (int j = i + 1; j < size; j++){
+                distanceMat[i][j] = distanceMat[j][i] = Utils.distVector(p1[i], p2[j]);
+            }
+        }
 
-        INDArray reduced1 = PCA.pca(P1, 5, false);
-        INDArray reduced2 = PCA.pca(P2, 5, false);
+        int[] assignment = new HungarianAlgorithm(distanceMat).execute();
+        double distance = 0;
+        for (int i = 0; i < size; i++){
+            distance += distanceMat[i][assignment[i]];
+        }
 
-        INDArray[] d1 = PCA.covarianceMatrix(reduced1);
-        INDArray[] d2 = PCA.covarianceMatrix(reduced2);
-
-        INDArray mean1 = d1[1];
-        INDArray cov1 = d1[0];
-        INDArray mean2 = d2[1];
-        INDArray cov2 = d2[0];
-
-        double distance1 = 0;
-        double distance2 = 0;
-
-        distance1 = Transforms.pow(mean1.sub(mean2), 2).sumNumber().doubleValue();
-        INDArray tmp = Transforms.pow(cov1, 0.5);
-        distance2 = (Transforms.pow((Transforms.pow(cov1, 0.5).sub(Transforms.pow(cov2, 0.5))), 2)).sumNumber().doubleValue();
-
-        double distance = distance1 + distance2;
-        return distance;
+        return distance / size;
     }
 }

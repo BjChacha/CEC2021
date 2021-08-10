@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import etmo.core.*;
+import etmo.problems.CEC2017.*;
 import etmo.util.comparators.LocationComparator;
 
 import etmo.operators.crossover.CrossoverFactory;
@@ -14,6 +15,7 @@ import etmo.operators.selection.SelectionFactory;
 
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
+import etmo.util.logging.LogIGD;
 
 public class EMTET_main {
     public static void main(String[] args) throws IOException, JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -25,26 +27,41 @@ public class EMTET_main {
 
         HashMap parameters; // Operator parameters
 
-        int problemStart = 25;
-        int problemEnd = 32;
+        int problemStart = 1;
+        int problemEnd = 9;
 
-        int times = 5;
+        int times = 20;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
         System.out.println("Algo: EMTET.");
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
-            problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-                    .getMethod("getProblem")
-                    .invoke(null, null);
+//            problemSet = (ProblemSet) Class
+//                    .forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
+//                    .getMethod("getProblem")
+//                    .invoke(null, null);
+            // CEC2017
+            ProblemSet[] cec2017 = {
+                    CIHS.getProblem(),
+                    CIMS.getProblem(),
+                    CILS.getProblem(),
+                    PIHS.getProblem(),
+                    PIMS.getProblem(),
+                    PILS.getProblem(),
+                    NIHS.getProblem(),
+                    NIMS.getProblem(),
+                    NILS.getProblem()
+            };
+            problemSet = cec2017[pCase-1];
+
+
             int taskNum = problemSet.size();
             double[] ave = new double[taskNum];
 
             String[] pf = new String[taskNum];
             for (int i = 0; i < pf.length; i++) {
-                pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
+                pf[i] = "resources/PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
             }
 
             String pSName = problemSet.get(0).getName();
@@ -79,6 +96,7 @@ public class EMTET_main {
             algorithm.addOperator("mutation", mutation);
             algorithm.addOperator("selection", selection);
 
+            double[][] IGDs = new double[taskNum][times];
             for (int t = 1; t <= times; t++) {
                 long startTime = System.currentTimeMillis();
 
@@ -113,9 +131,11 @@ public class EMTET_main {
                         continue;
 
                     igd = indicator.getIGD(resPopulation[k]);
+                    IGDs[k][t-1] = igd;
                     ave[k] += igd;
                 }
             }
+            LogIGD.LogIGD("EMTET_CEC2017_x" + times, pCase, IGDs);
             for (int i = 0; i < taskNum; i++)
                 System.out.println("Average IGD for " + problemSet.get(i).getName() + ": " + form.format(ave[i] / times));
             System.out.println();

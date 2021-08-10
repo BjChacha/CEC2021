@@ -41,18 +41,18 @@ public class MOEAD_TA_pamExp_main {
 		algorithm.setInputParameter("transferP", 1.0);
 
 		parameters = new HashMap();
-		parameters.put("CR", cr);
+		parameters.put("CR", 0.6);
 		parameters.put("F", 0.5);
 		crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
 
-		parameters = new HashMap();
-		parameters.put("probability", 0.9);
-		parameters.put("distributionIndex", 20.0);
-		crossover2 = CrossoverFactory.getCrossoverOperator("SBXCrossover",parameters);
-
 //		parameters = new HashMap();
-//		parameters.put("CR", 0.5);
-//		crossover2 = CrossoverFactory.getCrossoverOperator("UniformCrossover", parameters);
+//		parameters.put("probability", 0.9);
+//		parameters.put("distributionIndex", 20.0);
+//		crossover2 = CrossoverFactory.getCrossoverOperator("SBXCrossover",parameters);
+
+		parameters = new HashMap();
+		parameters.put("CR", cr);
+		crossover2 = CrossoverFactory.getCrossoverOperator("UniformCrossover", parameters);
 //
 //		parameters = new HashMap();
 //		crossover2 = CrossoverFactory.getCrossoverOperator("TransferDECrossover", parameters);
@@ -145,7 +145,7 @@ public class MOEAD_TA_pamExp_main {
 //			}
 
 					if (LOG_IGD) {
-						LogIGD.LogIGD("exp_MOEAD_T(simTransfer_10" +"_SBX_DE(CR"+cr+")_noPM_A1)" + "_x" + times + "_" + benchmarkName, pCase, igds);
+						LogIGD.LogIGD("exp_MOEAD_T(simTransfer_10" +"_UF(CR"+cr+")_DE(CR0.6)_noPM_A1)" + "_x" + times + "_" + benchmarkName, pCase, igds);
 //				LogIGD.LogIGD("MOEAD" + "_" + benchmarkName, pCase, igds);
 					}
 				}
@@ -179,7 +179,7 @@ public class MOEAD_TA_pamExp_main {
 		} else {
 			System.out.println("Error: unknown benchmark type: " + problemName);
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + problemId)
+					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		}

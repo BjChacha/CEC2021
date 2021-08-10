@@ -16,14 +16,14 @@ public class findPF_main {
         for (int pCase = problemStart; pCase <= problemEnd; pCase++) {
             System.out.println("Processing Task " + pCase + " ...");
             problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                    .forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
                     .getMethod("getProblem")
                     .invoke(null, null);
 
             int taskNum = problemSet.size();
             String[] pf = new String[taskNum];
             for (int k = 0; k < pf.length; k++) {
-                pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+                pf[k] = "resources/PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
             }
             algorithm = new findPF(problemSet);
             algorithm.execute();

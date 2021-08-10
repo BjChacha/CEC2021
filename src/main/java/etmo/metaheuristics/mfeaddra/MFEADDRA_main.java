@@ -25,20 +25,20 @@ public class MFEADDRA_main {
 
         HashMap parameters; // Operator parameters
 
-        int taskStart = 1;
-        int taskEnd = 9;
+        int taskStart = 25;
+        int taskEnd = 32;
 
-        int times = 20;
+        int times = 10;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
         System.out.println("Algo: MFEADDRA.");
 
         for (int pCase = taskStart; pCase <= taskEnd; pCase++) {
-//			problemSet = (ProblemSet) Class
-//					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
-//					.getMethod("getProblem")
-//					.invoke(null, null);
+			problemSet = (ProblemSet) Class
+					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
+					.getMethod("getProblem")
+					.invoke(null, null);
 
 //            // WCCI 2020
 //            problemSet = (ProblemSet) Class
@@ -46,19 +46,19 @@ public class MFEADDRA_main {
 //                    .getMethod("getProblem")
 //                    .invoke(null, null);
 
-            // CEC2017
-            ProblemSet[] cec2017 = {
-                    CIHS.getProblem(),
-                    CIMS.getProblem(),
-                    CILS.getProblem(),
-                    PIHS.getProblem(),
-                    PIMS.getProblem(),
-                    PILS.getProblem(),
-                    NIHS.getProblem(),
-                    NIMS.getProblem(),
-                    NILS.getProblem()
-            };
-            problemSet = cec2017[pCase - 1];
+//            // CEC2017
+//            ProblemSet[] cec2017 = {
+//                    CIHS.getProblem(),
+//                    CIMS.getProblem(),
+//                    CILS.getProblem(),
+//                    PIHS.getProblem(),
+//                    PIMS.getProblem(),
+//                    PILS.getProblem(),
+//                    NIHS.getProblem(),
+//                    NIMS.getProblem(),
+//                    NILS.getProblem()
+//            };
+//            problemSet = cec2017[pCase - 1];
 
             int taskNum = problemSet.size();
             double ave[] = new double[taskNum];
@@ -74,8 +74,8 @@ public class MFEADDRA_main {
 
             algorithm = new MFEADDRA(problemSet);
 
-            algorithm.setInputParameter("populationSize", 105 * taskNum);
-            algorithm.setInputParameter("maxEvaluations", 1000 * taskNum * 105);
+            algorithm.setInputParameter("populationSize", 100 * taskNum);
+            algorithm.setInputParameter("maxEvaluations", 1000 * taskNum * 100);
             algorithm.setInputParameter("rmp", 0.1);
             algorithm.setInputParameter("beta", 0.8);
             algorithm.setInputParameter("nr", 2);
@@ -135,7 +135,7 @@ public class MFEADDRA_main {
                     ave[i] += igd;
                 }
             }
-            LogIGD.LogIGD("MOMFEADRA_CEC2017", pCase, igds);
+            LogIGD.LogIGD("MOMFEADRA_p100_CEC2021_x" + times, pCase, igds);
             for (int i = 0; i < taskNum; i++)
                 System.out.println("T" + (i + 1) + "\t" + form.format(ave[i] / times));
             System.out.println();

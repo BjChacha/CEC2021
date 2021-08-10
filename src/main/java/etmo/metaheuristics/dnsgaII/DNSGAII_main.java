@@ -68,7 +68,7 @@ public class DNSGAII_main {
 			
 			String[] pf = new String[nc+1];
 			for(int i=0;i<nc+1;i++){
-				pf[i] = "PF/DynamicPF/" + problemSet2.get(0).getName() + "/POF_Tt=" + i + ".txt";
+				pf[i] = "resources/PF/DynamicPF/" + problemSet2.get(0).getName() + "/POF_Tt=" + i + ".txt";
 			}
 			
 			QualityIndicator indicator;

@@ -79,7 +79,7 @@ public class MTEA_AD_main {
 
 //            // CEC2021
 //            problemSet = (ProblemSet) Class
-//                    .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//                    .forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
 //                    .getMethod("getProblem")
 //                    .invoke(null, null);
 
@@ -97,7 +97,7 @@ public class MTEA_AD_main {
 
             String[] pf = new String[taskNumber];
             for (int i = 0; i < pf.length; i++){
-                pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
+                pf[i] = "resources/PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
             }//String pf = "PF/StaticPF/" + "convex.pf";
             //System.out.println(pf);
             algorithm.setInputParameter("populationSize", 100);

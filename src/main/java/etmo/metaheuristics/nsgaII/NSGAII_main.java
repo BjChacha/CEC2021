@@ -32,7 +32,7 @@ public class NSGAII_main {
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++) {
 			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
 
@@ -47,7 +47,7 @@ public class NSGAII_main {
 
 			for (int tsk = 0; tsk < taskNum; tsk++) {
 				ProblemSet pS = problemSet.getTask(tsk);
-				pf[tsk] = "PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
+				pf[tsk] = "resources/PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
 				for (int t = 1; t <= times; t++) {
 					algorithm = new NSGAII(pS);
 					algorithm.setInputParameter("populationSize", 100);

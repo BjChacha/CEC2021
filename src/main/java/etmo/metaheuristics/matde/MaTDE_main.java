@@ -39,7 +39,7 @@ public class MaTDE_main {
 //           // CEC 2021
 //           benchmark_name = "CEC2021";
 //           problemSet = (ProblemSet) Class
-//                   .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+//                   .forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
 //                   .getMethod("getProblem")
 //                   .invoke(null, null);
 

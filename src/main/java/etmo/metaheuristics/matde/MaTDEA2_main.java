@@ -34,7 +34,7 @@ public class MaTDEA2_main {
                 // CEC 2021
                 benchmark_name = "CEC2021";
                 problemSet = (ProblemSet) Class
-                        .forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+                        .forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
                         .getMethod("getProblem")
                         .invoke(null, null);
 
@@ -66,7 +66,7 @@ public class MaTDEA2_main {
 
                 String[] pf = new String[taskNum];
                 for (int k = 0; k < pf.length; k++) {
-                    pf[k] = "PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+                    pf[k] = "resources/PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
                 }
 
                 String pSName = problemSet.get(0).getName();

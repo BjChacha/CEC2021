@@ -189,7 +189,7 @@ public class MaTDE_A extends MtoAlgorithm {
         igds = new ArrayList[taskNum];
         indicators = new QualityIndicator[taskNum];
         for (int k = 0; k < pf.length; k++){
-            pf[k] = "PF/StaticPF/" + problemSet_.get(k).getHType() + "_" + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
+            pf[k] = "resources/PF/StaticPF/" + problemSet_.get(k).getHType() + "_" + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
             igds[k] = new ArrayList<>();
             indicators[k] = new QualityIndicator(problemSet_.get(k), pf[k]);
         }

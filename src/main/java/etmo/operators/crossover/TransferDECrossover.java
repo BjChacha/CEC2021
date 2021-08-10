@@ -59,6 +59,8 @@ public class TransferDECrossover extends Crossover{
         K_ = DEFAULT_K;
         DE_Variant_ = DEFAULT_DE_VARIANT;
 
+        if (parameters.get("CR") != null)
+            Arrays.fill(CR_, (Double) parameters.get("CR"));
         if (parameters.get("K") != null)
             K_ = (Double) parameters.get("K");
         if (parameters.get("DE_VARIANT") != null)
@@ -93,12 +95,10 @@ public class TransferDECrossover extends Crossover{
         CR_ = new double[len];
         F1_ = new double[len];
         F2_ = new double[len];
-        F3_ = new double[len];
         for (int i = 0; i < len; i++) {
-            CR_[i] = 0.9 - Math.sqrt(2 * deltaMean[i]);
+
             F1_[i] = 2 * Math.sqrt(deltaMean[i]);
             F2_[i] = stdSource[i];
-            F3_[i] = stdTarget[i];
         }
     }
 

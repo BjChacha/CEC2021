@@ -35,7 +35,7 @@ public class MOMFEAII_main {
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++ ){
 			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
 
@@ -44,7 +44,7 @@ public class MOMFEAII_main {
 
 			String[] pf = new String[taskNum];
 			for (int i = 0; i < pf.length; i++){
-				pf[i] = "PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
+				pf[i] = "resources/PF/StaticPF/" + problemSet.get(i).getHType() + "_" + problemSet.get(i).getNumberOfObjectives() + "D.pf";
 			}
 
 			String pSName = problemSet.get(0).getName();

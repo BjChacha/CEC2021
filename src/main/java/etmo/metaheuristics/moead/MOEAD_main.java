@@ -34,7 +34,7 @@ public class MOEAD_main {
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
 			benchmark_name = "CEC2021";
 			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + pCase)
+					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
 
@@ -60,7 +60,7 @@ public class MOEAD_main {
 
 //				System.out.println("RunID\t" + "IGD for " + problemSet.get(tsk).getName() + " for " + times + " times.");
 
-				pf[tsk] = "PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
+				pf[tsk] = "resources/PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
 
 				for (int t = 1; t <= times; t++){
 					algorithm = new MOEAD(pS);

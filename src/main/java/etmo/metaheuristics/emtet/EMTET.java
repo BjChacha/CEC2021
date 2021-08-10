@@ -113,7 +113,6 @@ public class EMTET extends MtoAlgorithm {
     }
 
     private SolutionSet transferNeighbor(Variable[] x, int source, int target, int num) throws JMException {
-//        记得要做标记
         SolutionSet closestNeighbor = new SolutionSet(num);
         Map<Double,Integer> dis = new TreeMap<Double,Integer>();
         for (int i = 0; i < populationSize; i++){
@@ -184,7 +183,6 @@ public class EMTET extends MtoAlgorithm {
     }
 
     private void initPopulation() throws ClassNotFoundException, JMException {
-
         population = new SolutionSet[problemSet_.size()];
         for (int i = 0; i < problemSet_.size(); i++) {
             population[i] = new SolutionSet(populationSize);
@@ -193,13 +191,11 @@ public class EMTET extends MtoAlgorithm {
                 problemSet_.get(i).evaluate(newSolution);
                 problemSet_.get(i).evaluateConstraints(newSolution);
                 evaluations++;
-//                这里的skillFactor为迁移存活标志
                 newSolution.setSkillFactor(0);
                 population[i].add(newSolution);
             } // for
             assignFitness(population[i]);
         }
-
     }
 
     void assignFitness(SolutionSet pop) {

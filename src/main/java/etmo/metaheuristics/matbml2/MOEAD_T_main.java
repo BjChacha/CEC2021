@@ -43,9 +43,16 @@ public class MOEAD_T_main {
 		algorithm.setInputParameter("transferP", 1.0);
 
 		parameters = new HashMap();
-		parameters.put("CR", 0.9);
+		parameters.put("CR", 0.6);
 		parameters.put("F", 0.5);
 		crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
+
+//		parameters = new HashMap();
+//		parameters.put("CR_LB", 0.1);
+//		parameters.put("CR_UB", 0.9);
+//		parameters.put("F_LB", 0.1);
+//		parameters.put("F_UB", 2.0);
+//		crossover = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
 
 		parameters = new HashMap();
 		parameters.put("probability", 0.9);
@@ -74,12 +81,12 @@ public class MOEAD_T_main {
 	public static void main(String[] args) throws JMException, SecurityException, IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
 		ProblemSet problemSet; // The problem to solve
 
-		String benchmarkName = "CEC2017";
+		String benchmarkName = "CEC2021";
 		Class algorithmClass = MOEAD_T.class;
 		String algorithmName = algorithmClass.getName();
-		int taskStart = 1;
-		int taskEnd = 9;
-		int times = 20;
+		int taskStart = 25;
+		int taskEnd = 32;
+		int times = 10;
 
 		System.out.println("Algo:" + algorithmName + ".");
 
@@ -97,7 +104,6 @@ public class MOEAD_T_main {
 			String pSName = problemSet.get(0).getName();
 			System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
 
-			// 尝试并行
 			List<MtoAlgorithm> algorithms = new ArrayList<>(times);
 			List<SolutionSet[]> populations = new ArrayList<>(times);
 			// 初始化算法
@@ -108,12 +114,15 @@ public class MOEAD_T_main {
 			algorithms.parallelStream().forEach(a -> {
 				try {
 					populations.add(a.execute());
-				} catch (JMException e) {
-					e.printStackTrace();
-				} catch (ClassNotFoundException e) {
+				} catch (JMException | ClassNotFoundException e) {
 					e.printStackTrace();
 				}
 			});
+
+//			// 串行执行
+//			for (int t = 0; t < times; t++){
+//				populations.add(algorithms.get(t).execute());
+//			}
 
 			// 计算IGD
 			double[][] igds = new double[taskNum][times];
@@ -143,7 +152,7 @@ public class MOEAD_T_main {
 //			}
 
 			if (LOG_IGD) {
-				LogIGD.LogIGD("MOEAD_T(simTransfer_10_DE(0.9)_SBX_noPM_nA1_ADATP(D0.9))" + "_x" + times + "_" + benchmarkName, pCase, igds);
+				LogIGD.LogIGD("MOEAD_T(wd(1.0)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName, pCase, igds);
 //				LogIGD.LogIGD("MOEAD" + "_x" + times + "_" + benchmarkName, pCase, igds);
 			}
 		}
@@ -174,7 +183,7 @@ public class MOEAD_T_main {
 		} else {
 			System.out.println("Error: unknown benchmark type: " + problemName);
 			ps = (ProblemSet) Class
-					.forName("etmo.problems.benchmarks_ETMO.ETMOF" + problemId)
+					.forName("etmo.problems.benchmarks_CEC2021.ETMOF" + problemId)
 					.getMethod("getProblem")
 					.invoke(null, null);
 		}

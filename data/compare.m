@@ -2,9 +2,10 @@
 clear;
 clc;
 
-%% 定义参数
+%% 定义参数v
 basePath = ".\IGDs";
-baseAlgoIdx = 4;
+baseAlgoIdx = 10;
+isPrintResult = true;
 
 %% 读取数据
 srcList = dir(basePath);
@@ -73,25 +74,27 @@ for i = 1:algoNum
 end
 
 % 打印具体结果
-fprintf("======== 具体结果 ========\n");
-for i = 1:algoNum
-    fprintf("---- " + srcList(i).name + " ----\n");
-    for j = 1:size(igd, 2)
-%         fprintf("T" + j + ": \n");
-        for k = 1:size(igd{i, j},1)
-            fprintf('%.2E',igd{i,j}(k,end-1));
-            fprintf('±%.2E',igd{i,j}(k,end-2));
-            switch igd{i,j}(k,end)
-                case -1
-                    fprintf('(-)');
-                case 0
-                    fprintf('(≈)');
-                case 1
-                    fprintf('(+)');
-                otherwise
-            end
-            fprintf('\n');
-        end 
-%         fprintf('\n');
+if isPrintResult
+    fprintf("======== 具体结果 ========\n");
+    for i = 1:algoNum
+        fprintf("---- " + srcList(i).name + " ----\n");
+        for j = 1:size(igd, 2)
+    %         fprintf("T" + j + ": \n");
+            for k = 1:size(igd{i, j},1)
+                fprintf('%.2E',igd{i,j}(k,end-1));
+                fprintf('±%.2E',igd{i,j}(k,end-2));
+                switch igd{i,j}(k,end)
+                    case -1
+                        fprintf('(-)');
+                    case 0
+                        fprintf('(≈)');
+                    case 1
+                        fprintf('(+)');
+                    otherwise
+                end
+                fprintf('\n');
+            end 
+    %         fprintf('\n');
+        end
     end
 end
