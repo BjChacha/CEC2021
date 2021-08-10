@@ -82,7 +82,7 @@ public class MOEAD_T_CEC2021_main {
 		String benchmarkName = "CEC2021";
 		Class algorithmClass = MOEAD_T.class;
 		String algorithmName = algorithmClass.getName();
-		int taskStart = 25;
+		int taskStart = 31;
 		int taskEnd = 32;
 		int times = 1;
 

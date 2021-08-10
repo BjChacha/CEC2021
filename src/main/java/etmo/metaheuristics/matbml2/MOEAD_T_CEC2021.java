@@ -194,14 +194,22 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 //				LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
 //			}
 		}
-
+		System.out.println(Arrays.toString(convergeTimes));
+		System.out.println();
+		for (int k = 0; k < taskNum_; k++){
+			System.out.println(Arrays.toString(transferTimes[k]));
+		}
+		System.out.println();
+		for (int k = 0; k < taskNum_; k++){
+			System.out.println(Arrays.toString(transferBetterTimes[k]));
+		}
 		return population_;
 	}
 
 	public void iterate() throws JMException {
 		for (int taskId = 0; taskId < taskNum_; taskId++) {
-			int assistTask = getSourceTaskId(taskId, "random");
-			if (PseudoRandom.randDouble() < 1) {
+			int assistTask = getSourceTaskId(taskId, "wd");
+			if (PseudoRandom.randDouble() < 1 && assistTask != taskId) {
 				transferConverge(taskId, assistTask);
 			} else {
 				solelyConverge(taskId, 1);
@@ -284,14 +292,19 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 			// Wasserstein Distance
 			double[] distance = new double[taskNum_];
 			double[] finalScore = new double[taskNum_];
+			double maxScore = 0;
 			for (int k = 0; k < taskNum_; k++) {
 				if (k == targetTaskId) continue;
 				distance[k] = WassersteinDistance.getWD2(
 						population_[targetTaskId].getMat(),
 						population_[k].getMat());
 				finalScore[k] = 3 * scores[targetTaskId][k] / distance[k];
+				maxScore = Math.max(maxScore, finalScore[k]);
 			}
-			sourceTaskId = Utils.rouletteExceptZero(finalScore);
+			if (maxScore > 0)
+				sourceTaskId = Utils.rouletteExceptZero(finalScore);
+			else
+				sourceTaskId = targetTaskId;
 		} else if (type.equalsIgnoreCase("kl")) {
 			double[] distance;
 			double[] finalScore = new double[taskNum_];
