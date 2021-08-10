@@ -5,12 +5,98 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3785e055-dd78-403a-bdac-4cda1bf08803" name="Default Changelist" comment="backup: 2021-08-09">
-      <change afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml2/MOEAD_T_CEC2021.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml2/MOEAD_T_CEC2021_main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/base/GFunctions.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/base/MMDTLZ.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Algo_Develop.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Algo_Develop.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml2/MOEAD_T.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml2/MOEAD_T.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml2/MOEAD_T_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matbml2/MOEAD_T_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CEC2021.iml" beforeDir="false" afterPath="$PROJECT_DIR$/CEC2021.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/dnsgaII/DNSGAII_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/dnsgaII/DNSGAII_main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matmy2/test2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matmy2/test2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/dynamicBase/DGFunctions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/dynamicBase/DGFunctions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/dynamicBase/DMDTLZ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/dynamicBase/DMDTLZ.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/dynamicBase/DMLZ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/dynamicBase/DMLZ.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/dynamicBase/DMZDT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/dynamicBase/DMZDT.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/BaseFunctions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/BaseFunctions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/GFunctions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/GFunctions.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/GroupingStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/GroupingStrategy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/IO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/IO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/MMDTLZ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/MMDTLZ.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/MMIDTLZ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/MMIDTLZ.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/MMLMOP.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/MMLMOP.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/MMLZ.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/MMLZ.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/base/staticBase/MMZDT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/base/staticBase/MMZDT.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CIHS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CILS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CIMS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX1.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX10.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX2.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX3.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX4.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX5.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX6.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX7.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX8.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/CPLX9.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/NIHS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/NILS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/NIMS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/PIHS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/PILS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/PIMS.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/base/GFunctions.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/base/IO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/base/IO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/base/MMDTLZ.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2017/base/MMZDT.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/base/MMZDT.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF1.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF10.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF10.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF11.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF11.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF12.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF12.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF13.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF13.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF14.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF14.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF15.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF15.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF16.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF16.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF17.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF17.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF18.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF18.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF19.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF19.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF20.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF20.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF21.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF21.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF22.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF22.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF23.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF23.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF24.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF24.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF25.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF25.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF26.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF26.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF27.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF27.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF28.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF28.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF29.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF29.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF3.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF3.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF30.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF30.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF31.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF31.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF32.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF32.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF33.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF33.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF34.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF34.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF35.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF35.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF36.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF36.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF37.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF37.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF38.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF38.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF39.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF39.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF4.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF4.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF40.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF40.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF5.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF5.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF6.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF6.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF7.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF7.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF8.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF8.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_CEC2021/ETMOF9.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2021/ETMOF9.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP1.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP10.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP10.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP2.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP2.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP3.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP3.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP4.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP4.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP5.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP5.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP6.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP6.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP7.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP7.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP8.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP8.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/problems/benchmarks_WCCI2020/MATP9.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020/MATP9.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +127,9 @@
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedIndex" value="1" />
+  </component>
   <component name="ProjectId" id="1u3PxnZGVJ8nmvvv4aZEeMqo8om" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -53,7 +142,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/java/etmo/problems/CEC2017" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/java/etmo/problems/WCCI2020" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
@@ -62,6 +151,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\_r\EA\ETMO\CEC2021\src\main\java\etmo\problems\WCCI2020" />
       <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\main\java\etmo\problems\CEC2017" />
       <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\main\java\etmo\problems\benchmarks_CEC2017" />
       <recent name="D:\_r\EA\ETMO\MTO-cec2021-\src\main\java\etmo\metaheuristics\matbml2" />
@@ -169,10 +259,10 @@
     </configuration>
     <list>
       <item itemvalue="Application.MOEAD_T_main" />
+      <item itemvalue="Application.Test_2" />
       <item itemvalue="Application.MOEAD_TA_pamExp_main" />
       <item itemvalue="Application.MFEADDRA_main" />
       <item itemvalue="Application.MOEAD_T_exp_TP_main" />
-      <item itemvalue="Application.Test_2" />
       <item itemvalue="Application.MOEAD_T_CEC2017_main" />
       <item itemvalue="Application.MOEAD_T_CEC2021_main" />
     </list>
