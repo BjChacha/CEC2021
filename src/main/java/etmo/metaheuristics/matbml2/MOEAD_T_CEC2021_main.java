@@ -6,7 +6,6 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
-import org.apache.commons.math3.linear.SparseRealMatrix;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -14,10 +13,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MOEAD_T_main {
+public class MOEAD_T_CEC2021_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-	static boolean LOG_IGD = true;
+	static boolean LOG_IGD = false;
 
 	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
@@ -27,12 +26,11 @@ public class MOEAD_T_main {
 		HashMap<String, Double> parameters;
 
 //		algorithm = (MtoAlgorithm) algorithmClass.getDeclaredConstructor().newInstance();
-		algorithm = new MOEAD_T(problemSet);
+		algorithm = new MOEAD_T_CEC2021(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
 
-		// TODO: 改成相对路径
 		algorithm.setInputParameter("dataDirectory", "resources/weightVectorFiles/moead");
 
 		algorithm.setInputParameter("T", 20);
@@ -86,7 +84,7 @@ public class MOEAD_T_main {
 		String algorithmName = algorithmClass.getName();
 		int taskStart = 25;
 		int taskEnd = 32;
-		int times = 10;
+		int times = 1;
 
 		System.out.println("Algo:" + algorithmName + ".");
 
@@ -110,19 +108,19 @@ public class MOEAD_T_main {
 			for (int t = 0; t < times; t++){
 				algorithms.add(algorithmGenerate(algorithmClass, problemSet));
 			}
-			// 并行执行times个算法
-			algorithms.parallelStream().forEach(a -> {
-				try {
-					populations.add(a.execute());
-				} catch (JMException | ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			});
+//			// 并行执行times个算法
+//			algorithms.parallelStream().forEach(a -> {
+//				try {
+//					populations.add(a.execute());
+//				} catch (JMException | ClassNotFoundException e) {
+//					e.printStackTrace();
+//				}
+//			});
 
-//			// 串行执行
-//			for (int t = 0; t < times; t++){
-//				populations.add(algorithms.get(t).execute());
-//			}
+			// 串行执行
+			for (int t = 0; t < times; t++){
+				populations.add(algorithms.get(t).execute());
+			}
 
 			// 计算IGD
 			double[][] igds = new double[taskNum][times];
@@ -152,7 +150,7 @@ public class MOEAD_T_main {
 //			}
 
 			if (LOG_IGD) {
-				LogIGD.LogIGD("MOEAD_T(rnd(1.0)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName, pCase, igds);
+				LogIGD.LogIGD("MOEAD_T(wd(1.0)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName, pCase, igds);
 //				LogIGD.LogIGD("MOEAD" + "_x" + times + "_" + benchmarkName, pCase, igds);
 			}
 		}

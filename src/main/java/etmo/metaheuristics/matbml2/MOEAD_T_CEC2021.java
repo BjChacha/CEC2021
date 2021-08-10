@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class MOEAD_T extends MtoAlgorithm {
+public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 	private int populationSize_;
 	private SolutionSet[] population_;
 
@@ -52,6 +52,10 @@ public class MOEAD_T extends MtoAlgorithm {
 	int[] preTransferTask;
 	boolean[][] bannedTask;
 
+	int[] convergeTimes;
+	int[][] transferTimes;
+	int[][] transferBetterTimes;
+
 	Solution[][] indArray_;
 	String functionType_;
 
@@ -66,7 +70,7 @@ public class MOEAD_T extends MtoAlgorithm {
 
 	int taskNum_;
 
-	public MOEAD_T(ProblemSet problemSet) {
+	public MOEAD_T_CEC2021(ProblemSet problemSet) {
 		super(problemSet);
 
 		functionType_ = "_TCHE1";
@@ -103,16 +107,25 @@ public class MOEAD_T extends MtoAlgorithm {
 		preTransferTask = new int[taskNum_];
 		bannedTask = new boolean[taskNum_][taskNum_];
 
+		convergeTimes = new int[taskNum_];
+		transferTimes = new int[taskNum_][taskNum_];
+		transferBetterTimes = new int[taskNum_][taskNum_];
+
+		Arrays.fill(preTransferTask, -1);
+		Arrays.fill(convergeTimes, 0);
+
 		for (int k = 0; k < taskNum_; k++){
 			indArray_[k] = new Solution[problemSet_.get(k).getNumberOfObjectives()];
 			z_[k] = new double[problemSet_.get(k).getNumberOfObjectives()];
 			lambda_[k] = new double[populationSize_][problemSet_.get(k).getNumberOfObjectives()];
 
-			Arrays.fill(preTransferTask, -1);
 			Arrays.fill(scores[k], 3);
 			Arrays.fill(transferP[k], tP);
 			Arrays.fill(implicitP[k], 0.5);
 			Arrays.fill(bannedTask[k], false);
+
+			Arrays.fill(transferTimes[k], 0);
+			Arrays.fill(transferBetterTimes[k], 0);
 		}
 	}
 
@@ -187,7 +200,7 @@ public class MOEAD_T extends MtoAlgorithm {
 
 	public void iterate() throws JMException {
 		for (int taskId = 0; taskId < taskNum_; taskId++) {
-			int assistTask = getSourceTaskId(taskId, "wd");
+			int assistTask = getSourceTaskId(taskId, "random");
 			if (PseudoRandom.randDouble() < 1) {
 				transferConverge(taskId, assistTask);
 			} else {
@@ -199,6 +212,7 @@ public class MOEAD_T extends MtoAlgorithm {
 
 	public void solelyConverge(int taskId, int times) throws JMException {
 		int betterCount = 0;
+		convergeTimes[taskId] ++;
 		for (int t = 0; t < times; t ++){
 			for (int i = 0; i < populationSize_; i++) {
 				int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
@@ -217,6 +231,8 @@ public class MOEAD_T extends MtoAlgorithm {
 		int[] betterCount = new int[2];
 		// Async
 		solelyConverge(sourceTaskId, aStep);
+
+		transferTimes[targetTaskId][sourceTaskId] ++;
 
 		for (int i = 0; i < populationSize_; i++) {
 			int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
@@ -248,7 +264,10 @@ public class MOEAD_T extends MtoAlgorithm {
 		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.5 * transferP[targetTaskId][sourceTaskId]){
 			transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
 			preTransferTask[targetTaskId] = sourceTaskId;
+			transferBetterTimes[targetTaskId][sourceTaskId] ++;
 //			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
+		} else {
+			transferBetterTimes[targetTaskId][sourceTaskId] ++;
 		}
 //		System.out.println(evaluations_ + ": " + assistTask + " -> " + taskId + ": " + implicitP + "\t" + transferP);
 	}
