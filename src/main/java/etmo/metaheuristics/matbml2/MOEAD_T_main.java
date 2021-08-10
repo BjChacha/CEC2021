@@ -97,8 +97,9 @@ public class MOEAD_T_main {
 		long startTime = System.currentTimeMillis();
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-			problemSet = getProblemSet(benchmarkName, pCase);
+			System.gc();
 
+			problemSet = getProblemSet(benchmarkName, pCase);
 			int taskNum = problemSet.size();
 			String[] pf = new String[taskNum];
 			List<QualityIndicator> indicators = new ArrayList<>(taskNum);
