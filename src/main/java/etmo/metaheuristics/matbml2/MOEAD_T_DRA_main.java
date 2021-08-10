@@ -96,8 +96,6 @@ public class MOEAD_T_DRA_main {
 		long startTime = System.currentTimeMillis();
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-			System.gc();
-
 			problemSet = getProblemSet(benchmarkName, pCase);
 			int taskNum = problemSet.size();
 			String[] pf = new String[taskNum];

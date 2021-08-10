@@ -56,6 +56,7 @@ public class MOEAD_T2 extends MtoAlgorithm {
 
 	int[][] transferVol;
 
+	int generations_;
 	int evaluations_;
 	int maxEvaluations_;
 
@@ -77,6 +78,7 @@ public class MOEAD_T2 extends MtoAlgorithm {
 	private void initState() {
 		taskNum_ = problemSet_.size();
 		evaluations_ = 0;
+		generations_ = 0;
 		maxEvaluations_ = (Integer) this.getInputParameter("maxEvaluations");
 		populationSize_ = (Integer) this.getInputParameter("populationSize");
 		dataDirectory_ = this.getInputParameter("dataDirectory").toString();
@@ -179,10 +181,21 @@ public class MOEAD_T2 extends MtoAlgorithm {
 		initPopulation();
 		initIdealPoint();
 
+		generations_ = 1;
 		while (evaluations_ < maxEvaluations_) {
 			iterate();
+			generations_ ++;
+			if (generations_ % 300 == 0){
+				parameterReset();
+			}
 		}
 		return population_;
+	}
+
+	private void parameterReset() {
+		for (int k = 0; k < taskNum_; k++){
+			Arrays.fill(transferVol[k], populationSize_ / taskNum_);
+		}
 	}
 
 	public void iterate() throws JMException {
@@ -196,6 +209,7 @@ public class MOEAD_T2 extends MtoAlgorithm {
 			for (int taskId = 0; taskId < taskNum_; taskId++){
 				int sourceTaskId = taskOrder[taskId];
 				if (targetTaskId == sourceTaskId) continue;
+
 				int betterCount = 0;
 				for (int i = 0; i < transferVol[targetTaskId][sourceTaskId]; i++){
 					Solution child = transferReproduce(targetTaskId, sourceTaskId, permutation[pIdx]);
@@ -207,7 +221,9 @@ public class MOEAD_T2 extends MtoAlgorithm {
 
 					pIdx ++;
 				}
-				transferVol[targetTaskId][sourceTaskId] = Math.min(betterCount, transferVol[targetTaskId][sourceTaskId]);
+				transferVol[targetTaskId][sourceTaskId] = Math.min(
+						betterCount,
+						transferVol[targetTaskId][sourceTaskId]);
 			}
 
 			// normal
