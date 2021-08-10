@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class LogIGD {
     public static void LogIGD(String algoName, int problemNum, double[][] igds){
-        String folderPath = ".\\data\\IGDs\\_collections\\" + algoName;
+        String folderPath = "./data/IGDs/_collections/" + algoName;
         File folder = new File(folderPath);
         if (!folder.exists()){
             folder.mkdirs();
@@ -15,7 +15,7 @@ public class LogIGD {
 
         int taskNum = igds.length;
         int times = igds[0].length;
-        String filePath = folderPath + "\\" + algoName + "_ETMOF" + problemNum + "_" + times + ".txt";
+        String filePath = folderPath + "/" + algoName + "_ETMOF" + problemNum + "_" + times + ".txt";
         try {
             /* Open the file */
             FileOutputStream fos = new FileOutputStream(filePath);
@@ -38,14 +38,14 @@ public class LogIGD {
     }
 
     public static void MarkLog(String AlgoName, String problemName, double[][] igds){
-        String folderPath = ".\\data\\IGDs\\_study\\" + AlgoName;
+        String folderPath = "./data/IGDs/_study/" + AlgoName;
         File folder = new File(folderPath);
         if (!folder.exists()){
             folder.mkdirs();
         }
 
         int taskNum = igds.length;
-        String filePath = folderPath + "\\" + AlgoName + "_" + problemName + ".txt";
+        String filePath = folderPath + "/" + AlgoName + "_" + problemName + ".txt";
         try {
             /* Open the file */
             FileOutputStream fos = new FileOutputStream(filePath);
