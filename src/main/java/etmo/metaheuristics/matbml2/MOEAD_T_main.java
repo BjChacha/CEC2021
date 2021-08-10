@@ -90,6 +90,8 @@ public class MOEAD_T_main {
 
 		System.out.println("Algo:" + algorithmName + ".");
 
+		long startTime = System.currentTimeMillis();
+
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
 			problemSet = getProblemSet(benchmarkName, pCase);
 
@@ -106,6 +108,7 @@ public class MOEAD_T_main {
 
 			List<MtoAlgorithm> algorithms = new ArrayList<>(times);
 			List<SolutionSet[]> populations = new ArrayList<>(times);
+
 			// 初始化算法
 			for (int t = 0; t < times; t++){
 				algorithms.add(algorithmGenerate(algorithmClass, problemSet));
@@ -156,6 +159,9 @@ public class MOEAD_T_main {
 //				LogIGD.LogIGD("MOEAD" + "_x" + times + "_" + benchmarkName, pCase, igds);
 			}
 		}
+
+		long endTime = System.currentTimeMillis();
+		System.out.println("Total time cost: " + (endTime - startTime) / 1000 + " s.");
 	}
 
 	public static ProblemSet getProblemSet(String problemName, int problemId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
