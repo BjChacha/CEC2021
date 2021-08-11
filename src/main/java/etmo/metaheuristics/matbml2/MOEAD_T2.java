@@ -118,7 +118,7 @@ public class MOEAD_T2 extends MtoAlgorithm {
 			Arrays.fill(transferP[k], tP);
 			Arrays.fill(implicitP[k], 0.5);
 			Arrays.fill(bannedTask[k], false);
-			Arrays.fill(transferVol[k], populationSize_ / taskNum_);
+			Arrays.fill(transferVol[k], populationSize_ / taskNum_ / 2);
 		}
 	}
 
@@ -185,7 +185,7 @@ public class MOEAD_T2 extends MtoAlgorithm {
 		while (evaluations_ < maxEvaluations_) {
 			iterate();
 			generations_ ++;
-			if (generations_ % 300 == 0){
+			if (generations_ % 200 == 0){
 				parameterReset();
 			}
 		}
@@ -194,7 +194,7 @@ public class MOEAD_T2 extends MtoAlgorithm {
 
 	private void parameterReset() {
 		for (int k = 0; k < taskNum_; k++){
-			Arrays.fill(transferVol[k], populationSize_ / taskNum_);
+			Arrays.fill(transferVol[k], populationSize_ / taskNum_ / 2);
 		}
 	}
 
@@ -222,7 +222,7 @@ public class MOEAD_T2 extends MtoAlgorithm {
 					pIdx ++;
 				}
 				transferVol[targetTaskId][sourceTaskId] = Math.min(
-						betterCount,
+						(int)(betterCount * 0.3 + transferVol[targetTaskId][sourceTaskId] * 0.7),
 						transferVol[targetTaskId][sourceTaskId]);
 			}
 

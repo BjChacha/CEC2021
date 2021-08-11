@@ -90,7 +90,7 @@ public class MOEAD_T2_main {
 		// System.out.println("Algo:" + algorithmName + ".");
 
 		System.out.println();
-		String fileName = "MOEAD_T(T2(reset300)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
+		String fileName = "MOEAD_T(T2(37)(reset200)(initHalf)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
 		System.out.println("Experiment started -> " + fileName);
 
 		long startTime = System.currentTimeMillis();
