@@ -136,11 +136,11 @@ public class MOEAD_T_DRA extends MtoAlgorithm {
 	}
 
 	public void iterate() throws JMException {
-		calculatedConverge(1);
+		calculatedConverge(3);
 
 		for (int taskId = 0; taskId < taskNum_; taskId++) {
-			int assistTask = getSourceTaskId(taskId, "random");
-			if (PseudoRandom.randDouble() < 1 && taskId != assistTask){
+			int assistTask = getSourceTaskId(taskId, "wd");
+			if (PseudoRandom.randDouble() < transferP[taskId][assistTask] && taskId != assistTask){
 				int t = 0;
 				while (steps[assistTask] > steps[taskId] && t < 3){
 					steps[assistTask] = solelyConverge(assistTask, 1);
@@ -207,7 +207,7 @@ public class MOEAD_T_DRA extends MtoAlgorithm {
 			scores[targetTaskId][sourceTaskId] = Math.max(scores[targetTaskId][sourceTaskId] - 1, 0);
 			bannedTask[targetTaskId][sourceTaskId] = true;
 		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.5 * transferP[targetTaskId][sourceTaskId]){
-			transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
+			// transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
 			preTransferTask[targetTaskId] = sourceTaskId;
 //			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
 		}
@@ -232,7 +232,7 @@ public class MOEAD_T_DRA extends MtoAlgorithm {
 				distance[k] = WassersteinDistance.getWD2(
 						population_[targetTaskId].getMat(),
 						population_[k].getMat());
-				finalScore[k] = 3 * scores[targetTaskId][k] / distance[k];
+				finalScore[k] = 1 / distance[k];
 				maxScore = Math.max(maxScore, finalScore[k]);
 			}
 
@@ -261,6 +261,8 @@ public class MOEAD_T_DRA extends MtoAlgorithm {
 			} else {
 				sourceTaskId = preTransferTask[targetTaskId];
 			}
+		}  else {
+			System.out.println("Unsupported type: " + type);
 		}
 
 		return sourceTaskId;

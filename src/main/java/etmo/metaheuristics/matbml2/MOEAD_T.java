@@ -299,6 +299,8 @@ public class MOEAD_T extends MtoAlgorithm {
 			} else {
 				sourceTaskId = preTransferTask[targetTaskId];
 			}
+		} else {
+			System.out.println("Unsupported type: " + type);
 		}
 
 		return sourceTaskId;
