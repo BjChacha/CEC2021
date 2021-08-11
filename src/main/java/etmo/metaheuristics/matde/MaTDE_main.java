@@ -26,9 +26,9 @@ public class MaTDE_main {
         HashMap parameters;
 
         int problemStart = 1;
-        int problemEnd = 9;
+        int problemEnd = 10;
 
-        int times = 20;
+        int times = 10;
 
         String benchmark_name;
         DecimalFormat form = new DecimalFormat("#.####E0");
@@ -43,27 +43,27 @@ public class MaTDE_main {
 //                   .getMethod("getProblem")
 //                   .invoke(null, null);
 
-//             // WCCI 2020
-//             benchmark_name = "WCCI2020";
-//             problemSet = (ProblemSet) Class
-//                     .forName("etmo.problems.WCCI2020.MATP" + pCase)
-//                     .getMethod("getProblem")
-//                     .invoke(null, null);
+            // WCCI 2020
+            benchmark_name = "WCCI2020";
+            problemSet = (ProblemSet) Class
+                    .forName("etmo.problems.WCCI2020.MATP" + pCase)
+                    .getMethod("getProblem")
+                    .invoke(null, null);
 
-             // CEC2017
-             benchmark_name = "CEC2017";
-             ProblemSet[] cec2017 = {
-                 CIHS.getProblem(),
-                 CIMS.getProblem(),
-                 CILS.getProblem(),
-                 PIHS.getProblem(),
-                 PIMS.getProblem(),
-                 PILS.getProblem(),
-                 NIHS.getProblem(),
-                 NIMS.getProblem(),
-                 NILS.getProblem()
-             };
-             problemSet = cec2017[pCase-1];
+            //  // CEC2017
+            //  benchmark_name = "CEC2017";
+            //  ProblemSet[] cec2017 = {
+            //      CIHS.getProblem(),
+            //      CIMS.getProblem(),
+            //      CILS.getProblem(),
+            //      PIHS.getProblem(),
+            //      PIMS.getProblem(),
+            //      PILS.getProblem(),
+            //      NIHS.getProblem(),
+            //      NIMS.getProblem(),
+            //      NILS.getProblem()
+            //  };
+            //  problemSet = cec2017[pCase-1];
 
 
             int taskNum = problemSet.size();

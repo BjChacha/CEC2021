@@ -12,6 +12,7 @@ import etmo.operators.selection.SelectionFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.Ranking;
+import etmo.util.logging.LogIGD;
 
 public class NSGAII_main {
 	public static void main(String args[]) throws IOException, JMException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -26,7 +27,7 @@ public class NSGAII_main {
 		int taskStart = 25;
 		int taskEnd = 32;
 
-		int times = 21;
+		int times = 10;
 		
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -35,6 +36,12 @@ public class NSGAII_main {
 					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
+
+			// // WCCI 2020
+			// problemSet = (ProblemSet) Class
+			// .forName("etmo.problems.WCCI2020.MATP" + pCase)
+			// .getMethod("getProblem")
+			// .invoke(null, null);
 
 			int taskNum = problemSet.size();
 
@@ -45,6 +52,7 @@ public class NSGAII_main {
 			pSName = pSName.substring(0, pSName.length() - 2);
 			System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
 
+			double[][] igds = new double[taskNum][times];
 			for (int tsk = 0; tsk < taskNum; tsk++) {
 				ProblemSet pS = problemSet.getTask(tsk);
 				pf[tsk] = "resources/PF/StaticPF/" + problemSet.get(tsk).getHType() + "_" + problemSet.get(tsk).getNumberOfObjectives() + "D.pf";
@@ -82,10 +90,12 @@ public class NSGAII_main {
 							pS.get(0).getName() + "_" + pS.get(0).getNumberOfVariables() + "D_run" + t + ".txt");
 					double igd = indicator.getIGD(population);
 					ave[tsk] += igd;
+					igds[tsk][t-1] = igd;
 				}
 				System.out.println("T" + (tsk + 1) + "\t" + form.format(ave[tsk] / times));
 			}
 			System.out.println();
+			LogIGD.LogIGD("NSGA_CEC2021_x" + times, pCase, igds);
 		}
 	}	
 

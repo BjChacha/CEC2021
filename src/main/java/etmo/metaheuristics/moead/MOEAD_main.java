@@ -24,26 +24,26 @@ public class MOEAD_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 25;
-		int taskEnd = 32;
+		int taskStart = 1;
+		int taskEnd = 10;
 
 		int times = 10;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 		String benchmark_name;
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-			benchmark_name = "CEC2021";
+			// benchmark_name = "CEC2021";
+			// problemSet = (ProblemSet) Class
+			// 		.forName("etmo.problems.CEC2021.ETMOF" + pCase)
+			// 		.getMethod("getProblem")
+			// 		.invoke(null, null);
+
+			// WCCI 2020
+			benchmark_name = "WCCI2020";
 			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
+					.forName("etmo.problems.WCCI2020.MATP" + pCase)
 					.getMethod("getProblem")
 					.invoke(null, null);
-
-//			// WCCI 2020
-//			benchmark_name = "WCCI2020";
-//			problemSet = (ProblemSet) Class
-//					.forName("etmo.problems.WCCI2020.MATP" + pCase)
-//					.getMethod("getProblem")
-//					.invoke(null, null);
 
 			int taskNum = problemSet.size();
 

@@ -25,8 +25,8 @@ public class MFEADDRA_main {
 
         HashMap parameters; // Operator parameters
 
-        int taskStart = 25;
-        int taskEnd = 32;
+        int taskStart = 1;
+        int taskEnd = 10;
 
         int times = 10;
 
@@ -35,16 +35,16 @@ public class MFEADDRA_main {
         System.out.println("Algo: MFEADDRA.");
 
         for (int pCase = taskStart; pCase <= taskEnd; pCase++) {
-			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
-					.getMethod("getProblem")
-					.invoke(null, null);
+			// problemSet = (ProblemSet) Class
+			// 		.forName("etmo.problems.CEC2021.ETMOF" + pCase)
+			// 		.getMethod("getProblem")
+			// 		.invoke(null, null);
 
-//            // WCCI 2020
-//            problemSet = (ProblemSet) Class
-//                    .forName("etmo.problems.WCCI2020.MATP" + pCase)
-//                    .getMethod("getProblem")
-//                    .invoke(null, null);
+           // WCCI 2020
+           problemSet = (ProblemSet) Class
+                   .forName("etmo.problems.WCCI2020.MATP" + pCase)
+                   .getMethod("getProblem")
+                   .invoke(null, null);
 
 //            // CEC2017
 //            ProblemSet[] cec2017 = {
@@ -135,7 +135,7 @@ public class MFEADDRA_main {
                     ave[i] += igd;
                 }
             }
-            LogIGD.LogIGD("MOMFEADRA_p100_CEC2021_x" + times, pCase, igds);
+            LogIGD.LogIGD("MOMFEADRA_p100_WCCI2020_x" + times, pCase, igds);
             for (int i = 0; i < taskNum; i++)
                 System.out.println("T" + (i + 1) + "\t" + form.format(ave[i] / times));
             System.out.println();
