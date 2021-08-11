@@ -90,14 +90,12 @@ public class MOEAD_T_main {
 		// System.out.println("Algo:" + algorithmName + ".");
 
 		System.out.println();
-		String fileName = "MOEAD_T(wd(ada2)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
+		String fileName = "MOEAD_T(rndwd(ADA)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
 		System.out.println("Experiment started -> " + fileName);
 
 		long startTime = System.currentTimeMillis();
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-			System.gc();
-
 			problemSet = getProblemSet(benchmarkName, pCase);
 			int taskNum = problemSet.size();
 			String[] pf = new String[taskNum];
