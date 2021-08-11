@@ -186,7 +186,7 @@ public class MOEAD_T extends MtoAlgorithm {
 
 	public void iterate() throws JMException {
 		for (int taskId = 0; taskId < taskNum_; taskId++) {
-			int assistTask = getSourceTaskId(taskId, "kl");
+			int assistTask = getSourceTaskId(taskId, "wd");
 			if (PseudoRandom.randDouble() < 1 && taskId != assistTask){
 				transferConverge(taskId, assistTask);
 			} else {
@@ -265,12 +265,20 @@ public class MOEAD_T extends MtoAlgorithm {
 			double[] distance = new double[taskNum_];
 			double[] finalScore = new double[taskNum_];
 			double maxScore = 0;
+			double minDistance = Double.MAX_VALUE;
+			double maxDistance = 0;
 			for (int k = 0; k < taskNum_; k++) {
 				if (k == targetTaskId) continue;
 				distance[k] = WassersteinDistance.getWD2(
 						population_[targetTaskId].getMat(),
 						population_[k].getMat());
-				finalScore[k] = 3 * scores[targetTaskId][k] / distance[k];
+				minDistance = Math.min(distance[k], minDistance);
+				maxDistance = Math.max(distance[k], maxDistance);
+			}
+			for (int k = 0; k < taskNum_; k++){
+				if (k == targetTaskId) continue;
+				distance[k] = (distance[k] - minDistance) / (maxDistance - minDistance);
+				finalScore[k] = (1 - distance[k]) * transferP[targetTaskId][sourceTaskId];
 				maxScore = Math.max(maxScore, finalScore[k]);
 			}
 

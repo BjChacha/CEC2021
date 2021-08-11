@@ -32,7 +32,6 @@ public class MOEAD_T_main {
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
 
-		// TODO: 改成相对路径
 		algorithm.setInputParameter("dataDirectory", "resources/weightVectorFiles/moead");
 
 		algorithm.setInputParameter("T", 20);
@@ -91,7 +90,7 @@ public class MOEAD_T_main {
 		// System.out.println("Algo:" + algorithmName + ".");
 
 		System.out.println();
-		String fileName = "MOEAD_T(kl(1.0)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
+		String fileName = "MOEAD_T(wd(ada2)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
 		System.out.println("Experiment started -> " + fileName);
 
 		long startTime = System.currentTimeMillis();
