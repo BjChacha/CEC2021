@@ -3,7 +3,9 @@ package etmo.metaheuristics.matde;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
@@ -17,25 +19,20 @@ import etmo.problems.CEC2017.*;
 import etmo.util.logging.LogIGD;
 
 public class MaTDE_main {
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException {
-        ProblemSet problemSet;
-        MtoAlgorithm algorithm;
-        Operator crossover1;
-        Operator crossover2;
-
-        HashMap parameters;
-
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException, InstantiationException {
         int problemStart = 1;
         int problemEnd = 10;
 
         int times = 10;
 
         String benchmark_name;
-        DecimalFormat form = new DecimalFormat("#.####E0");
 
         System.out.println("Algo: MaTDE.");
 
+        long startTime = System.currentTimeMillis();
+
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
+            ProblemSet problemSet;
 //           // CEC 2021
 //           benchmark_name = "CEC2021";
 //           problemSet = (ProblemSet) Class
@@ -67,90 +64,110 @@ public class MaTDE_main {
 
 
             int taskNum = problemSet.size();
-            double[] ave = new double[taskNum];
 
+            List<QualityIndicator> indicators = new ArrayList<>(taskNum);
             String[] pf = new String[taskNum];
             for (int k = 0; k < pf.length; k++){
                 pf[k] = "resources/PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+                indicators.add(new QualityIndicator(problemSet.get(k), pf[k]));
             }
 
             String pSName = problemSet.get(0).getName();
-            pSName = pSName.substring(0, pSName.length()-2);
             System.out.println(pSName + "\ttaskNum = "+taskNum+"\tfor "+times+" times.");
 
-            algorithm = new MaTDE(problemSet);
+            List<MtoAlgorithm> algorithms = new ArrayList<>(times);
+			List<SolutionSet[]> populations = new ArrayList<>(times);
+            
+			// 初始化算法
+			for (int t = 0; t < times; t++){
+				algorithms.add(algorithmGenerate(problemSet));
+			}
+			// 并行执行times个算法
+			algorithms.parallelStream().forEach(a -> {
+				try {
+					populations.add(a.execute());
+				} catch (JMException | ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			});
 
-            algorithm.setInputParameter("populationSize", 100);
-            algorithm.setInputParameter("archiveSize", 300);
-            algorithm.setInputParameter("maxEvaluations", 1000 * taskNum * 100);
-
-            // 迁移交叉概率
-            algorithm.setInputParameter("alpha", 0.1);
-            // 衰减系数
-            algorithm.setInputParameter("ro", 0.8);
-            // 衰减速率
-            algorithm.setInputParameter("shrinkRate", 0.8);
-            // Archive更新概率
-            algorithm.setInputParameter("replaceRate", 0.2);
-
-            parameters = new HashMap();
-            // 原论文：CR = (0.1, 0.9)
-            parameters.put("CR_LB", 0.1);
-            parameters.put("CR_UB", 0.9);
-            // 原论文：F = (0.1, 2)
-            parameters.put("F_LB", 0.1);
-            parameters.put("F_UB", 2.0);
-            crossover1 = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
-            algorithm.addOperator("crossover1", crossover1);
-
-            parameters = new HashMap();
-            parameters.put("CR_LB", 0.1);
-            parameters.put("CR_UB", 0.9);
-            crossover2 = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
-            algorithm.addOperator("crossover2", crossover2);
-
-            double[][] IGDs = new double[taskNum][times];
-            for (int t = 0; t < times; t++){
-                long startTime = System.currentTimeMillis();
-                SolutionSet[] population = algorithm.execute();
-                long endTime = System.currentTimeMillis();
-                System.out.println("epoch: " + t + "\trunning: " + (endTime-startTime)/1000 + " s.");
-
-                // 各个任务的目标数不一，所以评价时需要根据任务来重新设置种群规模。
-                SolutionSet[] resPopulation = new SolutionSet[taskNum];
-                for (int k = 0; k < taskNum; k++) {
-                    resPopulation[k] = new SolutionSet();
-                    for (int i = 0; i < population[k].size(); i++) {
-                        Solution sol = population[k].get(i);
-
-                        int start = problemSet.get(k).getStartObjPos();
-                        int end = problemSet.get(k).getEndObjPos();
-
-                        Solution newSolution = new Solution(end - start + 1);
-
-                        for (int kk = start; kk <= end; kk++)
-                            newSolution.setObjective(kk - start, sol.getObjective(kk));
-
-                        resPopulation[k].add(newSolution);
-                    }
-//                    resPopulation[k].printObjectivesToFile("MaTDE_"+problemSet.get(k).getNumberOfObjectives()+"Obj_"+
-//                            problemSet.get(k).getName()+ "_" + problemSet.get(k).getNumberOfVariables() + "D_run_"+t+".txt");
-                }
-                double igd;
-                for (int k = 0; k < taskNum; k++){
-                    QualityIndicator indicator = new QualityIndicator(problemSet.get(k), pf[k]);
-                    if (population[k].size() == 0)
-                        continue;
-
-                    igd = indicator.getIGD(resPopulation[k]);
-                    IGDs[k][t] = igd;
-                    ave[k] += igd;
-                }
-            }
-            LogIGD.LogIGD("MaTDE_" + "x" + times + "_" + benchmark_name, pCase, IGDs);
-            for(int i=0;i<taskNum;i++)
-                System.out.println(form.format(ave[i] / times));
-            System.out.println();
+            double[][] igds = new double[taskNum][times];
+            int t = 0;
+			for (SolutionSet[] pop: populations){
+				SolutionSet[] resPopulation = getEvalPopulations(pop, problemSet);
+				double igd;
+				for (int k = 0; k < taskNum; k++) {
+					igd = indicators.get(k).getIGD(resPopulation[k]);
+					igds[k][t] = igd;
+				}
+				t ++;
+			}
+            LogIGD.LogIGD("MaTDE_" + "x" + times + "_" + benchmark_name, pCase, igds);
         }
+        long endTime = System.currentTimeMillis();
+		System.out.println("Total time cost: " + (endTime - startTime) / 1000 + " s.");
+
     }
+
+    public static MtoAlgorithm algorithmGenerate(ProblemSet problemSet) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
+        MtoAlgorithm algorithm;
+        Operator crossover1;
+        Operator crossover2;
+
+        HashMap parameters;
+
+        int taskNum = problemSet.size();
+
+        algorithm = new MaTDE(problemSet);
+
+        algorithm.setInputParameter("populationSize", 100);
+        algorithm.setInputParameter("archiveSize", 300);
+        algorithm.setInputParameter("maxEvaluations", 1000 * taskNum * 100);
+
+        // 迁移交叉概率
+        algorithm.setInputParameter("alpha", 0.1);
+        // 衰减系数
+        algorithm.setInputParameter("ro", 0.8);
+        // 衰减速率
+        algorithm.setInputParameter("shrinkRate", 0.8);
+        // Archive更新概率
+        algorithm.setInputParameter("replaceRate", 0.2);
+
+        parameters = new HashMap();
+        // 原论文：CR = (0.1, 0.9)
+        parameters.put("CR_LB", 0.1);
+        parameters.put("CR_UB", 0.9);
+        // 原论文：F = (0.1, 2)
+        parameters.put("F_LB", 0.1);
+        parameters.put("F_UB", 2.0);
+        crossover1 = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
+        algorithm.addOperator("crossover1", crossover1);
+
+        parameters = new HashMap();
+        parameters.put("CR_LB", 0.1);
+        parameters.put("CR_UB", 0.9);
+        crossover2 = CrossoverFactory.getCrossoverOperator("RandomUniformCrossover", parameters);
+        algorithm.addOperator("crossover2", crossover2);
+
+        return algorithm;
+	}
+
+    public static SolutionSet[] getEvalPopulations(SolutionSet[] population, ProblemSet problemSet){
+		int taskNum = population.length;
+		SolutionSet[] resPopulation = new SolutionSet[taskNum];
+
+		for (int k = 0; k < taskNum; k++) {
+			resPopulation[k] = new SolutionSet();
+			for (int i = 0; i < population[k].size(); i++) {
+				Solution sol = population[k].get(i);
+				int start = problemSet.get(k).getStartObjPos();
+				int end = problemSet.get(k).getEndObjPos();
+				Solution newSolution = new Solution(end - start + 1);
+				for (int kk = start; kk <= end; kk++)
+					newSolution.setObjective(kk - start, sol.getObjective(kk));
+				resPopulation[k].add(newSolution);
+			}
+		}
+		return resPopulation;
+	}
 }
