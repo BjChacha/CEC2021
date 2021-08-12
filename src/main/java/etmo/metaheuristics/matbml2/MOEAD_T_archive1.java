@@ -115,7 +115,7 @@ public class MOEAD_T_archive1 extends MtoAlgorithm {
 
 	public void iterate() throws JMException {
 		calculatedConverge(3);
-
+		
 		for (int taskId = 0; taskId < taskNum_; taskId++) {
 			int assistTask = getSourceTaskId(taskId, "rndwd");
 			if (PseudoRandom.randDouble() < transferP[taskId][assistTask] && taskId != assistTask){
