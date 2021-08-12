@@ -68,7 +68,7 @@ public class MOEAD_main {
 					algorithm.setInputParameter("populationSize", 100);
 					algorithm.setInputParameter("maxEvaluations", 1000 * 100);
 
-					algorithm.setInputParameter("dataDirectory", "D:\\_r\\EA\\ETMO\\MTO-cec2021-\\resources\\weightVectorFiles\\moead");
+					algorithm.setInputParameter("dataDirectory", "resources/weightVectorFiles/moead");
 
 					algorithm.setInputParameter("T", 20);
 					algorithm.setInputParameter("delta", 0.9);
