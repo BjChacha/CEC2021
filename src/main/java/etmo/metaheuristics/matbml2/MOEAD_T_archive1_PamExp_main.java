@@ -88,8 +88,8 @@ public class MOEAD_T_archive1_PamExp_main {
 
 		// System.out.println("Algo:" + algorithmName + ".");
 
-		for (int t1 = 1; t1 <= 5; t1++){
-			for (int t2 = 1; t2 <= 5; t2 ++){
+		for (int t1 = 3; t1 <= 3; t1++){
+			for (int t2 = 4; t2 <= 5; t2 ++){
 				System.out.println();
 				String fileName = "MOEAD_T_archive1(" + t1 + "-" + t2 + ")" + "_x" + times + "_" + benchmarkName;
 				System.out.println("Experiment started -> " + fileName);
