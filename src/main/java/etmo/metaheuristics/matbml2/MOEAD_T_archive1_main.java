@@ -79,12 +79,12 @@ public class MOEAD_T_archive1_main {
 	public static void main(String[] args) throws JMException, SecurityException, IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
 		ProblemSet problemSet; // The problem to solve
 
-		String benchmarkName = "WCCI2020";
+		String benchmarkName = "CEC2021";
 		Class algorithmClass = MOEAD_T.class;
 		String algorithmName = algorithmClass.getName();
-		int taskStart = 1;
-		int taskEnd = 10;
-		int times = 10;
+		int taskStart = 25;
+		int taskEnd = 32;
+		int times = 21;
 
 		// System.out.println("Algo:" + algorithmName + ".");
 

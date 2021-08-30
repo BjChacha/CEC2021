@@ -20,10 +20,10 @@ import etmo.util.logging.LogIGD;
 
 public class MaTDE_main {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException, InstantiationException {
-        int problemStart = 1;
-        int problemEnd = 10;
+        int problemStart = 25;
+        int problemEnd = 32;
 
-        int times = 10;
+        int times = 21;
 
         String benchmark_name;
 
@@ -33,19 +33,19 @@ public class MaTDE_main {
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
             ProblemSet problemSet;
-//           // CEC 2021
-//           benchmark_name = "CEC2021";
-//           problemSet = (ProblemSet) Class
-//                   .forName("etmo.problems.CEC2021.ETMOF" + pCase)
-//                   .getMethod("getProblem")
-//                   .invoke(null, null);
+          // CEC 2021
+          benchmark_name = "CEC2021";
+          problemSet = (ProblemSet) Class
+                  .forName("etmo.problems.CEC2021.ETMOF" + pCase)
+                  .getMethod("getProblem")
+                  .invoke(null, null);
 
-            // WCCI 2020
-            benchmark_name = "WCCI2020";
-            problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.WCCI2020.MATP" + pCase)
-                    .getMethod("getProblem")
-                    .invoke(null, null);
+            // // WCCI 2020
+            // benchmark_name = "WCCI2020";
+            // problemSet = (ProblemSet) Class
+            //         .forName("etmo.problems.WCCI2020.MATP" + pCase)
+            //         .getMethod("getProblem")
+            //         .invoke(null, null);
 
             //  // CEC2017
             //  benchmark_name = "CEC2017";

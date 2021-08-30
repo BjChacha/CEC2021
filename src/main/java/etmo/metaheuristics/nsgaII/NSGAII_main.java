@@ -27,7 +27,7 @@ public class NSGAII_main {
 		int taskStart = 25;
 		int taskEnd = 32;
 
-		int times = 10;
+		int times = 21;
 		
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
@@ -86,8 +86,8 @@ public class NSGAII_main {
 					SolutionSet population = algorithm.execute();
 					Ranking ranking = new Ranking(population);
 					population = ranking.getSubfront(0);
-					population.printObjectivesToFile("NSGAII_" + pS.get(0).getNumberOfObjectives() + "Obj_" +
-							pS.get(0).getName() + "_" + pS.get(0).getNumberOfVariables() + "D_run" + t + ".txt");
+					// population.printObjectivesToFile("NSGAII_" + pS.get(0).getNumberOfObjectives() + "Obj_" +
+					// 		pS.get(0).getName() + "_" + pS.get(0).getNumberOfVariables() + "D_run" + t + ".txt");
 					double igd = indicator.getIGD(population);
 					ave[tsk] += igd;
 					igds[tsk][t-1] = igd;

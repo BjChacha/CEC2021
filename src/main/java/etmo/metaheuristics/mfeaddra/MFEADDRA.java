@@ -1,18 +1,11 @@
 package etmo.metaheuristics.mfeaddra;
 
 import etmo.core.*;
-import etmo.encodings.variable.Int;
 import etmo.util.Distance;
 import etmo.util.JMException;
 import etmo.util.PORanking;
 import etmo.util.PseudoRandom;
 import etmo.util.comparators.CrowdingComparator;
-import etmo.util.comparators.LocationComparator;
-import etmo.util.logging.LogPopulation;
-import org.bytedeco.libfreenect._freenect_device;
-import org.uma.jmetal.operator.crossover.CrossoverOperator;
-import org.uma.jmetal.operator.crossover.impl.DifferentialEvolutionCrossover;
-import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -26,9 +19,7 @@ public class MFEADDRA extends Algorithm {
     private int populationSize;
     private int taskNum;
     private SolutionSet population;
-    private SolutionSet offspringPopulation;
-    private SolutionSet union;
-
+    
     double beta;
     int nr;
     int T;
@@ -322,14 +313,12 @@ public class MFEADDRA extends Algorithm {
     public void initUniformWeight() { // init lambda vectors
         lambda = new double[taskNum][][];
         for (int k = 0; k < taskNum; k++) {
-            int nw = 0;
             lambda[k] = new double[subSize][problemSet_.get(k).getNumberOfObjectives()];
             if (problemSet_.get(k).getNumberOfObjectives() == 2) {
                 for (int n = 0; n < subSize; n++) {
                     double a = 1.0 * n / (subSize - 1);
                     lambda[k][n][0] = a;
                     lambda[k][n][1] = 1 - a;
-                    nw++;
                 } // for
             } // if
             else {

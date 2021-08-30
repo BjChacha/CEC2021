@@ -31,20 +31,20 @@ public class MOMFEA_main {
 
 		HashMap parameters; // Operator parameters
 
-		int taskStart = 1;
-		int taskEnd = 9;
+		int taskStart = 32;
+		int taskEnd = 32;
 
-		int times = 20;
+		int times = 21;
 
 		DecimalFormat form = new DecimalFormat("#.####E0");
 
 		System.out.println("Algo: MOMFEA.");
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++ ){
-//			problemSet = (ProblemSet) Class
-//					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
-//					.getMethod("getProblem")
-//					.invoke(null, null);
+			problemSet = (ProblemSet) Class
+					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
+					.getMethod("getProblem")
+					.invoke(null, null);
 
 //			// WCCI 2020
 //			problemSet = (ProblemSet) Class
@@ -52,19 +52,19 @@ public class MOMFEA_main {
 //					.getMethod("getProblem")
 //					.invoke(null, null);
 
-			// CEC2017
-			ProblemSet[] cec2017 = {
-					CIHS.getProblem(),
-					CIMS.getProblem(),
-					CILS.getProblem(),
-					PIHS.getProblem(),
-					PIMS.getProblem(),
-					PILS.getProblem(),
-					NIHS.getProblem(),
-					NIMS.getProblem(),
-					NILS.getProblem()
-			};
-			problemSet = cec2017[pCase-1];
+			// // CEC2017
+			// ProblemSet[] cec2017 = {
+			// 		CIHS.getProblem(),
+			// 		CIMS.getProblem(),
+			// 		CILS.getProblem(),
+			// 		PIHS.getProblem(),
+			// 		PIMS.getProblem(),
+			// 		PILS.getProblem(),
+			// 		NIHS.getProblem(),
+			// 		NIMS.getProblem(),
+			// 		NILS.getProblem()
+			// };
+			// problemSet = cec2017[pCase-1];
 
 			int taskNum = problemSet.size();
 			double ave[] = new double[taskNum];

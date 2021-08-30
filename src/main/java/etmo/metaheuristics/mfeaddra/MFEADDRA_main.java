@@ -26,25 +26,25 @@ public class MFEADDRA_main {
         HashMap parameters; // Operator parameters
 
         int taskStart = 1;
-        int taskEnd = 10;
+        int taskEnd = 8;
 
-        int times = 10;
+        int times = 30;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
         System.out.println("Algo: MFEADDRA.");
 
         for (int pCase = taskStart; pCase <= taskEnd; pCase++) {
-			// problemSet = (ProblemSet) Class
-			// 		.forName("etmo.problems.CEC2021.ETMOF" + pCase)
-			// 		.getMethod("getProblem")
-			// 		.invoke(null, null);
+			problemSet = (ProblemSet) Class
+					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
+					.getMethod("getProblem")
+					.invoke(null, null);
 
-           // WCCI 2020
-           problemSet = (ProblemSet) Class
-                   .forName("etmo.problems.WCCI2020.MATP" + pCase)
-                   .getMethod("getProblem")
-                   .invoke(null, null);
+        //    // WCCI 2020
+        //    problemSet = (ProblemSet) Class
+        //            .forName("etmo.problems.WCCI2020.MATP" + pCase)
+        //            .getMethod("getProblem")
+        //            .invoke(null, null);
 
 //            // CEC2017
 //            ProblemSet[] cec2017 = {
