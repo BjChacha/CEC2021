@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MOEAD_T_exp_TP_main {
+public class MOEAD_TA_pamExp_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-	static boolean LOG_IGD = false;
+	static boolean LOG_IGD = true;
 
-	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet, int pn) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
+	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet, double cr) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
 		Operator crossover;
 		Operator crossover2;
@@ -26,7 +26,7 @@ public class MOEAD_T_exp_TP_main {
 		HashMap<String, Double> parameters;
 
 //		algorithm = (MtoAlgorithm) algorithmClass.getDeclaredConstructor().newInstance();
-		algorithm = new MOEAD_T_exp_TP(problemSet);
+		algorithm = new MOEAD_T_exp_CR(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
@@ -37,11 +37,8 @@ public class MOEAD_T_exp_TP_main {
 		algorithm.setInputParameter("T", 20);
 		algorithm.setInputParameter("delta", 0.9);
 		algorithm.setInputParameter("nr", 2);
-
 		algorithm.setInputParameter("aStep", 1);
 		algorithm.setInputParameter("transferP", 1.0);
-
-		algorithm.setInputParameter("problemNo", pn);
 
 		parameters = new HashMap();
 		parameters.put("CR", 0.6);
@@ -49,21 +46,14 @@ public class MOEAD_T_exp_TP_main {
 		crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
 
 //		parameters = new HashMap();
-//		parameters.put("CR_LB", 0.1);
-//		parameters.put("CR_UB", 0.9);
-//		parameters.put("F_LB", 0.5);
-//		parameters.put("F_UB", 0.5);
-//		crossover = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
+//		parameters.put("probability", 0.9);
+//		parameters.put("distributionIndex", 20.0);
+//		crossover2 = CrossoverFactory.getCrossoverOperator("SBXCrossover",parameters);
 
 		parameters = new HashMap();
-		parameters.put("probability", 0.9);
-		parameters.put("distributionIndex", 20.0);
-		crossover2 = CrossoverFactory.getCrossoverOperator("SBXCrossover",parameters);
-
-//		parameters = new HashMap();
-//		parameters.put("CR", 0.5);
-//		crossover2 = CrossoverFactory.getCrossoverOperator("UniformCrossover", parameters);
-
+		parameters.put("CR", cr);
+		crossover2 = CrossoverFactory.getCrossoverOperator("UniformCrossover", parameters);
+//
 //		parameters = new HashMap();
 //		crossover2 = CrossoverFactory.getCrossoverOperator("TransferDECrossover", parameters);
 
@@ -87,54 +77,58 @@ public class MOEAD_T_exp_TP_main {
 		String algorithmName = algorithmClass.getName();
 		int taskStart = 1;
 		int taskEnd = 9;
-		int times = 1;
+		int times = 20;
 
-//		System.out.println("Algo:" + algorithmName + ".");
+		System.out.println("Algo:" + algorithmName + ".");
 
-		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
-			problemSet = getProblemSet(benchmarkName, pCase);
+		for (int icr = 0; icr < 10; icr ++){
+				double cr = icr * 0.1 + 0.1;
+				System.out.println("CR: " + cr);
 
-			int taskNum = problemSet.size();
-			String[] pf = new String[taskNum];
-			List<QualityIndicator> indicators = new ArrayList<>(taskNum);
-			for (int k = 0; k < taskNum; k++){
-				pf[k] = "resources/PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
-				indicators.add(new QualityIndicator(problemSet.get(k), pf[k]));
- 			}
+				for (int pCase = taskStart; pCase <= taskEnd; pCase++){
+					problemSet = getProblemSet(benchmarkName, pCase);
 
-			String pSName = problemSet.get(0).getName();
-//			System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
+					int taskNum = problemSet.size();
+					String[] pf = new String[taskNum];
+					List<QualityIndicator> indicators = new ArrayList<>(taskNum);
+					for (int k = 0; k < taskNum; k++){
+						pf[k] = "resources/PF/StaticPF/" + problemSet.get(k).getHType() + "_" + problemSet.get(k).getNumberOfObjectives() + "D.pf";
+						indicators.add(new QualityIndicator(problemSet.get(k), pf[k]));
+					}
 
-			// 尝试并行
-			List<MtoAlgorithm> algorithms = new ArrayList<>(times);
-			List<SolutionSet[]> populations = new ArrayList<>(times);
-			// 初始化算法
-			for (int t = 0; t < times; t++){
-				algorithms.add(algorithmGenerate(algorithmClass, problemSet, pCase));
-			}
-			// 并行执行times个算法
-			algorithms.parallelStream().forEach(a -> {
-				try {
-					populations.add(a.execute());
-				} catch (JMException e) {
-					e.printStackTrace();
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			});
+					String pSName = problemSet.get(0).getName();
+					System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
 
-			// 计算IGD
-			double[][] igds = new double[taskNum][times];
-			int t = 0;
-			for (SolutionSet[] pop: populations){
-				SolutionSet[] resPopulation = getEvalPopulations(pop, problemSet);
-				double igd;
-				for (int k = 0; k < taskNum; k++) {
-					igd = indicators.get(k).getIGD(resPopulation[k]);
-					igds[k][t] = igd;
-				}
-				t ++;
-			}
+
+					List<MtoAlgorithm> algorithms = new ArrayList<>(times);
+					List<SolutionSet[]> populations = new ArrayList<>(times);
+
+					for (int t = 0; t < times; t++){
+						algorithms.add(algorithmGenerate(algorithmClass, problemSet, cr));
+					}
+
+					algorithms.parallelStream().forEach(a -> {
+						try {
+							populations.add(a.execute());
+						} catch (JMException e) {
+							e.printStackTrace();
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					});
+
+					// 计算IGD
+					double[][] igds = new double[taskNum][times];
+					int t = 0;
+					for (SolutionSet[] pop: populations){
+						SolutionSet[] resPopulation = getEvalPopulations(pop, problemSet);
+						double igd;
+						for (int k = 0; k < taskNum; k++) {
+							igd = indicators.get(k).getIGD(resPopulation[k]);
+							igds[k][t] = igd;
+						}
+						t ++;
+					}
 
 //			double[][] igds = new double[taskNum][times];
 //			for (int t = 0; t < times; t++) {
@@ -150,11 +144,14 @@ public class MOEAD_T_exp_TP_main {
 //				}
 //			}
 
-			if (LOG_IGD) {
-				LogIGD.LogIGD("MOEAD_T(simTransfer_10_DE(RND_0.5)_SBX_noPM_nA1_ADATP(D0.9))" + "_x" + times + "_" + benchmarkName, pCase, igds);
-//				LogIGD.LogIGD("MOEAD" + "_x" + times + "_" + benchmarkName, pCase, igds);
+					if (LOG_IGD) {
+						LogIGD.LogIGD("exp_MOEAD_T(simTransfer_10" +"_UF(CR"+cr+")_DE(CR0.6)_noPM_A1)" + "_x" + times + "_" + benchmarkName, pCase, igds);
+//				LogIGD.LogIGD("MOEAD" + "_" + benchmarkName, pCase, igds);
+					}
+				}
 			}
-		}
+
+
 	}
 
 	public static ProblemSet getProblemSet(String problemName, int problemId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {

@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
@@ -6,6 +6,7 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
+import org.apache.commons.math3.linear.SparseRealMatrix;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MOEAD_T2_main {
+public class MOEAD_T_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
 	static boolean LOG_IGD = true;
@@ -26,12 +27,11 @@ public class MOEAD_T2_main {
 		HashMap<String, Double> parameters;
 
 //		algorithm = (MtoAlgorithm) algorithmClass.getDeclaredConstructor().newInstance();
-		algorithm = new MOEAD_T2(problemSet);
+		algorithm = new MOEAD_T(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
 
-		// TODO: 改成相对路径
 		algorithm.setInputParameter("dataDirectory", "resources/weightVectorFiles/moead");
 
 		algorithm.setInputParameter("T", 20);
@@ -90,14 +90,13 @@ public class MOEAD_T2_main {
 		// System.out.println("Algo:" + algorithmName + ".");
 
 		System.out.println();
-		String fileName = "MOEAD_T(T2(37)(reset200)(initHalf)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
+		String fileName = "MOEAD_T(rndwd(ADA)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
 		System.out.println("Experiment started -> " + fileName);
 
 		long startTime = System.currentTimeMillis();
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
 			problemSet = getProblemSet(benchmarkName, pCase);
-
 			int taskNum = problemSet.size();
 			String[] pf = new String[taskNum];
 			List<QualityIndicator> indicators = new ArrayList<>(taskNum);

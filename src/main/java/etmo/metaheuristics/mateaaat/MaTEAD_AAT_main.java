@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MOEAD_T_archive1_main {
+public class MaTEAD_AAT_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
 	static boolean LOG_IGD = true;
@@ -26,7 +26,7 @@ public class MOEAD_T_archive1_main {
 		HashMap<String, Double> parameters;
 
 //		algorithm = (MtoAlgorithm) algorithmClass.getDeclaredConstructor().newInstance();
-		algorithm = new MOEAD_T_archive1(problemSet);
+		algorithm = new MaTEAD_AAT(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);

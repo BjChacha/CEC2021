@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
@@ -25,7 +25,7 @@ public class MOEAD_T_archive1_PamExp_main {
 		Operator mutation;
 		HashMap<String, Double> parameters;
 
-		algorithm = new MOEAD_T_archive1(problemSet);
+		algorithm = new MaTEAD_AAT(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);

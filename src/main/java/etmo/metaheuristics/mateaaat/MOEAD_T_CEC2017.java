@@ -19,20 +19,21 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
-import etmo.encodings.variable.Int;
 import etmo.util.JMException;
+import etmo.util.KLD;
 import etmo.util.PseudoRandom;
-import org.nd4j.common.util.ArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
-public class MOEAD_T_exp_TP extends MtoAlgorithm {
+public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 	private int populationSize_;
 	private SolutionSet[] population_;
 
@@ -46,11 +47,10 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 	int aStep;
 	double[][] transferP;
 	double[][] implicitP;
+	int[] preBetterCount;
 
 	Solution[][] indArray_;
 	String functionType_;
-
-	int problemNo;
 
 	int evaluations_;
 	int maxEvaluations_;
@@ -61,12 +61,9 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 
 	String dataDirectory_;
 
-	List<Double>[] transferPCollection;
-	List<Integer>[] transferBetterCountCollection;
-
 	int taskNum_;
 
-	public MOEAD_T_exp_TP(ProblemSet problemSet) {
+	public MOEAD_T_CEC2017(ProblemSet problemSet) {
 		super(problemSet);
 
 		functionType_ = "_TCHE1";
@@ -86,8 +83,6 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 		aStep = (Integer) this.getInputParameter("aStep");
 		double tP = (Double) this.getInputParameter("transferP");
 
-		problemNo = (Integer) this.getInputParameter("problemNo");
-
 		crossover_ = operators_.get("crossover"); // default: DE crossover
 		crossover2_ = operators_.get("crossover2");
 		mutation_ = operators_.get("mutation"); // default: polynomial mutation
@@ -101,6 +96,7 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 		transferP = new double[taskNum_][taskNum_];
 		implicitP = new double[taskNum_][taskNum_];
 
+		preBetterCount = new int[taskNum_];
 		for (int k = 0; k < taskNum_; k++){
 			indArray_[k] = new Solution[problemSet_.get(k).getNumberOfObjectives()];
 			z_[k] = new double[problemSet_.get(k).getNumberOfObjectives()];
@@ -108,13 +104,6 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 
 			Arrays.fill(transferP[k], tP);
 			Arrays.fill(implicitP[k], 0.5);
-		}
-
-		transferPCollection = new ArrayList[taskNum_];
-		transferBetterCountCollection = new ArrayList[taskNum_];
-		for (int k = 0; k < taskNum_; k++){
-			transferPCollection[k] = new ArrayList<>();
-			transferBetterCountCollection[k] = new ArrayList<>();
 		}
 	}
 
@@ -150,6 +139,7 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 		Solution[] parents = new Solution[2];
 		parents[0] = population_[sourceTaskId].get(currentId);
 		parents[1] = population_[targetTaskId].get(PseudoRandom.randInt(0, populationSize_ - 1));
+//		parents[1] = normalReproduce(sourceTaskId, currentId, 2);
 		child = ((Solution[]) crossover2_.execute(parents))[PseudoRandom.randInt(0, 1)];
 
 //		// TDE
@@ -184,30 +174,21 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 //			}
 		}
 
-		for (int k = 0; k < taskNum_; k++){
-			String t = k == 0?"a":"b";
-			System.out.println("t"+t+"P"+problemNo+"=" + transferPCollection[k].toString() + ";");
-			System.out.println("t"+t+"C"+problemNo+"=" + transferBetterCountCollection[k].toString() + ";");
-		}
-
 		return population_;
 	}
 
 	public void iterate() throws JMException {
 		for (int taskId = 0; taskId < taskNum_; taskId++) {
 			int assistTask = getSourceTaskId(taskId, "random");
-			if (PseudoRandom.randDouble() < 0.1) {
-				int betterCount = transferConverge(taskId, assistTask);
-				transferBetterCountCollection[taskId].add(betterCount);
-				transferPCollection[taskId].add(transferP[taskId][1-taskId]);
+			if (PseudoRandom.randDouble() < transferP[taskId][assistTask]) {
+				transferConverge(taskId, assistTask);
 			} else {
-				int betterCount = solelyConverge(taskId, 1);
+				solelyConverge(taskId, 1);
 			}
 		}
 	}
 
-
-	public int solelyConverge(int taskId, int times) throws JMException {
+	public void solelyConverge(int taskId, int times) throws JMException {
 		int betterCount = 0;
 		for (int t = 0; t < times; t ++){
 			for (int i = 0; i < populationSize_; i++) {
@@ -220,16 +201,16 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 				betterCount += updateProblem(child, i, type, taskId);
 			}
 		}
-		return betterCount;
+		preBetterCount[taskId] = betterCount;
 	}
 
-	public int transferConverge(int targetTaskId, int sourceTaskId) throws JMException {
+	public void transferConverge(int targetTaskId, int sourceTaskId) throws JMException {
 		int[] betterCount = new int[2];
 		// Async
 		solelyConverge(sourceTaskId, aStep);
 
 		for (int i = 0; i < populationSize_; i++) {
-			int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
+			int type = 2;
 			Solution child;
 
 			// 0: I; 1: E
@@ -251,15 +232,15 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 			betterCount[transferMode] += updateProblem(child, i, type, targetTaskId);
 		}
 
-//		if ((betterCount[0] + betterCount[1]) < populationSize_ * 0.1 * transferP[targetTaskId][sourceTaskId]){
-//			transferP[targetTaskId][sourceTaskId] = transferP[targetTaskId][sourceTaskId] * 0.9;
-//		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.5 * transferP[targetTaskId][sourceTaskId]) {
+		if ((betterCount[0] + betterCount[1]) <= populationSize_ * 0.1 * transferP[targetTaskId][sourceTaskId]) {
+//		if ((betterCount[0] + betterCount[1]) == 0){
+			transferP[targetTaskId][sourceTaskId] *= 0.9;
+		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.3 * transferP[targetTaskId][sourceTaskId]){
 			transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
-//			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
-//		}
-//		System.out.println(evaluations_ + ": " + assistTask + " -> " + taskId + ": " + implicitP + "\t" + transferP);
 
-		return betterCount[0];
+//			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
+		}
+//		System.out.println(evaluations_ + ": " + assistTask + " -> " + taskId + ": " + implicitP + "\t" + transferP);
 	}
 
 	public int getSourceTaskId(int targetTaskId, String type) throws JMException {
@@ -278,6 +259,11 @@ public class MOEAD_T_exp_TP extends MtoAlgorithm {
 						population_[targetTaskId].getMat(),
 						population_[k].getMat());
 			}
+			sourceTaskId = Utils.rouletteExceptZero(distance);
+		}else if (type.equalsIgnoreCase("kl")) {
+			double[] distance;
+			KLD kld = new KLD(problemSet_, population_);
+			distance = kld.getKDL(targetTaskId);
 			sourceTaskId = Utils.rouletteExceptZero(distance);
 		}
 

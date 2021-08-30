@@ -19,21 +19,20 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
+import etmo.encodings.variable.Int;
 import etmo.util.JMException;
-import etmo.util.KLD;
 import etmo.util.PseudoRandom;
+import org.nd4j.common.util.ArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 
-public class MOEAD_T_CEC2021 extends MtoAlgorithm {
+public class MOEAD_T_exp_TP extends MtoAlgorithm {
 	private int populationSize_;
 	private SolutionSet[] population_;
 
@@ -47,17 +46,11 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 	int aStep;
 	double[][] transferP;
 	double[][] implicitP;
-	int[] preBetterCount;
-	double[][] scores;
-	int[] preTransferTask;
-	boolean[][] bannedTask;
-
-	int[] convergeTimes;
-	int[][] transferTimes;
-	int[][] transferBetterTimes;
 
 	Solution[][] indArray_;
 	String functionType_;
+
+	int problemNo;
 
 	int evaluations_;
 	int maxEvaluations_;
@@ -68,9 +61,12 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 
 	String dataDirectory_;
 
+	List<Double>[] transferPCollection;
+	List<Integer>[] transferBetterCountCollection;
+
 	int taskNum_;
 
-	public MOEAD_T_CEC2021(ProblemSet problemSet) {
+	public MOEAD_T_exp_TP(ProblemSet problemSet) {
 		super(problemSet);
 
 		functionType_ = "_TCHE1";
@@ -90,6 +86,8 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 		aStep = (Integer) this.getInputParameter("aStep");
 		double tP = (Double) this.getInputParameter("transferP");
 
+		problemNo = (Integer) this.getInputParameter("problemNo");
+
 		crossover_ = operators_.get("crossover"); // default: DE crossover
 		crossover2_ = operators_.get("crossover2");
 		mutation_ = operators_.get("mutation"); // default: polynomial mutation
@@ -102,30 +100,21 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 
 		transferP = new double[taskNum_][taskNum_];
 		implicitP = new double[taskNum_][taskNum_];
-		scores = new double[taskNum_][taskNum_];
-		preBetterCount = new int[taskNum_];
-		preTransferTask = new int[taskNum_];
-		bannedTask = new boolean[taskNum_][taskNum_];
-
-		convergeTimes = new int[taskNum_];
-		transferTimes = new int[taskNum_][taskNum_];
-		transferBetterTimes = new int[taskNum_][taskNum_];
-
-		Arrays.fill(preTransferTask, -1);
-		Arrays.fill(convergeTimes, 0);
 
 		for (int k = 0; k < taskNum_; k++){
 			indArray_[k] = new Solution[problemSet_.get(k).getNumberOfObjectives()];
 			z_[k] = new double[problemSet_.get(k).getNumberOfObjectives()];
 			lambda_[k] = new double[populationSize_][problemSet_.get(k).getNumberOfObjectives()];
 
-			Arrays.fill(scores[k], 2);
 			Arrays.fill(transferP[k], tP);
 			Arrays.fill(implicitP[k], 0.5);
-			Arrays.fill(bannedTask[k], false);
+		}
 
-			Arrays.fill(transferTimes[k], 0);
-			Arrays.fill(transferBetterTimes[k], 0);
+		transferPCollection = new ArrayList[taskNum_];
+		transferBetterCountCollection = new ArrayList[taskNum_];
+		for (int k = 0; k < taskNum_; k++){
+			transferPCollection[k] = new ArrayList<>();
+			transferBetterCountCollection[k] = new ArrayList<>();
 		}
 	}
 
@@ -194,41 +183,32 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 //				LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
 //			}
 		}
-		System.out.println(Arrays.toString(convergeTimes));
-		System.out.println();
+
 		for (int k = 0; k < taskNum_; k++){
-			System.out.println(Arrays.toString(transferTimes[k]));
+			String t = k == 0?"a":"b";
+			System.out.println("t"+t+"P"+problemNo+"=" + transferPCollection[k].toString() + ";");
+			System.out.println("t"+t+"C"+problemNo+"=" + transferBetterCountCollection[k].toString() + ";");
 		}
-		System.out.println();
-		for (int k = 0; k < taskNum_; k++){
-			System.out.println(Arrays.toString(transferBetterTimes[k]));
-		}
-		System.out.println();
-		double[][] transferSuccessRate = new double[taskNum_][taskNum_];
-		for (int i = 0; i < taskNum_; i++){
-			for (int j = 0; j < taskNum_; j++){
-				if (i == j || transferTimes[i][j] == 0) continue;
-				transferSuccessRate[i][j] = (double) transferBetterTimes[i][j] / transferTimes[i][j];
-			}
-		}
+
 		return population_;
 	}
 
 	public void iterate() throws JMException {
 		for (int taskId = 0; taskId < taskNum_; taskId++) {
-			int assistTask = getSourceTaskId(taskId, "wd");
-			if (PseudoRandom.randDouble() < 1 && assistTask != taskId) {
-				transferConverge(taskId, assistTask);
+			int assistTask = getSourceTaskId(taskId, "random");
+			if (PseudoRandom.randDouble() < 0.1) {
+				int betterCount = transferConverge(taskId, assistTask);
+				transferBetterCountCollection[taskId].add(betterCount);
+				transferPCollection[taskId].add(transferP[taskId][1-taskId]);
 			} else {
-				solelyConverge(taskId, 1);
+				int betterCount = solelyConverge(taskId, 1);
 			}
 		}
 	}
 
 
-	public void solelyConverge(int taskId, int times) throws JMException {
+	public int solelyConverge(int taskId, int times) throws JMException {
 		int betterCount = 0;
-		convergeTimes[taskId] ++;
 		for (int t = 0; t < times; t ++){
 			for (int i = 0; i < populationSize_; i++) {
 				int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
@@ -240,15 +220,13 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 				betterCount += updateProblem(child, i, type, taskId);
 			}
 		}
-		preBetterCount[taskId] = betterCount;
+		return betterCount;
 	}
 
-	public void transferConverge(int targetTaskId, int sourceTaskId) throws JMException {
+	public int transferConverge(int targetTaskId, int sourceTaskId) throws JMException {
 		int[] betterCount = new int[2];
 		// Async
 		solelyConverge(sourceTaskId, aStep);
-
-		transferTimes[targetTaskId][sourceTaskId] ++;
 
 		for (int i = 0; i < populationSize_; i++) {
 			int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
@@ -273,20 +251,15 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 			betterCount[transferMode] += updateProblem(child, i, type, targetTaskId);
 		}
 
-		if ((betterCount[0] + betterCount[1]) <= populationSize_ * 0.1 * transferP[targetTaskId][sourceTaskId]) {
-			transferP[targetTaskId][sourceTaskId] = Math.max(transferP[targetTaskId][sourceTaskId] * 0.9, 0.05);
-			scores[targetTaskId][sourceTaskId] = Math.max(scores[targetTaskId][sourceTaskId] - 1, 0);
-			bannedTask[targetTaskId][sourceTaskId] = true;
-		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.5 * transferP[targetTaskId][sourceTaskId]){
+//		if ((betterCount[0] + betterCount[1]) < populationSize_ * 0.1 * transferP[targetTaskId][sourceTaskId]){
+//			transferP[targetTaskId][sourceTaskId] = transferP[targetTaskId][sourceTaskId] * 0.9;
+//		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.5 * transferP[targetTaskId][sourceTaskId]) {
 			transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
-			preTransferTask[targetTaskId] = sourceTaskId;
-			transferBetterTimes[targetTaskId][sourceTaskId] ++;
-			scores[targetTaskId][sourceTaskId] = 2;
 //			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
-		} else {
-			transferBetterTimes[targetTaskId][sourceTaskId] ++;
-		}
+//		}
 //		System.out.println(evaluations_ + ": " + assistTask + " -> " + taskId + ": " + implicitP + "\t" + transferP);
+
+		return betterCount[0];
 	}
 
 	public int getSourceTaskId(int targetTaskId, String type) throws JMException {
@@ -300,44 +273,12 @@ public class MOEAD_T_CEC2021 extends MtoAlgorithm {
 		else if (type.equalsIgnoreCase("wd")) {
 			// Wasserstein Distance
 			double[] distance = new double[taskNum_];
-			double[] finalScore = new double[taskNum_];
-			boolean participate = false;
 			for (int k = 0; k < taskNum_; k++) {
-				if (k == targetTaskId || scores[targetTaskId][k] == 0) continue;
-				distance[k] = WassersteinDistance.getWD2(
+				distance[k] = WassersteinDistance.getWD(
 						population_[targetTaskId].getMat(),
 						population_[k].getMat());
-				finalScore[k] = 3 * scores[targetTaskId][k] / distance[k];
-				participate = true;
 			}
-			if (participate)
-				sourceTaskId = Utils.rouletteExceptZero(finalScore);
-			else
-				sourceTaskId = targetTaskId;
-//			System.out.println(sourceTaskId + " -> " + targetTaskId);
-
-		} else if (type.equalsIgnoreCase("kl")) {
-			double[] distance;
-			double[] finalScore = new double[taskNum_];
-			double maxScore = 0;
-			KLD kld = new KLD(problemSet_, population_);
-			distance = kld.getKDL(targetTaskId);
-			for (int k = 0; k < taskNum_; k++){
-				finalScore[k] = scores[targetTaskId][sourceTaskId] / distance[k];
-				maxScore = Math.max(maxScore, finalScore[k]);
-			}
-			if (maxScore > 0)
-				sourceTaskId = Utils.rouletteExceptZero(finalScore);
-			else
-				sourceTaskId = targetTaskId;
-
-		} else if (type.equalsIgnoreCase("banned")) {
-			if (preTransferTask[targetTaskId] == -1) {
-				while (sourceTaskId == targetTaskId && !bannedTask[targetTaskId][sourceTaskId])
-					sourceTaskId = PseudoRandom.randInt(0, taskNum_ - 1);
-			} else {
-				sourceTaskId = preTransferTask[targetTaskId];
-			}
+			sourceTaskId = Utils.rouletteExceptZero(distance);
 		}
 
 		return sourceTaskId;

@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.util.JMException;

@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.util.JMException;
@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class MOEAD_T_CEC2017 extends MtoAlgorithm {
+public class MOEAD_T_DRA extends MtoAlgorithm {
 	private int populationSize_;
 	private SolutionSet[] population_;
 
@@ -43,14 +43,18 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 	int[][][] neighborhood_;
 	double delta_;
 	int nr_;
+	Solution[][] indArray_;
+	String functionType_;
 
 	int aStep;
 	double[][] transferP;
 	double[][] implicitP;
 	int[] preBetterCount;
+	double[][] scores;
+	int[] preTransferTask;
+	boolean[][] bannedTask;
 
-	Solution[][] indArray_;
-	String functionType_;
+	double[] steps;
 
 	int evaluations_;
 	int maxEvaluations_;
@@ -63,7 +67,7 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 
 	int taskNum_;
 
-	public MOEAD_T_CEC2017(ProblemSet problemSet) {
+	public MOEAD_T_DRA(ProblemSet problemSet) {
 		super(problemSet);
 
 		functionType_ = "_TCHE1";
@@ -95,16 +99,173 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 
 		transferP = new double[taskNum_][taskNum_];
 		implicitP = new double[taskNum_][taskNum_];
-
+		scores = new double[taskNum_][taskNum_];
 		preBetterCount = new int[taskNum_];
+		preTransferTask = new int[taskNum_];
+		bannedTask = new boolean[taskNum_][taskNum_];
+
+		steps = new double[taskNum_];
+
 		for (int k = 0; k < taskNum_; k++){
 			indArray_[k] = new Solution[problemSet_.get(k).getNumberOfObjectives()];
 			z_[k] = new double[problemSet_.get(k).getNumberOfObjectives()];
 			lambda_[k] = new double[populationSize_][problemSet_.get(k).getNumberOfObjectives()];
 
+			Arrays.fill(preTransferTask, -1);
+			Arrays.fill(scores[k], 3);
 			Arrays.fill(transferP[k], tP);
 			Arrays.fill(implicitP[k], 0.5);
+			Arrays.fill(bannedTask[k], false);
 		}
+	}
+
+	public SolutionSet[] execute() throws JMException, ClassNotFoundException {
+		initState();
+		initUniformWeight();
+		initNeighborhood();
+		initPopulation();
+		initIdealPoint();
+
+		while (evaluations_ < maxEvaluations_) {
+			iterate();
+//			if (evaluations_ % (populationSize_ * 20) == 0){
+//				LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
+//			}
+		}
+		return population_;
+	}
+
+	public void iterate() throws JMException {
+		calculatedConverge(3);
+
+		for (int taskId = 0; taskId < taskNum_; taskId++) {
+			int assistTask = getSourceTaskId(taskId, "wd");
+			if (PseudoRandom.randDouble() < transferP[taskId][assistTask] && taskId != assistTask){
+				int t = 0;
+				while (steps[assistTask] > steps[taskId] && t < 3){
+					steps[assistTask] = solelyConverge(assistTask, 1);
+					t ++;
+				}
+				transferConverge(taskId, assistTask);
+			}
+		}
+	}
+
+	void calculatedConverge(int times) throws JMException {
+		Arrays.fill(steps, 0);
+		for (int k = 0; k < taskNum_; k++){
+			steps[k] = solelyConverge(k, times);
+		}
+	}
+
+	public double solelyConverge(int taskId, int times) throws JMException {
+		double improvement = 0;
+		for (int t = 0; t < times; t ++){
+			for (int i = 0; i < populationSize_; i++) {
+				int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
+				Solution child = normalReproduce(taskId, i, type);
+				problemSet_.get(taskId).evaluate(child);
+				evaluations_++;
+
+				updateReference(child, taskId);
+				improvement += updateProblem(child, i, type, taskId);
+			}
+		}
+		return improvement;
+	}
+
+	public void transferConverge(int targetTaskId, int sourceTaskId) throws JMException {
+		int[] betterCount = new int[2];
+		// Async
+		solelyConverge(sourceTaskId, aStep);
+
+		for (int i = 0; i < populationSize_; i++) {
+			int type = 2;
+			Solution child;
+
+			// 0: I; 1: E
+			int transferMode;
+			if (PseudoRandom.randDouble() < 1) {
+				// 隐式
+				transferMode = 0;
+				child = transferReproduce(targetTaskId, sourceTaskId, i);
+			} else {
+				// 显式
+				transferMode = 1;
+				child = transferReproduce(sourceTaskId, sourceTaskId, i);
+			}
+
+			problemSet_.get(targetTaskId).evaluate(child);
+			evaluations_++;
+
+			updateReference(child, targetTaskId);
+			betterCount[transferMode] += updateProblem(child, i, type, targetTaskId);
+		}
+
+		if ((betterCount[0] + betterCount[1]) <= populationSize_ * 0.1 * transferP[targetTaskId][sourceTaskId]) {
+			transferP[targetTaskId][sourceTaskId] = Math.max(transferP[targetTaskId][sourceTaskId] * 0.9, 0.05);
+			scores[targetTaskId][sourceTaskId] = Math.max(scores[targetTaskId][sourceTaskId] - 1, 0);
+			bannedTask[targetTaskId][sourceTaskId] = true;
+		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.5 * transferP[targetTaskId][sourceTaskId]){
+			// transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
+			preTransferTask[targetTaskId] = sourceTaskId;
+//			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
+		}
+//		System.out.println(evaluations_ + ": " + assistTask + " -> " + taskId + ": " + implicitP + "\t" + transferP);
+	}
+
+	public int getSourceTaskId(int targetTaskId, String type) throws JMException {
+		int sourceTaskId = targetTaskId;
+
+		if (type.equalsIgnoreCase("random")) {
+			// random
+			while (sourceTaskId == targetTaskId)
+				sourceTaskId = PseudoRandom.randInt(0, taskNum_ - 1);
+		}
+		else if (type.equalsIgnoreCase("wd")) {
+			// Wasserstein Distance
+			double[] distance = new double[taskNum_];
+			double[] finalScore = new double[taskNum_];
+			double maxScore = 0;
+			for (int k = 0; k < taskNum_; k++) {
+				if (k == targetTaskId) continue;
+				distance[k] = WassersteinDistance.getWD2(
+						population_[targetTaskId].getMat(),
+						population_[k].getMat());
+				finalScore[k] = 1 / distance[k];
+				maxScore = Math.max(maxScore, finalScore[k]);
+			}
+
+			if (maxScore > 0)
+				sourceTaskId = Utils.rouletteExceptZero(finalScore);
+			else
+				sourceTaskId = targetTaskId;
+		} else if (type.equalsIgnoreCase("kl")) {
+			double[] distance;
+			double[] finalScore = new double[taskNum_];
+			double maxScore = 0;
+			KLD kld = new KLD(problemSet_, population_);
+			distance = kld.getKDL(targetTaskId);
+			for (int k = 0; k < taskNum_; k++){
+				finalScore[k] = scores[targetTaskId][sourceTaskId] / distance[k];
+				maxScore = Math.max(maxScore, finalScore[k]);
+			}
+			if (maxScore > 0)
+				sourceTaskId = Utils.rouletteExceptZero(finalScore);
+			else
+				sourceTaskId = targetTaskId;
+		} else if (type.equalsIgnoreCase("banned")) {
+			if (preTransferTask[targetTaskId] == -1) {
+				while (sourceTaskId == targetTaskId && !bannedTask[targetTaskId][sourceTaskId])
+					sourceTaskId = PseudoRandom.randInt(0, taskNum_ - 1);
+			} else {
+				sourceTaskId = preTransferTask[targetTaskId];
+			}
+		}  else {
+			System.out.println("Unsupported type: " + type);
+		}
+
+		return sourceTaskId;
 	}
 
 	private Solution normalReproduce(int taskId, int currentId, int type) throws JMException {
@@ -139,7 +300,6 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 		Solution[] parents = new Solution[2];
 		parents[0] = population_[sourceTaskId].get(currentId);
 		parents[1] = population_[targetTaskId].get(PseudoRandom.randInt(0, populationSize_ - 1));
-//		parents[1] = normalReproduce(sourceTaskId, currentId, 2);
 		child = ((Solution[]) crossover2_.execute(parents))[PseudoRandom.randInt(0, 1)];
 
 //		// TDE
@@ -160,115 +320,6 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 		return child;
 	}
 
-	public SolutionSet[] execute() throws JMException, ClassNotFoundException {
-		initState();
-		initUniformWeight();
-		initNeighborhood();
-		initPopulation();
-		initIdealPoint();
-
-		while (evaluations_ < maxEvaluations_) {
-			iterate();
-//			if (evaluations_ % (populationSize_ * 20) == 0){
-//				LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
-//			}
-		}
-
-		return population_;
-	}
-
-	public void iterate() throws JMException {
-		for (int taskId = 0; taskId < taskNum_; taskId++) {
-			int assistTask = getSourceTaskId(taskId, "random");
-			if (PseudoRandom.randDouble() < transferP[taskId][assistTask]) {
-				transferConverge(taskId, assistTask);
-			} else {
-				solelyConverge(taskId, 1);
-			}
-		}
-	}
-
-	public void solelyConverge(int taskId, int times) throws JMException {
-		int betterCount = 0;
-		for (int t = 0; t < times; t ++){
-			for (int i = 0; i < populationSize_; i++) {
-				int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
-				Solution child = normalReproduce(taskId, i, type);
-				problemSet_.get(taskId).evaluate(child);
-				evaluations_++;
-
-				updateReference(child, taskId);
-				betterCount += updateProblem(child, i, type, taskId);
-			}
-		}
-		preBetterCount[taskId] = betterCount;
-	}
-
-	public void transferConverge(int targetTaskId, int sourceTaskId) throws JMException {
-		int[] betterCount = new int[2];
-		// Async
-		solelyConverge(sourceTaskId, aStep);
-
-		for (int i = 0; i < populationSize_; i++) {
-			int type = 2;
-			Solution child;
-
-			// 0: I; 1: E
-			int transferMode;
-			if (PseudoRandom.randDouble() < 1) {
-				// 隐式
-				transferMode = 0;
-				child = transferReproduce(targetTaskId, sourceTaskId, i);
-			} else {
-				// 显式
-				transferMode = 1;
-				child = transferReproduce(sourceTaskId, sourceTaskId, i);
-			}
-
-			problemSet_.get(targetTaskId).evaluate(child);
-			evaluations_++;
-
-			updateReference(child, targetTaskId);
-			betterCount[transferMode] += updateProblem(child, i, type, targetTaskId);
-		}
-
-		if ((betterCount[0] + betterCount[1]) <= populationSize_ * 0.1 * transferP[targetTaskId][sourceTaskId]) {
-//		if ((betterCount[0] + betterCount[1]) == 0){
-			transferP[targetTaskId][sourceTaskId] *= 0.9;
-		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.3 * transferP[targetTaskId][sourceTaskId]){
-			transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
-
-//			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
-		}
-//		System.out.println(evaluations_ + ": " + assistTask + " -> " + taskId + ": " + implicitP + "\t" + transferP);
-	}
-
-	public int getSourceTaskId(int targetTaskId, String type) throws JMException {
-		int sourceTaskId = targetTaskId;
-
-		if (type.equalsIgnoreCase("random")) {
-			// random
-			while (sourceTaskId == targetTaskId)
-				sourceTaskId = PseudoRandom.randInt(0, taskNum_ - 1);
-		}
-		else if (type.equalsIgnoreCase("wd")) {
-			// Wasserstein Distance
-			double[] distance = new double[taskNum_];
-			for (int k = 0; k < taskNum_; k++) {
-				distance[k] = WassersteinDistance.getWD(
-						population_[targetTaskId].getMat(),
-						population_[k].getMat());
-			}
-			sourceTaskId = Utils.rouletteExceptZero(distance);
-		}else if (type.equalsIgnoreCase("kl")) {
-			double[] distance;
-			KLD kld = new KLD(problemSet_, population_);
-			distance = kld.getKDL(targetTaskId);
-			sourceTaskId = Utils.rouletteExceptZero(distance);
-		}
-
-		return sourceTaskId;
-	}
 
 	public void initUniformWeight() { // init lambda vectors
 		for (int k = 0; k < taskNum_; k++) {
@@ -435,7 +486,8 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 	 * @param id
 	 * @param type
 	 */
-	int updateProblem(Solution indiv, int id, int type, int taskId) {
+	double updateProblem(Solution indiv, int id, int type, int taskId) {
+		double improvement = 0;
 		int size;
 		int time;
 
@@ -465,6 +517,7 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 
 			if (f2 < f1) {
 				population_[taskId].replace(k, new Solution(indiv));
+				improvement += ((f1 - f2) / f1);
 				time++;
 			}
 			// the maximal number of solutions updated is not allowed to exceed
@@ -474,7 +527,7 @@ public class MOEAD_T_CEC2017 extends MtoAlgorithm {
 			}
 		}
 
-		return time;
+		return improvement;
 	} // updateProblem
 
 	double fitnessFunction(Solution individual, double[] lambda, int taskId) {

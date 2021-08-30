@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.operators.crossover.CrossoverFactory;
@@ -6,7 +6,6 @@ import etmo.operators.mutation.MutationFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
-import org.apache.commons.math3.linear.SparseRealMatrix;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -14,12 +13,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MOEAD_T_main {
+public class MOEAD_T_exp_TP_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-	static boolean LOG_IGD = true;
+	static boolean LOG_IGD = false;
 
-	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
+	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet, int pn) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
 		Operator crossover;
 		Operator crossover2;
@@ -27,11 +26,12 @@ public class MOEAD_T_main {
 		HashMap<String, Double> parameters;
 
 //		algorithm = (MtoAlgorithm) algorithmClass.getDeclaredConstructor().newInstance();
-		algorithm = new MOEAD_T(problemSet);
+		algorithm = new MOEAD_T_exp_TP(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
 
+		// TODO: 改成相对路径
 		algorithm.setInputParameter("dataDirectory", "resources/weightVectorFiles/moead");
 
 		algorithm.setInputParameter("T", 20);
@@ -41,6 +41,8 @@ public class MOEAD_T_main {
 		algorithm.setInputParameter("aStep", 1);
 		algorithm.setInputParameter("transferP", 1.0);
 
+		algorithm.setInputParameter("problemNo", pn);
+
 		parameters = new HashMap();
 		parameters.put("CR", 0.6);
 		parameters.put("F", 0.5);
@@ -49,8 +51,8 @@ public class MOEAD_T_main {
 //		parameters = new HashMap();
 //		parameters.put("CR_LB", 0.1);
 //		parameters.put("CR_UB", 0.9);
-//		parameters.put("F_LB", 0.1);
-//		parameters.put("F_UB", 2.0);
+//		parameters.put("F_LB", 0.5);
+//		parameters.put("F_UB", 0.5);
 //		crossover = CrossoverFactory.getCrossoverOperator("RandomDECrossover",parameters);
 
 		parameters = new HashMap();
@@ -80,23 +82,18 @@ public class MOEAD_T_main {
 	public static void main(String[] args) throws JMException, SecurityException, IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
 		ProblemSet problemSet; // The problem to solve
 
-		String benchmarkName = "CEC2021";
+		String benchmarkName = "CEC2017";
 		Class algorithmClass = MOEAD_T.class;
 		String algorithmName = algorithmClass.getName();
-		int taskStart = 25;
-		int taskEnd = 32;
-		int times = 10;
+		int taskStart = 1;
+		int taskEnd = 9;
+		int times = 1;
 
-		// System.out.println("Algo:" + algorithmName + ".");
-
-		System.out.println();
-		String fileName = "MOEAD_T(rndwd(ADA)_DE(CR0.6)_SBX_A(1)" + "_x" + times + "_" + benchmarkName;
-		System.out.println("Experiment started -> " + fileName);
-
-		long startTime = System.currentTimeMillis();
+//		System.out.println("Algo:" + algorithmName + ".");
 
 		for (int pCase = taskStart; pCase <= taskEnd; pCase++){
 			problemSet = getProblemSet(benchmarkName, pCase);
+
 			int taskNum = problemSet.size();
 			String[] pf = new String[taskNum];
 			List<QualityIndicator> indicators = new ArrayList<>(taskNum);
@@ -106,28 +103,25 @@ public class MOEAD_T_main {
  			}
 
 			String pSName = problemSet.get(0).getName();
-			System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
+//			System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
 
+			// 尝试并行
 			List<MtoAlgorithm> algorithms = new ArrayList<>(times);
 			List<SolutionSet[]> populations = new ArrayList<>(times);
-
 			// 初始化算法
 			for (int t = 0; t < times; t++){
-				algorithms.add(algorithmGenerate(algorithmClass, problemSet));
+				algorithms.add(algorithmGenerate(algorithmClass, problemSet, pCase));
 			}
 			// 并行执行times个算法
 			algorithms.parallelStream().forEach(a -> {
 				try {
 					populations.add(a.execute());
-				} catch (JMException | ClassNotFoundException e) {
+				} catch (JMException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
 			});
-
-//			// 串行执行
-//			for (int t = 0; t < times; t++){
-//				populations.add(algorithms.get(t).execute());
-//			}
 
 			// 计算IGD
 			double[][] igds = new double[taskNum][times];
@@ -157,13 +151,10 @@ public class MOEAD_T_main {
 //			}
 
 			if (LOG_IGD) {
-				LogIGD.LogIGD(fileName, pCase, igds);
+				LogIGD.LogIGD("MOEAD_T(simTransfer_10_DE(RND_0.5)_SBX_noPM_nA1_ADATP(D0.9))" + "_x" + times + "_" + benchmarkName, pCase, igds);
 //				LogIGD.LogIGD("MOEAD" + "_x" + times + "_" + benchmarkName, pCase, igds);
 			}
 		}
-
-		long endTime = System.currentTimeMillis();
-		System.out.println("Total time cost: " + (endTime - startTime) / 1000 + " s.");
 	}
 
 	public static ProblemSet getProblemSet(String problemName, int problemId) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {

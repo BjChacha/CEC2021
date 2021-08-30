@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package etmo.metaheuristics.matbml2;
+package etmo.metaheuristics.mateaaat;
 
 import etmo.core.*;
 import etmo.util.JMException;
@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class MOEAD_T extends MtoAlgorithm {
+public class MOEAD_T2 extends MtoAlgorithm {
 	private int populationSize_;
 	private SolutionSet[] population_;
 
@@ -53,8 +53,10 @@ public class MOEAD_T extends MtoAlgorithm {
 	double[][] scores;
 	int[] preTransferTask;
 	boolean[][] bannedTask;
-	double[] steps;
 
+	int[][] transferVol;
+
+	int generations_;
 	int evaluations_;
 	int maxEvaluations_;
 
@@ -66,7 +68,7 @@ public class MOEAD_T extends MtoAlgorithm {
 
 	int taskNum_;
 
-	public MOEAD_T(ProblemSet problemSet) {
+	public MOEAD_T2(ProblemSet problemSet) {
 		super(problemSet);
 
 		functionType_ = "_TCHE1";
@@ -76,6 +78,7 @@ public class MOEAD_T extends MtoAlgorithm {
 	private void initState() {
 		taskNum_ = problemSet_.size();
 		evaluations_ = 0;
+		generations_ = 0;
 		maxEvaluations_ = (Integer) this.getInputParameter("maxEvaluations");
 		populationSize_ = (Integer) this.getInputParameter("populationSize");
 		dataDirectory_ = this.getInputParameter("dataDirectory").toString();
@@ -102,18 +105,20 @@ public class MOEAD_T extends MtoAlgorithm {
 		preBetterCount = new int[taskNum_];
 		preTransferTask = new int[taskNum_];
 		bannedTask = new boolean[taskNum_][taskNum_];
-		steps = new double[taskNum_];
 
-		Arrays.fill(preTransferTask, -1);
+		transferVol = new int[taskNum_][taskNum_];
+
 		for (int k = 0; k < taskNum_; k++){
 			indArray_[k] = new Solution[problemSet_.get(k).getNumberOfObjectives()];
 			z_[k] = new double[problemSet_.get(k).getNumberOfObjectives()];
 			lambda_[k] = new double[populationSize_][problemSet_.get(k).getNumberOfObjectives()];
 
+			Arrays.fill(preTransferTask, -1);
 			Arrays.fill(scores[k], 3);
 			Arrays.fill(transferP[k], tP);
 			Arrays.fill(implicitP[k], 0.5);
 			Arrays.fill(bannedTask[k], false);
+			Arrays.fill(transferVol[k], populationSize_ / taskNum_ / 2);
 		}
 	}
 
@@ -176,42 +181,68 @@ public class MOEAD_T extends MtoAlgorithm {
 		initPopulation();
 		initIdealPoint();
 
+		generations_ = 1;
 		while (evaluations_ < maxEvaluations_) {
 			iterate();
-//			if (evaluations_ % (populationSize_ * 20) == 0){
-//				LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
-//			}
+			generations_ ++;
+			if (generations_ % 200 == 0){
+				parameterReset();
+			}
 		}
 		return population_;
 	}
 
-	public void iterate() throws JMException {
-		calculatedConverge(3);
+	private void parameterReset() {
+		for (int k = 0; k < taskNum_; k++){
+			Arrays.fill(transferVol[k], populationSize_ / taskNum_ / 2);
+		}
+	}
 
-		for (int taskId = 0; taskId < taskNum_; taskId++) {
-			int assistTask = getSourceTaskId(taskId, "rndwd");
-			if (PseudoRandom.randDouble() < transferP[taskId][assistTask] && taskId != assistTask){
-				// int t = 0;
-				// while (steps[assistTask] > steps[taskId] && t < 3){
-				// 	steps[assistTask] = solelyConverge(assistTask, 1);
-				// 	t ++;
-				// }
-				transferConverge(taskId, assistTask);
-			} else {
-				solelyConverge(taskId, 1);
+	public void iterate() throws JMException {
+		for (int targetTaskId = 0; targetTaskId < taskNum_; targetTaskId++) {
+			int pIdx = 0;
+			int[] permutation = new int[populationSize_];
+			Utils.randomPermutation(permutation, populationSize_);
+			int[] taskOrder = new int[taskNum_];
+			Utils.randomPermutation(taskOrder, taskNum_);
+			// transfer
+			for (int taskId = 0; taskId < taskNum_; taskId++){
+				int sourceTaskId = taskOrder[taskId];
+				if (targetTaskId == sourceTaskId) continue;
+
+				int betterCount = 0;
+				for (int i = 0; i < transferVol[targetTaskId][sourceTaskId]; i++){
+					Solution child = transferReproduce(targetTaskId, sourceTaskId, permutation[pIdx]);
+					child.setFlag(sourceTaskId);
+					problemSet_.get(targetTaskId).evaluate(child);
+					evaluations_ ++;
+					updateReference(child, targetTaskId);
+					betterCount += updateProblem(child, permutation[pIdx], 2, targetTaskId);
+
+					pIdx ++;
+				}
+				transferVol[targetTaskId][sourceTaskId] = Math.min(
+						(int)(betterCount * 0.3 + transferVol[targetTaskId][sourceTaskId] * 0.7),
+						transferVol[targetTaskId][sourceTaskId]);
+			}
+
+			// normal
+			while (pIdx < populationSize_){
+				int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
+				Solution child = normalReproduce(targetTaskId, permutation[pIdx], type);
+				child.setFlag(targetTaskId);
+				problemSet_.get(targetTaskId).evaluate(child);
+				evaluations_ ++;
+				updateReference(child, targetTaskId);
+				updateProblem(child, permutation[pIdx], type, targetTaskId);
+				pIdx ++;
 			}
 		}
 	}
 
-	void calculatedConverge(int times) throws JMException {
-		Arrays.fill(steps, 0);
-		for (int k = 0; k < taskNum_; k++){
-			steps[k] = solelyConverge(k, times);
-		}
-	}
 
-	public double solelyConverge(int taskId, int times) throws JMException {
-		double improvement = 0;
+	public void solelyConverge(int taskId, int times) throws JMException {
+		int betterCount = 0;
 		for (int t = 0; t < times; t ++){
 			for (int i = 0; i < populationSize_; i++) {
 				int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
@@ -220,19 +251,19 @@ public class MOEAD_T extends MtoAlgorithm {
 				evaluations_++;
 
 				updateReference(child, taskId);
-				improvement += updateProblemAndGetImprove(child, i, type, taskId);
+				betterCount += updateProblem(child, i, type, taskId);
 			}
 		}
-		return improvement;
+		preBetterCount[taskId] = betterCount;
 	}
 
 	public void transferConverge(int targetTaskId, int sourceTaskId) throws JMException {
 		int[] betterCount = new int[2];
 		// Async
-		// solelyConverge(sourceTaskId, aStep);
+		solelyConverge(sourceTaskId, aStep);
 
 		for (int i = 0; i < populationSize_; i++) {
-			int type = 2;
+			int type = PseudoRandom.randDouble() < delta_ ? 1 : 2;
 			Solution child;
 
 			// 0: I; 1: E
@@ -255,9 +286,12 @@ public class MOEAD_T extends MtoAlgorithm {
 		}
 
 		if ((betterCount[0] + betterCount[1]) <= populationSize_ * 0.1 * transferP[targetTaskId][sourceTaskId]) {
-			transferP[targetTaskId][sourceTaskId] = Math.max(transferP[targetTaskId][sourceTaskId] * 0.9, 0.1);
+			transferP[targetTaskId][sourceTaskId] = Math.max(transferP[targetTaskId][sourceTaskId] * 0.9, 0.05);
+			scores[targetTaskId][sourceTaskId] = Math.max(scores[targetTaskId][sourceTaskId] - 1, 0);
+			bannedTask[targetTaskId][sourceTaskId] = true;
 		} else if ((betterCount[0] + betterCount[1]) > populationSize_ * 0.5 * transferP[targetTaskId][sourceTaskId]){
 			transferP[targetTaskId][sourceTaskId] = Math.min(transferP[targetTaskId][sourceTaskId] / 0.9, 1);
+			preTransferTask[targetTaskId] = sourceTaskId;
 //			implicitP[targetTaskId][sourceTaskId] = 0.1 * implicitP[targetTaskId][sourceTaskId] + 0.9 * ((double) betterCount[0] / (betterCount[0] + betterCount[1]));
 		}
 //		System.out.println(evaluations_ + ": " + assistTask + " -> " + taskId + ": " + implicitP + "\t" + transferP);
@@ -276,20 +310,12 @@ public class MOEAD_T extends MtoAlgorithm {
 			double[] distance = new double[taskNum_];
 			double[] finalScore = new double[taskNum_];
 			double maxScore = 0;
-			double minDistance = Double.MAX_VALUE;
-			double maxDistance = 0;
 			for (int k = 0; k < taskNum_; k++) {
 				if (k == targetTaskId) continue;
 				distance[k] = WassersteinDistance.getWD2(
 						population_[targetTaskId].getMat(),
 						population_[k].getMat());
-				minDistance = Math.min(distance[k], minDistance);
-				maxDistance = Math.max(distance[k], maxDistance);
-			}
-			for (int k = 0; k < taskNum_; k++){
-				if (k == targetTaskId) continue;
-				distance[k] = (distance[k] - minDistance) / (maxDistance - minDistance);
-				finalScore[k] = (1 - distance[k]) * transferP[targetTaskId][sourceTaskId];
+				finalScore[k] = 3 * scores[targetTaskId][k] / distance[k];
 				maxScore = Math.max(maxScore, finalScore[k]);
 			}
 
@@ -297,8 +323,7 @@ public class MOEAD_T extends MtoAlgorithm {
 				sourceTaskId = Utils.rouletteExceptZero(finalScore);
 			else
 				sourceTaskId = targetTaskId;
-		} 
-		else if (type.equalsIgnoreCase("kl")) {
+		} else if (type.equalsIgnoreCase("kl")) {
 			double[] distance;
 			double[] finalScore = new double[taskNum_];
 			double maxScore = 0;
@@ -312,49 +337,13 @@ public class MOEAD_T extends MtoAlgorithm {
 				sourceTaskId = Utils.rouletteExceptZero(finalScore);
 			else
 				sourceTaskId = targetTaskId;
-		} 
-		else if (type.equalsIgnoreCase("banned")) {
+		} else if (type.equalsIgnoreCase("banned")) {
 			if (preTransferTask[targetTaskId] == -1) {
 				while (sourceTaskId == targetTaskId && !bannedTask[targetTaskId][sourceTaskId])
 					sourceTaskId = PseudoRandom.randInt(0, taskNum_ - 1);
 			} else {
 				sourceTaskId = preTransferTask[targetTaskId];
 			}
-		} 
-		else if (type.equalsIgnoreCase("rndwd")) {
-			int size = (int)(Math.sqrt(taskNum_));
-			int taskOrder[] = new int[taskNum_];
-			int perm[] = new int[size];
-			Utils.randomPermutation(taskOrder, taskNum_);
-			for (int i = 0; i < size; i ++){
-				perm[i] = taskOrder[i];
-			}
-			double distance[] = new double[size];
-			double minDistance = Double.MAX_VALUE;
-			double maxDistance = 0;
-			for (int i = 0; i < size; i++){
-				if (perm[i] == targetTaskId) continue;
-				distance[i] = WassersteinDistance.getWD2(
-						population_[targetTaskId].getMat(),
-						population_[perm[i]].getMat());
-				minDistance = Math.min(minDistance, distance[i]);
-				maxDistance = Math.max(maxDistance, distance[i]);
-			}
-
-			double[] finalScore = new double[size];
-			double maxScore = 0;
-			for (int i = 0; i < size; i++){
-				if (perm[i] == targetTaskId) continue;
-				// distance[i] = distance[i] / (maxDistance - minDistance);
-				finalScore[i] = transferP[targetTaskId][perm[i]] / distance[i];
-				maxScore = Math.max(finalScore[i], maxScore);
-			}
-			if (maxScore > 0){
-				sourceTaskId = perm[Utils.rouletteExceptZero(finalScore)];
-			}
-		}
-		else {
-			System.out.println("Unsupported type: " + type);
 		}
 
 		return sourceTaskId;
@@ -525,50 +514,6 @@ public class MOEAD_T extends MtoAlgorithm {
 	 * @param id
 	 * @param type
 	 */
-	double updateProblemAndGetImprove(Solution indiv, int id, int type, int taskId) {
-		double improvement = 0;
-		int size;
-		int time;
-
-		time = 0;
-
-		if (type == 1) {
-			size = neighborhood_[taskId][id].length;
-		} else {
-			size = population_[taskId].size();
-		}
-		int[] perm = new int[size];
-
-		Utils.randomPermutation(perm, size);
-
-		for (int i = 0; i < size; i++) {
-			int k;
-			if (type == 1) {
-				k = neighborhood_[taskId][id][perm[i]];
-			} else {
-				k = perm[i]; // calculate the values of objective function
-								// regarding the current subproblem
-			}
-			double f1, f2;
-
-			f1 = fitnessFunction(population_[taskId].get(k), lambda_[taskId][k], taskId);
-			f2 = fitnessFunction(indiv, lambda_[taskId][k], taskId);
-
-			if (f2 < f1) {
-				population_[taskId].replace(k, new Solution(indiv));
-				improvement += ((f1 - f2) / f1);
-				time++;
-			}
-			// the maximal number of solutions updated is not allowed to exceed
-			// 'limit'
-			if (time >= nr_) {
-				break;
-			}
-		}
-
-		return improvement;
-	} // updateProblem
-
 	int updateProblem(Solution indiv, int id, int type, int taskId) {
 		int size;
 		int time;
