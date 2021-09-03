@@ -455,6 +455,19 @@ public class SolutionSet implements Serializable {
 		return objectives;
 	} // writeObjectivesMatrix
 
+	public double[][] writeObjectivesToMatrix(int objStart, int objEnd) {
+		if (this.size() == 0 || objStart > objEnd || objEnd < 0 || objStart >= size()) {
+			return null;
+		}
+		double[][] objectives = new double[size()][objEnd-objStart+1];
+		for (int i = 0; i < size(); i++) {
+			for (int j = objStart; j <= objEnd; j++) {
+				objectives[i][j-objStart] = get(i).getObjective(j);
+			}
+		}
+		return objectives;
+	}
+
 	public void printObjectives() {
 		for (int i = 0; i < solutionsList_.size(); i++)
 			System.out.println("" + solutionsList_.get(i));

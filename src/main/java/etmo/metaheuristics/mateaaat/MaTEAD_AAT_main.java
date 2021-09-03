@@ -10,13 +10,15 @@ import etmo.util.logging.LogIGD;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class MaTEAD_AAT_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-	static boolean LOG_IGD = true;
+	static boolean LOG_IGD = false;
+	static boolean IGD_PRINT = true;
 
 	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
@@ -83,8 +85,8 @@ public class MaTEAD_AAT_main {
 		Class algorithmClass = MOEAD_T.class;
 		String algorithmName = algorithmClass.getName();
 		int taskStart = 1;
-		int taskEnd = 1;
-		int times = 1;
+		int taskEnd = 10;
+		int times = 5;
 
 		// System.out.println("Algo:" + algorithmName + ".");
 
@@ -159,6 +161,14 @@ public class MaTEAD_AAT_main {
 				LogIGD.LogIGD(fileName, pCase, igds);
 //				LogIGD.LogIGD("MOEAD" + "_x" + times + "_" + benchmarkName, pCase, igds);
 			}
+			if (IGD_PRINT) {
+                double[] igdMean = new double[taskNum];
+                // System.out.println("Subproblem " + problemID + ": ");
+                for (int k = 0; k < taskNum; k++) {
+                    igdMean[k] = Arrays.stream(igds[k]).sum() / times;
+                    System.out.println(igdMean[k]);
+                }
+            }
 		}
 
 		long endTime = System.currentTimeMillis();

@@ -117,14 +117,14 @@ public class MaTEAD_AAT extends MtoAlgorithm {
 		initNeighborhood();
 		initPopulation();
 		initIdealPoint();
-		calIGD();
+		// calIGD();
 
 		while (evaluations_ < maxEvaluations_) {
 			iterate();
 //			if (evaluations_ % (populationSize_ * 20) == 0){
 //				LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
 //			}
-			calIGD();
+			// calIGD();
 		}
 		return population_;
 	}

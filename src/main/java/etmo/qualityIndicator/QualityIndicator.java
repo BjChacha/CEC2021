@@ -82,6 +82,16 @@ public class QualityIndicator {
 				trueParetoFront_.writeObjectivesToMatrix(), problem_.getNumberOfObjectives());
 	} // getIGD`
 
+	public double getIGD(SolutionSet solutionSet, int taskID) {
+		return new InvertedGenerationalDistance()
+		.invertedGenerationalDistance(
+			solutionSet.writeObjectivesToMatrix(
+				problem_.getStartObjPos(), problem_.getEndObjPos()),
+				trueParetoFront_.writeObjectivesToMatrix(), 
+				problem_.getNumberOfObjectives());
+
+	}
+
 	/**
 	 * Returns the generational distance of solution set
 	 * 
