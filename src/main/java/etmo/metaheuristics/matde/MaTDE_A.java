@@ -135,7 +135,7 @@ public class MaTDE_A extends MtoAlgorithm {
             }
         }
 
-        int[] idxs = SortingIdx.SortingIdx(improvements, true);
+        int[] idxs = SortingIdx.sort(improvements, true);
         for (int i = 0; i < (int) Math.sqrt(taskNum); i++){
             for (int t = 0; t < times; t++){
                 normalReproduce(idxs[i]);

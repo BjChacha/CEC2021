@@ -123,7 +123,7 @@ public class MaTBMLx_ADASTEP2 extends MtoAlgorithm{
         Arrays.fill(groups, -1);
 
         if (Arrays.stream(improvements).sum() > 0) {
-            int[] idxs = SortingIdx.SortingIdx(improvements, true);
+            int[] idxs = SortingIdx.sort(improvements, true);
             for (int i = 0; i < leaders.length; i++)
                 leaders[i] = idxs[i];
 

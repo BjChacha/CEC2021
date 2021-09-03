@@ -65,6 +65,14 @@ public class SolutionSet implements Serializable {
 		capacity_ = solutionList.size();
 	}
 
+	public SolutionSet(SolutionSet solutionSet) {
+		solutionsList_ = new ArrayList<Solution>();
+		for (int i = 0; i < solutionSet.size(); i++) {
+			solutionsList_.add(new Solution(solutionSet.get(i)));
+		}
+		capacity_ = solutionsList_.size();
+	}
+
 	/**
 	 * Inserts a new solution into the SolutionSet.
 	 * 

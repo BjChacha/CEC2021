@@ -149,7 +149,7 @@ public class MOMFEAII extends MtoAlgorithm {
 		}
 
 		if (Arrays.stream(improvements).sum() > 0){
-			int[] idx = SortingIdx.SortingIdx(improvements, true);
+			int[] idx = SortingIdx.sort(improvements, true);
 			for (int i = 0; i < leaderNum; i++)
 				leaders[i] = idx[i];
 

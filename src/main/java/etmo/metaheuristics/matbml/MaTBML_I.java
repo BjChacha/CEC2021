@@ -114,7 +114,7 @@ public class MaTBML_I extends MtoAlgorithm {
                 improvements[k] = 0;
         }
         if (Arrays.stream(improvements).sum() > 0) {
-            int[] idxs = SortingIdx.SortingIdx(improvements, true);
+            int[] idxs = SortingIdx.sort(improvements, true);
             for (int i = 0; i < leaders_.length; i++)
                 leaders_[i] = idxs[i];
 

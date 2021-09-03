@@ -4,12 +4,14 @@ import etmo.core.*;
 import etmo.util.JMException;
 import etmo.util.KLD;
 import etmo.util.PseudoRandom;
-import oshi.software.os.unix.solaris.SolarisOSVersionInfoEx;
+import etmo.qualityIndicator.QualityIndicator;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -45,6 +47,10 @@ public class MaTEAD_AAT extends MtoAlgorithm {
 	String dataDirectory_;
 
 	int taskNum_;
+
+	// DEBUG
+	String[] pf;
+	List<QualityIndicator> indicators;
 
 	public MaTEAD_AAT(ProblemSet problemSet) {
 		super(problemSet);
@@ -95,6 +101,14 @@ public class MaTEAD_AAT extends MtoAlgorithm {
 			Arrays.fill(implicitP[k], 0.5);
 			Arrays.fill(bannedTask[k], false);
 		}
+
+		// DEBUG
+		pf = new String[taskNum_];
+		indicators = new ArrayList<>(taskNum_);
+		for (int k = 0; k < taskNum_; k++) {
+			pf[k] = "resources/PF/StaticPF/" + problemSet_.get(k).getHType() + "_" + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
+			indicators.add(new QualityIndicator(problemSet_.get(k), pf[k]));
+		}
 	}
 
 	public SolutionSet[] execute() throws JMException, ClassNotFoundException {
@@ -103,12 +117,14 @@ public class MaTEAD_AAT extends MtoAlgorithm {
 		initNeighborhood();
 		initPopulation();
 		initIdealPoint();
+		calIGD();
 
 		while (evaluations_ < maxEvaluations_) {
 			iterate();
 //			if (evaluations_ % (populationSize_ * 20) == 0){
 //				LogPopulation.LogPopulation("MOEAD", population_, problemSet_, evaluations_, false);
 //			}
+			calIGD();
 		}
 		return population_;
 	}
@@ -583,5 +599,28 @@ public class MaTEAD_AAT extends MtoAlgorithm {
 		}
 		return fitness;
 	} // fitnessEvaluation
+
+	private void calIGD() {
+        SolutionSet[] resPopulation = new SolutionSet[taskNum_];
+		for (int k = 0; k < taskNum_; k++) {
+			resPopulation[k] = new SolutionSet();
+			for (int i = 0; i < population_[k].size(); i++) {
+				Solution sol = population_[k].get(i);
+				int start = problemSet_.get(k).getStartObjPos();
+				int end = problemSet_.get(k).getEndObjPos();
+				Solution newSolution = new Solution(end - start + 1);
+				for (int kk = start; kk <= end; kk++)
+					newSolution.setObjective(kk - start, sol.getObjective(kk));
+				resPopulation[k].add(newSolution);
+			}
+		}
+
+        double[] igd = new double[taskNum_];
+        for (int k = 0; k < taskNum_; k++) {
+            igd[k] = indicators.get(k).getIGD(resPopulation[k]);
+        }
+
+        System.out.println(evaluations_ + ": " + Arrays.toString(igd));
+    }
 } // MOEAD
 

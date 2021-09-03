@@ -79,12 +79,12 @@ public class MaTEAD_AAT_main {
 	public static void main(String[] args) throws JMException, SecurityException, IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
 		ProblemSet problemSet; // The problem to solve
 
-		String benchmarkName = "CEC2021";
+		String benchmarkName = "WCCI2020";
 		Class algorithmClass = MOEAD_T.class;
 		String algorithmName = algorithmClass.getName();
-		int taskStart = 25;
-		int taskEnd = 32;
-		int times = 21;
+		int taskStart = 1;
+		int taskEnd = 1;
+		int times = 1;
 
 		// System.out.println("Algo:" + algorithmName + ".");
 
@@ -114,19 +114,19 @@ public class MaTEAD_AAT_main {
 			for (int t = 0; t < times; t++){
 				algorithms.add(algorithmGenerate(algorithmClass, problemSet));
 			}
-			// 并行执行times个算法
-			algorithms.parallelStream().forEach(a -> {
-				try {
-					populations.add(a.execute());
-				} catch (JMException | ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			});
+			// // 并行执行times个算法
+			// algorithms.parallelStream().forEach(a -> {
+			// 	try {
+			// 		populations.add(a.execute());
+			// 	} catch (JMException | ClassNotFoundException e) {
+			// 		e.printStackTrace();
+			// 	}
+			// });
 
-//			// 串行执行
-//			for (int t = 0; t < times; t++){
-//				populations.add(algorithms.get(t).execute());
-//			}
+			// 串行执行
+			for (int t = 0; t < times; t++){
+				populations.add(algorithms.get(t).execute());
+			}
 
 			// 计算IGD
 			double[][] igds = new double[taskNum][times];
