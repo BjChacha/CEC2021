@@ -19,7 +19,7 @@ import etmo.util.logging.LogIGD;
 public class MaTMY3_main {
     static int MAX_POPULATION_SIZE = 100;
     static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-    static String CROSSOVER_TYPE = "SBX";
+    static String CROSSOVER_TYPE = "DE";
     static boolean IGD_LOG = false;
     static boolean IGD_PRINT = true;
 
@@ -31,7 +31,7 @@ public class MaTMY3_main {
         int problemStart = 1;
         int problemEnd = 10;
         int times = 1;
-        String fileName = "EMaTOMKT_x" + times + "_" + benchmarkName;
+        String fileName = "MaTMY3_x" + times + "_" + benchmarkName;
 
         System.out.println("\nExperiment started -> " + fileName);
 
@@ -115,27 +115,27 @@ public class MaTMY3_main {
         algorithm.setInputParameter("XType", XType);
 
         if (XType.equalsIgnoreCase("SBX")) {
-            parameters = new HashMap();
+            parameters = new HashMap<>();
             parameters.put("probability", 1.0);
             parameters.put("distributionIndex", 20.0);
             crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover",parameters);
         }
         else if (XType.equalsIgnoreCase("DE")) {
-            parameters = new HashMap();
-            parameters.put("CR", 1.0);
+            parameters = new HashMap<>();
+            parameters.put("CR", 0.6);
             parameters.put("F", 0.5);
             crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
         }
         else {
             System.out.println("Error: unsupported crossover tpye: " + XType + ", turn to default: SBX...");
-            parameters = new HashMap();
+            parameters = new HashMap<>();
             parameters.put("probability", 1.0);
             parameters.put("distributionIndex", 20.0);
             crossover = CrossoverFactory.getCrossoverOperator("SBXCrossover",parameters);
  
         }
 
-		parameters = new HashMap();
+		parameters = new HashMap<>();
 		parameters.put("probability", 1.0 / problemSet.get(0).getNumberOfVariables());
 		parameters.put("distributionIndex", 20.0);
 		mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);

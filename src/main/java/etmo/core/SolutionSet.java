@@ -655,4 +655,12 @@ public class SolutionSet implements Serializable {
 	public void setRemove(boolean remove) {
 		this.remove = remove;
 	}
+
+	public double[] getObjectiveVec(int objectiveID) {
+		double[] objective = new double[solutionsList_.size()];
+		for (int i = 0; i < solutionsList_.size(); i++) {
+			objective[i] = solutionsList_.get(i).getObjective(objectiveID);
+		}
+		return objective;
+	}
 } // SolutionSet

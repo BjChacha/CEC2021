@@ -21,6 +21,8 @@
 
 package etmo.util;
 
+import java.util.Arrays;
+
 /**
  * Class representing a pseudo-random number generator
  */
@@ -106,4 +108,27 @@ public class PseudoRandom {
 		return minBound + random_.nextDouble() * (maxBound - minBound);
 		// return minBound + (maxBound - minBound)*randomJava.nextDouble();
 	} // randDouble
+
+	public static int[] randomPermutation(int range, int size) {
+        /*
+        range: generate array with value in [0,range)
+        */
+        if (range < size) {
+            System.out.println("Error: range cannot less than size. setting size = range...");
+            size = range;
+        }
+
+        int[] arr = new int[range];
+        for (int i = 0; i < range; i++)
+            arr[i] = i;
+
+        for (int i = 0; i < range - 1; i++) {
+            int j = randInt(i, range - 1);
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+
+        return Arrays.copyOfRange(arr, 0, size);
+	}
 } // PseudoRandom

@@ -14,6 +14,11 @@ import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
+import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
+import org.knowm.xchart.style.colors.XChartSeriesColors;
+import org.knowm.xchart.style.lines.XChartSeriesLines;
+import org.knowm.xchart.style.markers.XChartSeriesMarkers;
+import org.nd4j.linalg.api.ops.random.impl.ProbablisticMerge;
 
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
@@ -40,18 +45,28 @@ public class MaTMY3 extends MtoAlgorithm{
     private Operator crossover;
     private Operator mutation;
     
+    int[] objStart;
+    int[] objEnd;
+
+    double[] bestObj;
+    int[] stuckTimes;
+
     // DEBUG: IGD
     String[] pf;
     List<QualityIndicator> indicators;
     double[] igd;
 
     // DEBUG: PLOT
-    XYChart chart;
+    int plotTaskID = 0;
+    XYChart chartIGD;
+    XYChart chartPF;
+    XYChart chartVar;
     List<XYChart> charts;
     SwingWrapper<XYChart> sw;
     int generation;
     List<Integer> generations;
     List<List<Double>> igdPlotValues;
+
 
     public MaTMY3(ProblemSet problemSet) {
         super(problemSet);
@@ -66,6 +81,8 @@ public class MaTMY3 extends MtoAlgorithm{
             // long startTime = System.currentTimeMillis();
             updatePlot();
             // System.out.println("evaluations " + evaluations + "update plot time cost: " + (System.currentTimeMillis() - startTime) + " ms.");
+        
+            // System.out.println(evaluations + ": " + Arrays.toString(stuckTimes));
         }
         endPlot();
         return population;
@@ -83,25 +100,36 @@ public class MaTMY3 extends MtoAlgorithm{
         crossover = operators_.get("crossover");
         mutation = operators_.get("mutation");
 
-        // initialize population
+        objStart = new int[taskNum];
+        objEnd = new int[taskNum];
+        bestObj = new double[problemSet_.getTotalNumberOfObjs()];
+        stuckTimes = new int[taskNum];
+        Arrays.fill(bestObj, Double.MAX_VALUE);
+        Arrays.fill(stuckTimes, 0);
+
         population = new SolutionSet[taskNum];
         offspring = new SolutionSet[taskNum];
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
+            objStart[k] = problemSet_.get(k).getStartObjPos();
+            objEnd[k] = problemSet_.get(k).getEndObjPos();
+
             population[k] = new SolutionSet(populationSize);
             offspring[k] = new SolutionSet(populationSize);
-            for (int i = 0; i < populationSize; i++) {
+            for (int i = 0; i < populationSize; i ++) {
                 Solution solution = new Solution(problemSet_);
                 solution.setSkillFactor(k);
                 problemSet_.get(k).evaluate(solution);
                 evaluations++;
                 population[k].add(solution);
             }
+
+            updateBestObjective(k);
         }
 
         // DEBUG: IGD
         pf = new String[taskNum];
         indicators = new ArrayList<>(taskNum);
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             pf[k] = "resources/PF/StaticPF/" + problemSet_.get(k).getHType() + "_" + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
             indicators.add(new QualityIndicator(problemSet_.get(k), pf[k]));
         }
@@ -110,21 +138,21 @@ public class MaTMY3 extends MtoAlgorithm{
         generation = 0;
         generations = new ArrayList<>();
         igdPlotValues =  new ArrayList<>();
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             igdPlotValues.add(new ArrayList<>());
         }
     }
 
-    public void iterate() throws JMException {
+    public void iterate() throws JMException, ClassNotFoundException {
         offspringGeneration(XType);
         environmentSelection();
     }
 
     public void offspringGeneration(String type) throws JMException {
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             offspring[k].clear();
             if (type.equalsIgnoreCase("SBX")) {
-                for (int i = 0; i < populationSize; i++) {
+                for (int i = 0; i < populationSize; i ++) {
                     int j = i;
                     while (j == i) 
                         j = PseudoRandom.randInt(0, populationSize - 1);
@@ -142,7 +170,7 @@ public class MaTMY3 extends MtoAlgorithm{
                 }
             }
             else if (type.equalsIgnoreCase("DE")) {
-                for (int i = 0; i < populationSize; i++) {
+                for (int i = 0; i < populationSize; i ++) {
                     int j1 = i, j2 = i;
                     while (j1 == i && j1 == j2){
                         j1 = PseudoRandom.randInt(0, populationSize - 1);
@@ -155,6 +183,7 @@ public class MaTMY3 extends MtoAlgorithm{
                     
                     Solution child = (Solution) crossover.execute(new Object[] {
                         population[k].get(i), parents });
+
                     mutation.execute(child);
 
                     child.setSkillFactor(k);
@@ -170,20 +199,54 @@ public class MaTMY3 extends MtoAlgorithm{
         }
     }
 
-    public void environmentSelection() {
-        for (int k = 0; k <  taskNum; k++) {
+    public void environmentSelection() throws ClassNotFoundException, JMException {
+        for (int k = 0; k <  taskNum; k ++) {
             SolutionSet union = population[k].union(offspring[k]);
             NDSortiong.sort(union, problemSet_, k);
-            for (int i = 0; i < populationSize; i++) {
+            for (int i = 0; i < populationSize; i ++) {
                 population[k].replace(i, union.get(i));
             }
+
+            updateBestObjective(k);
+
+            // 50% 灾变
+            if (stuckTimes[k] >= 100 && evaluations < maxEvaluations - 100 * taskNum * populationSize) {
+                // System.out.println(evaluations + ": task " + k  +" : reset.");
+                stuckTimes[k] = 0;
+                int[] perm = PseudoRandom.randomPermutation(populationSize, (int) (populationSize * 0.5));
+                for (int i = 0; i < perm.length; i ++) {
+                    Solution solution = new Solution(problemSet_);
+                    solution.setSkillFactor(k);
+                    problemSet_.get(k).evaluate(solution);
+                    // evaluations++;
+                    population[k].replace(perm[i], solution);
+                }
+            }
+        }
+    }
+
+    public void updateBestObjective(int taskID) {
+        boolean updated = false;
+        for (int i = objStart[taskID]; i <= objEnd[taskID]; i ++) {
+            for (int j = 0; j < population[taskID].size(); j ++) {
+                if (population[taskID].get(j).getObjective(i) < bestObj[i]) {
+                    updated = true;
+                    bestObj[i] = population[taskID].get(j).getObjective(i);
+                }
+            }
+        }
+
+        if (updated) {
+            stuckTimes[taskID] = 0;
+        } else {
+            stuckTimes[taskID] ++;
         }
     }
 
     // DEBUG: IGD
     private void calIGD() {
         igd = new double[taskNum];
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             igd[k] = indicators.get(k).getIGD(population[k], k);
             igdPlotValues.get(k).add(igd[k]);
         }
@@ -202,7 +265,7 @@ public class MaTMY3 extends MtoAlgorithm{
 
     public double[][] getPlotY() {
         double[][] y = new double[taskNum][];
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             y[k] = igdPlotValues.get(k).stream().mapToDouble(d->d).toArray();
         }
         return y;
@@ -210,29 +273,63 @@ public class MaTMY3 extends MtoAlgorithm{
 
     public double[][] getPlotY(int maxLength) {
         double[][] y = new double[taskNum][];
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             double[] tmp = igdPlotValues.get(k).stream().mapToDouble(d->d).toArray();
             y[k] = tmp.length > maxLength ? Arrays.copyOfRange(tmp, tmp.length - maxLength, tmp.length) : tmp;
         }
         return y;
     }
     
-    public void initPlot() {
+    public void initPlot() throws JMException {
         calIGD();
         double[] x = getPlotX();
         double[][] y = getPlotY();
-        chart = new XYChartBuilder()
+        chartIGD = new XYChartBuilder()
             .title("Generation: " + generation)
             .xAxisTitle("Generation")
             .yAxisTitle("IGD")
             .build();
-        for (int k = 0; k < taskNum; k++) {
-            chart.addSeries("Problem " + k, x, y[k]);
+        for (int k = 0; k < taskNum; k ++) {
+            chartIGD.addSeries("Problem " + k, x, y[k]);
         }
-    
-        chart.getStyler().setYAxisLogarithmic(true);
-        // sw = new SwingWrapper<XYChart>(chart);
-        // sw.displayChart().setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        chartIGD.getStyler().setYAxisLogarithmic(true);
+
+        chartPF = new XYChartBuilder()
+            .title("PF: " + generation)
+            .xAxisTitle("x")
+            .yAxisTitle("y")
+            .build();
+        chartPF.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Scatter);
+		SolutionSet trueParetoFront = new etmo.qualityIndicator.util.MetricsUtil().readNonDominatedSolutionSet(pf[plotTaskID]);
+        double[] truePFX = trueParetoFront.getObjectiveVec(problemSet_.get(plotTaskID).getStartObjPos());
+        double[] truePFY = trueParetoFront.getObjectiveVec(problemSet_.get(plotTaskID).getEndObjPos());
+        chartPF.addSeries("TruePF", truePFX, truePFY);
+
+        double[] PFX = population[plotTaskID].getObjectiveVec(problemSet_.get(plotTaskID).getStartObjPos());
+        double[] PFY = population[plotTaskID].getObjectiveVec(problemSet_.get(plotTaskID).getEndObjPos());
+        chartPF.addSeries("PF", PFX, PFY);
+
+        chartVar = new XYChartBuilder()
+            .title("Var: " + generation)
+            .xAxisTitle("Dimension")
+            .yAxisTitle("value")
+            .width(1200)
+            .height(600)
+            .build();
+        int plotTaskID = 0;
+        double[] varX = new double[problemSet_.get(plotTaskID).getNumberOfVariables()];
+        for (int i = 0; i < varX.length; i ++) {
+            varX[i] = i + 1;
+        }
+        for (int i = 0; i < population[plotTaskID].size(); i ++) {
+            XYSeries s = chartVar.addSeries("Solution " + i, varX, population[plotTaskID].get(i).getDecisionVariablesInDouble());
+            s.setLineColor(XChartSeriesColors.BLUE);
+            s.setLineStyle(XChartSeriesLines.SOLID);
+            s.setMarker(XChartSeriesMarkers.NONE);
+        }
+
+        sw = new SwingWrapper<XYChart>(chartVar);
+        sw.displayChart().setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
     }
 
     public void updatePlot() {
@@ -243,11 +340,33 @@ public class MaTMY3 extends MtoAlgorithm{
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                chart.setTitle("Generation: " + generation);
-                for (int k = 0; k < taskNum; k++){
-                    chart.updateXYSeries("Problem " + k, x, y[k], null);
+                chartIGD.setTitle("Generation: " + generation);
+                for (int k = 0; k < taskNum; k ++){
+                    chartIGD.updateXYSeries("Problem " + k, x, y[k], null);
                 }
-                // sw.repaintChart();
+
+                chartPF.setTitle("PF: " + generation);
+                double[] PFX = population[plotTaskID].getObjectiveVec(problemSet_.get(plotTaskID).getStartObjPos());
+                double[] PFY = population[plotTaskID].getObjectiveVec(problemSet_.get(plotTaskID).getEndObjPos());
+                chartPF.updateXYSeries("PF", PFX, PFY, null);
+
+
+                chartVar.setTitle("Var: " + generation);
+                int plotTaskID = 0;
+                double[] varX = new double[problemSet_.get(plotTaskID).getNumberOfVariables()];
+                for (int i = 0; i < varX.length; i ++) {
+                    varX[i] = i + 1;
+                }
+                for (int i = 0; i < population[0].size(); i ++) {
+                    try {
+                        chartVar.updateXYSeries("Solution " + i, varX, population[plotTaskID].get(i).getDecisionVariablesInDouble(), null);
+                    } catch (JMException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+
+                sw.repaintChart();
             }
         });
     }
@@ -258,7 +377,7 @@ public class MaTMY3 extends MtoAlgorithm{
         double[][] y = getPlotY();
 
         charts = new ArrayList<XYChart>();
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             XYChart c = new XYChartBuilder()
                 // .title("Problem " + k + " Generation: " + generation)
                 .title(Integer.toString(k))
@@ -280,7 +399,7 @@ public class MaTMY3 extends MtoAlgorithm{
         double[] x = getPlotX();
         double[][] y = getPlotY();
 
-        for (int k = 0; k < taskNum; k++) {
+        for (int k = 0; k < taskNum; k ++) {
             final int taskID = k;
             SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -294,7 +413,7 @@ public class MaTMY3 extends MtoAlgorithm{
         // SwingUtilities.invokeLater(new Runnable() {
         //     @Override
         //     public void run() {
-        //         for (int k = 0; k < taskNum; k++){
+        //         for (int k = 0; k < taskNum; k ++){
         //             // charts.get(k).setTitle("Generation: " + generation);
         //             charts.get(k).updateXYSeries("Problem " + k, x, y[k], null);
         //         }
@@ -305,11 +424,12 @@ public class MaTMY3 extends MtoAlgorithm{
 
     public void endPlot() {
         try {
-            BitmapEncoder.saveBitmap(chart, "./figs/" + problemSet_.get(0).getName(), BitmapFormat.PNG);
+            BitmapEncoder.saveBitmap(chartIGD, "./figs/" + problemSet_.get(0).getName(), BitmapFormat.PNG);
             // VectorGraphicsEncoder.saveVectorGraphic(chart, "./figs/" + problemSet_.get(0).getName(), VectorGraphicsFormat.PDF);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
     }
+
+
 }
