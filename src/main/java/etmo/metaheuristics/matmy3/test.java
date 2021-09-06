@@ -8,7 +8,7 @@ public class test {
         INDArray x = Nd4j.rand(50, 50);
         INDArray y = Nd4j.rand(50, 50);
         
-        Regression rg = new Regression(50, 1e-4, 50, 50, 50);
+        Regression rg = new Regression(20, 5e-1, 50, 50, 50);
         rg.train(x.toDoubleMatrix(), y.toDoubleMatrix());
         
         System.out.println("stop");
