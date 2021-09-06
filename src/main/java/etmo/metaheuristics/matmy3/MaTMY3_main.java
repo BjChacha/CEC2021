@@ -17,20 +17,32 @@ import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
 
 public class MaTMY3_main {
+    // CONFIG
     static int MAX_POPULATION_SIZE = 100;
     static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
     static String CROSSOVER_TYPE = "DE";
+    static double DE_CR = 0.6;
+    static double DE_F = 0.5;
+
+    static Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
+    static int PROBLEM_START = 1;
+    static int PROBLEM_END = 10;
+    static int PROBLEM_REPEAT_TIME = 10;
+
     static boolean IGD_LOG = false;
     static boolean IGD_PRINT = true;
+    static boolean PLOTTING = false;
 
     enum Benchmark { CEC2021, CEC2017, WCCI2020; }
 
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, JMException {
         ProblemSet problemSet;
-        Benchmark benchmarkName = Benchmark.WCCI2020;
-        int problemStart = 1;
-        int problemEnd = 10;
-        int times = 1;
+
+        Benchmark benchmarkName = BENCHMARK_TYPE;
+        int problemStart = PROBLEM_START;
+        int problemEnd = PROBLEM_END;
+        int times = PROBLEM_REPEAT_TIME;
+
         String fileName = "MaTMY3_x" + times + "_" + benchmarkName;
 
         System.out.println("\nExperiment started -> " + fileName);
@@ -113,6 +125,7 @@ public class MaTMY3_main {
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
         algorithm.setInputParameter("XType", XType);
+        algorithm.setInputParameter("isPlot", PLOTTING);
 
         if (XType.equalsIgnoreCase("SBX")) {
             parameters = new HashMap<>();
@@ -122,8 +135,8 @@ public class MaTMY3_main {
         }
         else if (XType.equalsIgnoreCase("DE")) {
             parameters = new HashMap<>();
-            parameters.put("CR", 0.6);
-            parameters.put("F", 0.5);
+            parameters.put("CR", DE_CR);
+            parameters.put("F", DE_F);
             crossover = CrossoverFactory.getCrossoverOperator("DifferentialEvolutionCrossover",parameters);
         }
         else {

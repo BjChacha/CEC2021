@@ -18,7 +18,6 @@ import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.colors.XChartSeriesColors;
 import org.knowm.xchart.style.lines.XChartSeriesLines;
 import org.knowm.xchart.style.markers.XChartSeriesMarkers;
-import org.nd4j.linalg.api.ops.random.impl.ProbablisticMerge;
 
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
@@ -48,7 +47,7 @@ public class MaTMY3 extends MtoAlgorithm{
     int[] objStart;
     int[] objEnd;
 
-    double[] bestObj;
+    double[] bestDistances;
     int[] stuckTimes;
 
     // DEBUG: IGD
@@ -57,12 +56,15 @@ public class MaTMY3 extends MtoAlgorithm{
     double[] igd;
 
     // DEBUG: PLOT
+    boolean isPlot;
     int plotTaskID = 0;
     XYChart chartIGD;
     XYChart chartPF;
     XYChart chartVar;
     List<XYChart> charts;
     SwingWrapper<XYChart> sw;
+    SwingWrapper<XYChart> sw2;
+    SwingWrapper<XYChart> sw3;
     int generation;
     List<Integer> generations;
     List<List<Double>> igdPlotValues;
@@ -75,16 +77,20 @@ public class MaTMY3 extends MtoAlgorithm{
     @Override
     public SolutionSet[] execute() throws JMException, ClassNotFoundException {
         initState();
-        initPlot();
+        if (isPlot)
+            initPlot();
         while (evaluations < maxEvaluations) {
             iterate();
             // long startTime = System.currentTimeMillis();
-            updatePlot();
+            if (isPlot)
+                updatePlot();
             // System.out.println("evaluations " + evaluations + "update plot time cost: " + (System.currentTimeMillis() - startTime) + " ms.");
         
             // System.out.println(evaluations + ": " + Arrays.toString(stuckTimes));
         }
-        endPlot();
+        if (isPlot)
+            endPlot();
+
         return population;
     }
 
@@ -96,15 +102,16 @@ public class MaTMY3 extends MtoAlgorithm{
         populationSize = (Integer) this.getInputParameter("populationSize");
 
         XType = (String) this.getInputParameter("XType");
+        isPlot = (Boolean) this.getInputParameter("isPlot");
 
         crossover = operators_.get("crossover");
         mutation = operators_.get("mutation");
 
         objStart = new int[taskNum];
         objEnd = new int[taskNum];
-        bestObj = new double[problemSet_.getTotalNumberOfObjs()];
+        bestDistances = new double[taskNum];
         stuckTimes = new int[taskNum];
-        Arrays.fill(bestObj, Double.MAX_VALUE);
+        Arrays.fill(bestDistances, Double.MAX_VALUE);
         Arrays.fill(stuckTimes, 0);
 
         population = new SolutionSet[taskNum];
@@ -123,7 +130,7 @@ public class MaTMY3 extends MtoAlgorithm{
                 population[k].add(solution);
             }
 
-            updateBestObjective(k);
+            updateBestDistances(k);
         }
 
         // DEBUG: IGD
@@ -184,7 +191,7 @@ public class MaTMY3 extends MtoAlgorithm{
                     Solution child = (Solution) crossover.execute(new Object[] {
                         population[k].get(i), parents });
 
-                    mutation.execute(child);
+                    // mutation.execute(child);
 
                     child.setSkillFactor(k);
                     problemSet_.get(k).evaluate(child);
@@ -207,13 +214,13 @@ public class MaTMY3 extends MtoAlgorithm{
                 population[k].replace(i, union.get(i));
             }
 
-            updateBestObjective(k);
+            updateBestDistances(k);
 
-            // 50% 灾变
-            if (stuckTimes[k] >= 100 && evaluations < maxEvaluations - 100 * taskNum * populationSize) {
+            // 90% 灾变
+            if (stuckTimes[k] >= 50 && evaluations < maxEvaluations - 100 * taskNum * populationSize) {
                 // System.out.println(evaluations + ": task " + k  +" : reset.");
                 stuckTimes[k] = 0;
-                int[] perm = PseudoRandom.randomPermutation(populationSize, (int) (populationSize * 0.5));
+                int[] perm = PseudoRandom.randomPermutation(populationSize, (int) (populationSize * 0.9));
                 for (int i = 0; i < perm.length; i ++) {
                     Solution solution = new Solution(problemSet_);
                     solution.setSkillFactor(k);
@@ -225,16 +232,33 @@ public class MaTMY3 extends MtoAlgorithm{
         }
     }
 
-    public void updateBestObjective(int taskID) {
+    public void updateBestDistances(int taskID) {
         boolean updated = false;
-        for (int i = objStart[taskID]; i <= objEnd[taskID]; i ++) {
-            for (int j = 0; j < population[taskID].size(); j ++) {
-                if (population[taskID].get(j).getObjective(i) < bestObj[i]) {
-                    updated = true;
-                    bestObj[i] = population[taskID].get(j).getObjective(i);
-                }
+        double avgDistance = 0;
+        for (int j = 0; j < population[taskID].size(); j ++) {
+            double distance = 0;
+            for (int i = objStart[taskID]; i <= objEnd[taskID]; i ++) {
+                distance += Math.pow(population[taskID].get(j).getObjective(i), 2);
             }
+            distance = Math.sqrt(distance);
+            avgDistance += distance;
         }
+        avgDistance /= population[taskID].size();
+        
+        if (Math.abs(avgDistance - bestDistances[taskID]) > bestDistances[taskID] * 5e-4) {
+            if (avgDistance < bestDistances[taskID]) {
+                updated = true;
+            }
+            bestDistances[taskID] = avgDistance;
+        }
+
+        // // DEBUG
+        // if (taskID == plotTaskID) {
+        //     if (updated)
+        //         System.out.println(avgDistance);
+        //     else
+        //         System.out.println("stucking " + stuckTimes[plotTaskID] + " ...");
+        // }
 
         if (updated) {
             stuckTimes[taskID] = 0;
@@ -242,6 +266,7 @@ public class MaTMY3 extends MtoAlgorithm{
             stuckTimes[taskID] ++;
         }
     }
+
 
     // DEBUG: IGD
     private void calIGD() {
@@ -289,9 +314,10 @@ public class MaTMY3 extends MtoAlgorithm{
             .xAxisTitle("Generation")
             .yAxisTitle("IGD")
             .build();
-        for (int k = 0; k < taskNum; k ++) {
-            chartIGD.addSeries("Problem " + k, x, y[k]);
-        }
+        // for (int k = 0; k < taskNum; k ++) {
+        //     chartIGD.addSeries("Problem " + k, x, y[k]);
+        // }
+        chartIGD.addSeries("Problem " + plotTaskID, x, y[plotTaskID]);
         chartIGD.getStyler().setYAxisLogarithmic(true);
 
         chartPF = new XYChartBuilder()
@@ -313,10 +339,10 @@ public class MaTMY3 extends MtoAlgorithm{
             .title("Var: " + generation)
             .xAxisTitle("Dimension")
             .yAxisTitle("value")
-            .width(1200)
-            .height(600)
+            .width(1024)
+            .height(512)
             .build();
-        int plotTaskID = 0;
+        chartVar.getStyler().setLegendVisible(false);
         double[] varX = new double[problemSet_.get(plotTaskID).getNumberOfVariables()];
         for (int i = 0; i < varX.length; i ++) {
             varX[i] = i + 1;
@@ -330,6 +356,10 @@ public class MaTMY3 extends MtoAlgorithm{
 
         sw = new SwingWrapper<XYChart>(chartVar);
         sw.displayChart().setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        sw2 = new SwingWrapper<XYChart>(chartPF);
+        sw2.displayChart().setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        sw3 = new SwingWrapper<XYChart>(chartIGD);
+        sw3.displayChart().setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
     }
 
     public void updatePlot() {
@@ -350,9 +380,7 @@ public class MaTMY3 extends MtoAlgorithm{
                 double[] PFY = population[plotTaskID].getObjectiveVec(problemSet_.get(plotTaskID).getEndObjPos());
                 chartPF.updateXYSeries("PF", PFX, PFY, null);
 
-
                 chartVar.setTitle("Var: " + generation);
-                int plotTaskID = 0;
                 double[] varX = new double[problemSet_.get(plotTaskID).getNumberOfVariables()];
                 for (int i = 0; i < varX.length; i ++) {
                     varX[i] = i + 1;
@@ -367,6 +395,8 @@ public class MaTMY3 extends MtoAlgorithm{
                 }
 
                 sw.repaintChart();
+                sw2.repaintChart();
+                sw3.repaintChart();
             }
         });
     }
