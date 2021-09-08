@@ -18,16 +18,19 @@ import etmo.util.logging.LogIGD;
 
 public class MaTMY3_main {
     // CONFIG
+    static Class<?> ALGORITHM_CLAZZ = MaTMY3_Transfer.class;
     static int MAX_POPULATION_SIZE = 100;
     static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
     static String CROSSOVER_TYPE = "DE";
     static double DE_CR = 0.6;
     static double DE_F = 0.5;
+    static boolean IS_MUTATE = true;
+    static double TRANSFER_PROBABILITY = 0.5;
 
     static Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
-    static int PROBLEM_START = 1;
-    static int PROBLEM_END = 10;
-    static int PROBLEM_REPEAT_TIME = 10;
+    static int PROBLEM_START = 2;
+    static int PROBLEM_END = 2;
+    static int PROBLEM_REPEAT_TIME = 1;
 
     static boolean IGD_LOG = false;
     static boolean IGD_PRINT = true;
@@ -67,7 +70,7 @@ public class MaTMY3_main {
 
             			// 初始化算法
 			for (int t = 0; t < times; t++){
-				algorithms.add(algorithmGenerate(problemSet, CROSSOVER_TYPE));
+				algorithms.add(algorithmGenerate(ALGORITHM_CLAZZ, problemSet, CROSSOVER_TYPE));
 			}
 
 			// // 并行执行times个算法
@@ -114,18 +117,23 @@ public class MaTMY3_main {
 
     }
 
-    public static MtoAlgorithm algorithmGenerate(ProblemSet problemSet, String XType) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
+    public static MtoAlgorithm algorithmGenerate(Class<?> algorithmClass, ProblemSet problemSet, String XType) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
 		Operator crossover;
 		Operator mutation;
 		HashMap<String, Double> parameters;
 
-		algorithm = new MaTMY3(problemSet);
+		// algorithm = new MaTMY3(problemSet);
+        algorithm = (MtoAlgorithm) algorithmClass
+                    .getDeclaredConstructor(ProblemSet.class)
+                    .newInstance(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
         algorithm.setInputParameter("XType", XType);
         algorithm.setInputParameter("isPlot", PLOTTING);
+        algorithm.setInputParameter("isMutate", IS_MUTATE);
+        algorithm.setInputParameter("transferProbability", TRANSFER_PROBABILITY);
 
         if (XType.equalsIgnoreCase("SBX")) {
             parameters = new HashMap<>();

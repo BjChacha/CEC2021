@@ -28,28 +28,28 @@ import etmo.util.JMException;
 import etmo.util.PseudoRandom;
 import etmo.util.sorting.NDSortiong;
 
-public class MaTMY3 extends MtoAlgorithm {
+public class MaTMY3_Transfer extends MtoAlgorithm {
     private SolutionSet[] population;
     private SolutionSet[] offspring;
-
-    private int populationSize;
-    private int taskNum;
-    private int varNum;
 
     private int generation;
     private int evaluations;
     private int maxEvaluations;
 
-    private String XType;
+    private int populationSize;
+    private int taskNum;
+    private int varNum;
+    private int[] objStart;
+    private int[] objEnd;
 
+    private String XType;
     private Operator crossover;
     private Operator mutation;
 
-    int[] objStart;
-    int[] objEnd;
+    private int[] stuckTimes;
+    private double[] bestDistances;
 
-    double[] bestDistances;
-    int[] stuckTimes;
+    private double transferProbability;
 
     boolean isMutate;
 
@@ -71,7 +71,7 @@ public class MaTMY3 extends MtoAlgorithm {
     List<Integer> generations;
     List<List<Double>> igdPlotValues;
 
-    public MaTMY3(ProblemSet problemSet) {
+    public MaTMY3_Transfer(ProblemSet problemSet) {
         super(problemSet);
     }
 
@@ -114,6 +114,8 @@ public class MaTMY3 extends MtoAlgorithm {
         isPlot = (Boolean) this.getInputParameter("isPlot");
         isMutate = (Boolean) this.getInputParameter("isMutate");
 
+        transferProbability = (Double) this.getInputParameter("transferProbability");
+
         crossover = operators_.get("crossover");
         mutation = operators_.get("mutation");
 
@@ -135,6 +137,8 @@ public class MaTMY3 extends MtoAlgorithm {
             for (int i = 0; i < populationSize; i++) {
                 Solution solution = new Solution(problemSet_);
                 solution.setSkillFactor(k);
+                // double[] features = new double[]{PseudoRandom.randDouble(), 0.49802832, 0.53675057, 0.45468875, 0.52329801, 0.488946  ,0.51170569, 0.45461273, 0.50697831, 0.47060217, 0.49723718,0.53323252, 0.50307031, 0.46455359, 0.5280332 , 0.50182858,0.46595516, 0.52930945, 0.52279787, 0.4700964 , 0.46489979,0.50416938, 0.51328641, 0.49796944, 0.51451951, 0.46973632,0.54227379, 0.54462272, 0.52398501, 0.53820799, 0.4534272 ,0.46881809, 0.50857003, 0.54416919, 0.50364375, 0.45100508,0.48236421, 0.450201  , 0.50381148, 0.54630262, 0.49303332,0.47703986, 0.54664697, 0.51835294, 0.50294303, 0.47206974,0.4557836 , 0.48946816, 0.53982868, 0.51843245};
+                // solution.setDecisionVariables(features);
                 problemSet_.get(k).evaluate(solution);
                 evaluations++;
                 population[k].add(solution);
@@ -175,8 +179,14 @@ public class MaTMY3 extends MtoAlgorithm {
                     while (j == i)
                         j = PseudoRandom.randInt(0, populationSize - 1);
                     Solution[] parents = new Solution[2];
+                    int k2 = k;
+                    if (PseudoRandom.randDouble() < transferProbability) {
+                        while (k2 == k) {
+                            k2 = PseudoRandom.randInt(0, taskNum - 1);
+                        }
+                    }
                     parents[0] = population[k].get(i);
-                    parents[1] = population[k].get(j);
+                    parents[1] = population[k2].get(j);
 
                     Solution child = ((Solution[]) crossover.execute(parents))[PseudoRandom.randInt(0, 1)];
                     if (isMutate)
@@ -196,14 +206,21 @@ public class MaTMY3 extends MtoAlgorithm {
                         j2 = PseudoRandom.randInt(0, populationSize - 1);
                     }
                     Solution[] parents = new Solution[3];
-                    parents[0] = population[k].get(j1);
-                    parents[1] = population[k].get(j2);
+                    int k2 = k;
+                    if (PseudoRandom.randDouble() < transferProbability) {
+                        while (k2 == k) {
+                            k2 = PseudoRandom.randInt(0, taskNum - 1);
+                        }
+                    }
+                    parents[0] = population[k2].get(j1);
+                    parents[1] = population[k2].get(j2);
                     parents[2] = population[k].get(i);
 
                     Solution child = (Solution) crossover.execute(new Object[] { population[k].get(i), parents });
 
-                    if (isMutate)
+                    if (isMutate) {
                         mutation.execute(child);
+                    }
 
                     child.setSkillFactor(k);
                     child.setFlag(1);
