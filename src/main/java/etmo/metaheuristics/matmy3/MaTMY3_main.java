@@ -18,18 +18,18 @@ import etmo.util.logging.LogIGD;
 
 public class MaTMY3_main {
     // CONFIG
-    static Class<?> ALGORITHM_CLAZZ = MaTMY3_Transfer.class;
+    static Class<?> ALGORITHM_CLAZZ = MaTMY3_Classifier.class;
     static int MAX_POPULATION_SIZE = 100;
     static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
     static String CROSSOVER_TYPE = "DE";
     static double DE_CR = 0.6;
     static double DE_F = 0.5;
-    static boolean IS_MUTATE = true;
-    static double TRANSFER_PROBABILITY = 0.5;
+    static boolean IS_MUTATE = false;
+    static double TRANSFER_PROBABILITY = 0.1;
 
     static Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
-    static int PROBLEM_START = 2;
-    static int PROBLEM_END = 2;
+    static int PROBLEM_START = 1;
+    static int PROBLEM_END = 10;
     static int PROBLEM_REPEAT_TIME = 1;
 
     static boolean IGD_LOG = false;
