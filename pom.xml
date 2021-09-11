@@ -19,11 +19,17 @@
     </build>
     <!-- Properties Section. Change ND4J versions here, if required -->
     <properties>
+  		<nd4j.cpu.backend>nd4j-native-platform</nd4j.cpu.backend>
+  		<nd4j.cpu.backend2>nd4j-native</nd4j.cpu.backend2>
+        <!-- <nd4j.gpu.backend>nd4j-cuda-11.2-platform</nd4j.gpu.backend>
+        <dl4j.gpu.backend>deeplearning4j-cuda-11.2</dl4j.gpu.backend> -->
         <dl4j-master.version>1.0.0-beta7</dl4j-master.version>
+        <dl4j-gpu.version>1.0.0-M1.1</dl4j-gpu.version>
         <logback.version>1.2.3</logback.version>
         <java.version>1.8</java.version>
         <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <exec.mainClass>MNISTCUDNN</exec.mainClass>
     </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.uma.jmetal/jmetal-core -->
@@ -51,11 +57,21 @@
             <artifactId>deeplearning4j-core</artifactId>
             <version>${dl4j-master.version}</version>
         </dependency>
+        <!-- <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-cuda-11.2</artifactId>
+            <version>${dl4j-gpu.version}</version>
+        </dependency> -->
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-native</artifactId>
             <version>${dl4j-master.version}</version>
         </dependency>
+        <!-- <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-cuda-11.2</artifactId>
+            <version>${dl4j-gpu.version}</version>
+        </dependency>  -->
         <dependency>
             <groupId>org.nd4j</groupId>
             <artifactId>nd4j-native</artifactId>
@@ -68,6 +84,16 @@
             <version>${dl4j-master.version}</version>
             <classifier>windows-x86_64-avx2</classifier>
         </dependency>
+        <!-- <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda-platform</artifactId>
+            <version>11.2-8.1-1.5.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cuda-platform-redist</artifactId>
+            <version>11.2-8.1-1.5.5</version>
+        </dependency> -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
