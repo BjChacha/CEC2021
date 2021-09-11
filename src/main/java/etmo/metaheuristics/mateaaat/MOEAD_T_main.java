@@ -11,14 +11,16 @@ import org.apache.commons.math3.linear.SparseRealMatrix;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class MOEAD_T_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-	static boolean LOG_IGD = true;
-
+	static boolean LOG_IGD = false;
+	static boolean IGD_PRINT = true;
+	
 	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
 		Operator crossover;
@@ -27,7 +29,7 @@ public class MOEAD_T_main {
 		HashMap<String, Double> parameters;
 
 //		algorithm = (MtoAlgorithm) algorithmClass.getDeclaredConstructor().newInstance();
-		algorithm = new MOEAD_T(problemSet);
+		algorithm = new MOEAD(problemSet);
 
 		algorithm.setInputParameter("populationSize", MAX_POPULATION_SIZE);
 		algorithm.setInputParameter("maxEvaluations", MAX_EVALUATION_PER_INDIVIDUAL * problemSet.size() * MAX_POPULATION_SIZE);
@@ -80,11 +82,11 @@ public class MOEAD_T_main {
 	public static void main(String[] args) throws JMException, SecurityException, IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
 		ProblemSet problemSet; // The problem to solve
 
-		String benchmarkName = "CEC2021";
+		String benchmarkName = "WCCI2020";
 		Class algorithmClass = MOEAD_T.class;
 		String algorithmName = algorithmClass.getName();
-		int taskStart = 25;
-		int taskEnd = 32;
+		int taskStart = 1;
+		int taskEnd = 10;
 		int times = 10;
 
 		// System.out.println("Algo:" + algorithmName + ".");
@@ -160,6 +162,14 @@ public class MOEAD_T_main {
 				LogIGD.LogIGD(fileName, pCase, igds);
 //				LogIGD.LogIGD("MOEAD" + "_x" + times + "_" + benchmarkName, pCase, igds);
 			}
+			if (IGD_PRINT) {
+                double[] igdMean = new double[taskNum];
+                // System.out.println("Subproblem " + problemID + ": ");
+                for (int k = 0; k < taskNum; k++) {
+                    igdMean[k] = Arrays.stream(igds[k]).sum() / times;
+                    System.out.println(igdMean[k]);
+                }
+            }
 		}
 
 		long endTime = System.currentTimeMillis();

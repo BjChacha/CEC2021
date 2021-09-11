@@ -2,8 +2,8 @@ package etmo.metaheuristics.matde;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,15 +15,14 @@ import etmo.core.SolutionSet;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
-import etmo.problems.CEC2017.*;
 import etmo.util.logging.LogIGD;
 
 public class MaTDE_main {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException, InstantiationException {
-        int problemStart = 25;
-        int problemEnd = 32;
+        int problemStart = 1;
+        int problemEnd = 10;
 
-        int times = 21;
+        int times = 10;
 
         String benchmark_name;
 
@@ -33,19 +32,19 @@ public class MaTDE_main {
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
             ProblemSet problemSet;
-          // CEC 2021
-          benchmark_name = "CEC2021";
-          problemSet = (ProblemSet) Class
-                  .forName("etmo.problems.CEC2021.ETMOF" + pCase)
-                  .getMethod("getProblem")
-                  .invoke(null, null);
+        //   // CEC 2021
+        //   benchmark_name = "CEC2021";
+        //   problemSet = (ProblemSet) Class
+        //           .forName("etmo.problems.CEC2021.ETMOF" + pCase)
+        //           .getMethod("getProblem")
+        //           .invoke(null, null);
 
-            // // WCCI 2020
-            // benchmark_name = "WCCI2020";
-            // problemSet = (ProblemSet) Class
-            //         .forName("etmo.problems.WCCI2020.MATP" + pCase)
-            //         .getMethod("getProblem")
-            //         .invoke(null, null);
+            // WCCI 2020
+            benchmark_name = "WCCI2020";
+            problemSet = (ProblemSet) Class
+                    .forName("etmo.problems.WCCI2020.MATP" + pCase)
+                    .getMethod("getProblem")
+                    .invoke(null, null);
 
             //  // CEC2017
             //  benchmark_name = "CEC2017";
@@ -102,7 +101,15 @@ public class MaTDE_main {
 				}
 				t ++;
 			}
-            LogIGD.LogIGD("MaTDE_" + "x" + times + "_" + benchmark_name, pCase, igds);
+            // LogIGD.LogIGD("MaTDE_" + "x" + times + "_" + benchmark_name, pCase, igds);
+
+            double[] igdMean = new double[taskNum];
+            // System.out.println("Subproblem " + problemID + ": ");
+            for (int k = 0; k < taskNum; k++) {
+                igdMean[k] = Arrays.stream(igds[k]).sum() / times;
+                System.out.println(igdMean[k]);
+            }
+
         }
         long endTime = System.currentTimeMillis();
 		System.out.println("Total time cost: " + (endTime - startTime) / 1000 + " s.");
