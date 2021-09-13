@@ -2,6 +2,7 @@ package etmo.metaheuristics.ematomkt;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,8 +28,8 @@ public class EMaTOMKT_main {
         ProblemSet problemSet;
         Benchmark benchmarkName = Benchmark.WCCI2020;
         int problemStart = 1;
-        int problemEnd = 1;
-        int times = 1;
+        int problemEnd = 10;
+        int times = 10;
         String fileName = "EMaTOMKT_x" + times + "_" + benchmarkName;
 
         System.out.println("\nExperiment started -> " + fileName);
@@ -85,6 +86,12 @@ public class EMaTOMKT_main {
 
             if (LOG_IGD) {
 				LogIGD.LogIGD(fileName, problemID, igds);
+			}
+			double[] igdMean = new double[taskNum];
+			// System.out.println("Subproblem " + problemID + ": ");
+			for (int k = 0; k < taskNum; k++) {
+				igdMean[k] = Arrays.stream(igds[k]).sum() / times;
+				System.out.println(igdMean[k]);
 			}
         }
 

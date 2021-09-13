@@ -208,7 +208,7 @@ public class EMaTOMKT extends MtoAlgorithm{
             // long startTime = System.currentTimeMillis();
             // double[][][] clusters = Utils.kmeans(selectedPopulations, clusterNum, populationSize);
             double[][] mat = selectedPopulations.getMat();
-            var kmeans = PartitionClustering.run(2, () -> KMeans.fit(mat, clusterNum));
+            var kmeans = PartitionClustering.run(1, () -> KMeans.fit(mat, clusterNum));
 
             // System.out.println("kmeans: " + (System.currentTimeMillis() - startTime) + "ms.");
             
@@ -312,7 +312,7 @@ public class EMaTOMKT extends MtoAlgorithm{
             igd[k] = indicators.get(k).getIGD(resPopulation[k]);
         }
 
-        System.out.println("Generation " + generations + ": " + Arrays.toString(igd));
+        // System.out.println("Generation " + generations + ": " + Arrays.toString(igd));
     }
 
 }
