@@ -27,12 +27,23 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
 import etmo.util.sorting.NDSortiong;
+import smile.classification.RandomForest;
+import smile.data.DataFrame;
+import smile.data.formula.Formula;
+
+enum EvolutionMode {
+    MODEL_ASSIST_SEARCH,
+    NORMAL_EVOLUTION,
+    PRECISE_CONVERGE
+}
 
 public class MaTMY3_Classifier extends MtoAlgorithm {
     private SolutionSet[] population;
     private SolutionSet[] offspring;
+    private SolutionSet[] archive;
 
     private int populationSize;
+    private int archiveSize;
     private int taskNum;
     private int varNum;
 
@@ -42,7 +53,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
 
     private String XType;
 
-    private Operator crossover;
+    private Operator DECrossover;
+    private Operator SBXCrossover;
     private Operator mutation;
 
     int[] objStart;
@@ -50,13 +62,17 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
 
     double[] bestDistances;
     int[] stuckTimes;
+    int[] modelFailTimes;
 
     boolean isMutate;
 
     // model
-    EmsembleClassifier[] models;
+    RandomForest[] models;
     int epoch = 100;
     double lr = 1e-2;
+
+    double archiveReplaceRate;
+    EvolutionMode[] states; 
 
     // DEBUG: IGD
     String[] pf;
@@ -97,7 +113,6 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         }
         // if (isPlot)
         // endPlot();
-
         return population;
     }
 
@@ -110,26 +125,35 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         maxEvaluations = (Integer) this.getInputParameter("maxEvaluations");
         populationSize = (Integer) this.getInputParameter("populationSize");
 
-        // DEBUG partly run
-        maxEvaluations /= taskNum * 2;
-        // problemSet_ = problemSet_.getTask(0);
-        taskNum = 2;
+        // // DEBUG partly run
+        // maxEvaluations /= taskNum * 2;
+        // // problemSet_ = problemSet_.getTask(0);
+        // taskNum = 2;
 
         XType = (String) this.getInputParameter("XType");
         isPlot = (Boolean) this.getInputParameter("isPlot");
         isMutate = (Boolean) this.getInputParameter("isMutate");
 
-        crossover = operators_.get("crossover");
+        DECrossover = operators_.get("crossover");
+        SBXCrossover = operators_.get("crossover2");
         mutation = operators_.get("mutation");
 
         objStart = new int[taskNum];
         objEnd = new int[taskNum];
         bestDistances = new double[taskNum];
         stuckTimes = new int[taskNum];
+        modelFailTimes = new int[taskNum];
         Arrays.fill(bestDistances, Double.MAX_VALUE);
         Arrays.fill(stuckTimes, 0);
+        Arrays.fill(modelFailTimes, 0);
 
-        models = new EmsembleClassifier[taskNum];
+        models = new RandomForest[taskNum];
+        archive = new SolutionSet[taskNum];
+        archiveSize = 300;
+
+        archiveReplaceRate = 0.5;
+        states = new EvolutionMode[taskNum];
+        Arrays.fill(states, EvolutionMode.MODEL_ASSIST_SEARCH);
 
         population = new SolutionSet[taskNum];
         offspring = new SolutionSet[taskNum];
@@ -137,10 +161,9 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
             objStart[k] = problemSet_.get(k).getStartObjPos();
             objEnd[k] = problemSet_.get(k).getEndObjPos();
 
-            models[k] = new EmsembleClassifier(epoch, lr, varNum, 10);
-
             population[k] = new SolutionSet(populationSize);
             offspring[k] = new SolutionSet(populationSize);
+            archive[k] = new SolutionSet(archiveSize);
             for (int i = 0; i < populationSize; i++) {
                 Solution solution = new Solution(problemSet_);
                 solution.setSkillFactor(k);
@@ -178,103 +201,164 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
     public void offspringGeneration(String type) throws JMException {
         for (int k = 0; k < taskNum; k++) {
             offspring[k].clear();
+            if (generation > 0 && states[k] == EvolutionMode.MODEL_ASSIST_SEARCH) {
+                modelAssistGenerating(k);
+            }
+            // else if (states[k] == EvolutionMode.NORMAL_EVOLUTION) {
             if (type.equalsIgnoreCase("SBX")) {
-                for (int i = 0; i < populationSize; i++) {
-                    int j = i;
-                    while (j == i)
-                        j = PseudoRandom.randInt(0, populationSize - 1);
-                    Solution[] parents = new Solution[2];
-                    parents[0] = population[k].get(i);
-                    parents[1] = population[k].get(j);
-
-                    Solution child = ((Solution[]) crossover.execute(parents))[PseudoRandom.randInt(0, 1)];
-                    if (isMutate)
-                        mutation.execute(child);
-
-                    child.setSkillFactor(k);
-                    child.setFlag(1);
-                    problemSet_.get(k).evaluate(child);
-                    evaluations++;
-                    offspring[k].add(child);
-                }
+                SBXGenerating(k);
             } else if (type.equalsIgnoreCase("DE")) {
-                for (int i = 0; i < populationSize; i++) {
-                    int j1 = i, j2 = i;
-                    while (j1 == i && j1 == j2) {
-                        j1 = PseudoRandom.randInt(0, populationSize - 1);
-                        j2 = PseudoRandom.randInt(0, populationSize - 1);
-                    }
-                    Solution[] parents = new Solution[3];
-                    parents[0] = population[k].get(j1);
-                    parents[1] = population[k].get(j2);
-                    parents[2] = population[k].get(i);
-
-                    Solution child = (Solution) crossover.execute(new Object[] { population[k].get(i), parents });
-
-                    if (isMutate)
-                        mutation.execute(child);
-
-                    child.setSkillFactor(k);
-                    child.setFlag(1);
-                    problemSet_.get(k).evaluate(child);
-                    evaluations++;
-                    offspring[k].add(child);
-                }
+                DEGenerating(k);
             } else {
                 System.out.println("Error: unsupported reproduce type: " + type);
                 System.exit(1);
             }
+            // }
         }
     }
 
     public void environmentSelection() throws ClassNotFoundException, JMException {
         for (int k = 0; k < taskNum; k++) {
-            SolutionSet union = population[k].union(offspring[k]);
-            NDSortiong.sort(union, problemSet_, k);
+            // System.out.println("G_T: " + generation + "_" + k);
 
-            System.out.println("G_T: " + generation + "_" + k);
-            trainModel(k, union);
-            models[k].evaluate(union.getMat());
-            
-            int k2 = k;
-            while (k2 == k)
-                k2 = PseudoRandom.randInt(0, taskNum - 1);
-
-            SolutionSet filtedSolutions = new SolutionSet();
-            for (int i = 0; i < population[k2].size(); i++) {
-                double[] features = population[k2].get(i).getDecisionVariablesInDouble();
-                if (!models[k].judge(features, 0.5, 0.8)) {
-                    Solution newSolution = new Solution(population[k2].get(i));
-                    newSolution.setSkillFactor(k);
-                    newSolution.setFlag(2);
-                    problemSet_.get(k).evaluate(newSolution);
-                    evaluations ++;
-                    filtedSolutions.add(newSolution);
+            int transferCount = 0;
+            for (int i = 0; i < offspring[k].size(); i++) {
+                if (offspring[k].get(i).getFlag() == 2) {
+                    transferCount ++;
                 }
             }
 
-            union = union.union(filtedSolutions);
+            SolutionSet union = population[k].union(offspring[k]);
             NDSortiong.sort(union, problemSet_, k);
-
+            updateArchive(k, union);
+            
             int filtedBetter = 0;
             int normalBetter = 0;
             for (int i = 0; i < populationSize; i++) {
                 if (union.get(i).getFlag() == 2) 
-                    filtedBetter ++;
+                filtedBetter ++;
                 else if (union.get(i).getFlag() == 1)
-                    normalBetter ++;
+                normalBetter ++;
                 union.get(i).setFlag(0);
                 population[k].replace(i, union.get(i));
             }
-            System.out.println("Normal offspring survival Rate: " + (double)normalBetter / population[k].size());
-            System.out.println("Filted offspring survival Rate: " + (double)filtedBetter / population[k].size());
-            System.out.println("Classifier Transfer Success Rate: " + (double)filtedBetter / filtedSolutions.size());
-
+            // System.out.println("Normal offspring survival Rate: " + (double)normalBetter / population[k].size());
+            // System.out.println("Filted offspring survival Rate: " + (double)filtedBetter / population[k].size());
+            // System.out.println("Classifier Transfer Success Rate: " + filtedBetter + "/" + transferCount);
+            
+            
+            if (filtedBetter / (transferCount + 1e-4) <= 0.2) {
+                modelFailTimes[k] ++;
+            } else {
+                modelFailTimes[k] = 0;
+            }
+            
+            if (PseudoRandom.randDouble() < (modelFailTimes[k] / 4.0)  && generation > 0) {
+                states[k] = EvolutionMode.NORMAL_EVOLUTION;
+            }
+            if (states[k] == EvolutionMode.MODEL_ASSIST_SEARCH){
+                trainModel(k, union, archive[k]);
+                // System.out.println("G " + generation + " T " + k + " model: " + models[k].metrics().accuracy);
+            }
+            
             updateBestDistances(k);
 
 
             // 灾变
             // catastrophe(k, 0.1, 50);
+        }
+    }
+
+    public void modelAssistGenerating(int taskID) throws JMException {
+        modelAssistGenerating(taskID, populationSize);
+    }
+
+    public void modelAssistGenerating(int taskID, int num) throws JMException {
+        for (int i = 0; i < num && !offspring[taskID].isFull(); i++) {
+            int[] taskOrder = PseudoRandom.randomPermutation(taskNum, taskNum);
+            for (int assistTaskID: taskOrder) {
+                if (assistTaskID == taskID) continue;
+                if (offspring[taskID].isFull()) break;
+                if (judgeIndividual(models[taskID], population[assistTaskID].get(i))) {
+                    // // SBX
+                    // Solution[] parents = new Solution[2];
+                    // parents[0] = population[taskID].get(i);
+                    // parents[1] = population[assistTaskID].get(i);
+                    // Solution newSolution = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+                        
+                    // DE
+                    int[] pids = PseudoRandom.randomPermutation(populationSize, 2);
+                    int j1 = pids[0], j2 = pids[1];
+                    Solution[] parents = new Solution[3];
+                    parents[0] = population[taskID].get(j1);
+                    parents[1] = population[taskID].get(j2);
+                    parents[2] = population[assistTaskID].get(i);
+                    Solution newSolution = (Solution) DECrossover.execute(new Object[] { population[assistTaskID].get(i), parents });
+
+                    newSolution.setSkillFactor(taskID);
+                    newSolution.setFlag(2);
+                    problemSet_.get(taskID).evaluate(newSolution);
+                    evaluations ++;
+                    offspring[taskID].add(newSolution);
+                }
+            }
+        }
+    }
+
+    public void DEGenerating(int taskID) throws JMException {
+        DEGenerating(taskID, populationSize);
+    }
+
+    public void DEGenerating(int taskID, int num) throws JMException {
+        for (int i = 0; i < num && !offspring[taskID].isFull(); i++) {
+            int j1 = i, j2 = i;
+            while (j1 == i && j1 == j2) {
+                j1 = PseudoRandom.randInt(0, populationSize - 1);
+                j2 = PseudoRandom.randInt(0, populationSize - 1);
+            }
+            Solution[] parents = new Solution[3];
+            parents[0] = population[taskID].get(j1);
+            parents[1] = population[taskID].get(j2);
+            parents[2] = population[taskID].get(i);
+
+            Solution child = (Solution) DECrossover.execute(new Object[] { population[taskID].get(i), parents });
+
+            if (isMutate)
+                mutation.execute(child);
+
+            // if (PseudoRandom.randDouble() < stuckTimes[taskID] * 0.15)
+            //     mutation.execute(child);
+
+            child.setSkillFactor(taskID);
+            child.setFlag(1);
+            problemSet_.get(taskID).evaluate(child);
+            evaluations++;
+            offspring[taskID].add(child);
+        }
+    }
+
+    public void SBXGenerating(int taskID) throws JMException {
+        SBXGenerating(taskID, populationSize);
+    }
+
+    public void SBXGenerating(int taskID, int num) throws JMException {
+        for (int i = 0; i < num && !offspring[taskID].isFull(); i++) {
+            int j = i;
+            while (j == i)
+                j = PseudoRandom.randInt(0, populationSize - 1);
+            Solution[] parents = new Solution[2];
+            parents[0] = population[taskID].get(i);
+            parents[1] = population[taskID].get(j);
+
+            Solution child = ((Solution[]) DECrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+            if (isMutate)
+                mutation.execute(child);
+
+            child.setSkillFactor(taskID);
+            child.setFlag(1);
+            problemSet_.get(taskID).evaluate(child);
+            evaluations++;
+            offspring[taskID].add(child);
         }
     }
 
@@ -294,20 +378,33 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         }
     }
 
-    public void trainModel(int taskID, SolutionSet union) throws JMException {
-        SolutionSet positive = new SolutionSet();
-        SolutionSet negative = new SolutionSet();
-        for (int i = 0; i < union.size(); i++) {
-            if (i < union.size() / 2) {
-                positive.add(union.get(i));
-            }
-            else {
-                negative.add(union.get(i));
-            }
+    public void trainModel(int taskID, SolutionSet union, SolutionSet negative) throws JMException {
+        int pLength = populationSize;
+        int nLength = negative.size();
+        double[][] features = new double[pLength+nLength][];
+        int[][] labels = new int[features.length][1];
+        for (int i = 0; i < pLength; i++) {
+            features[i] = union.get(i).getDecisionVariablesInDouble();
+            labels[i][0] = 0;
         }
-        // models[taskID].train(positive.getMat(), negative.getMat());
-        models[taskID].train(negative.getMat(), positive.getMat());
+        for (int i = 0; i < nLength; i++) {
+            features[i+pLength] = negative.get(i).getDecisionVariablesInDouble();
+            labels[i+pLength][0] = 1;
+        }
 
+        var X = DataFrame.of(features);
+        var Y = DataFrame.of(labels, "class");
+        var df = X.merge(Y);
+
+        models[taskID] = RandomForest.fit(Formula.lhs("class"), df);
+    }
+
+    public boolean judgeIndividual(RandomForest model, Solution individual) throws JMException {
+        double[] features = individual.getDecisionVariablesInDouble();
+        double[][] X = new double[1][];
+        X[0] = features;
+        var res = model.predict(DataFrame.of(X));
+        return res[0] == 0;
     }
 
     public void updateBestDistances(int taskID) {
@@ -342,6 +439,19 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
             stuckTimes[taskID] = 0;
         } else {
             stuckTimes[taskID]++;
+        }
+    }
+
+    public void updateArchive(int taskID, SolutionSet union) {
+        for (int i = union.size() / 2; i < union.size(); i++) {
+            if (!archive[taskID].isFull()){
+                archive[taskID].add(new Solution(union.get(i)));
+            }
+            else if (PseudoRandom.randDouble() < archiveReplaceRate) {
+                archive[taskID].replace(
+                    PseudoRandom.randInt(0, archive[taskID].size() - 1), 
+                    new Solution(union.get(i)));
+            }
         }
     }
 
