@@ -18,23 +18,23 @@ import etmo.util.logging.LogIGD;
 
 public class MaTMY3_main {
     // CONFIG
-    static Class<?> ALGORITHM_CLAZZ = MaTMY3_Classifier.class;
-    static int MAX_POPULATION_SIZE = 100;
-    static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-    static String CROSSOVER_TYPE = "DE";
-    static double DE_CR = 0.6;
-    static double DE_F = 0.5;
-    static boolean IS_MUTATE = false;
-    static double TRANSFER_PROBABILITY = 0.1;
+    static final Class<?> ALGORITHM_CLAZZ = MaTMY3_Classifier.class;
+    static final int MAX_POPULATION_SIZE = 100;
+    static final int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
+    static final String CROSSOVER_TYPE = "DE";
+    static final double DE_CR = 0.6;
+    static final double DE_F = 0.5;
+    static final boolean IS_MUTATE = false;
+    static final double TRANSFER_PROBABILITY = 0.1;
 
-    static Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
-    static int PROBLEM_START = 1;
-    static int PROBLEM_END = 10;
-    static int PROBLEM_REPEAT_TIME = 1;
+    static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
+    static final int PROBLEM_START = 1;
+    static final int PROBLEM_END = 10;
+    static final int PROBLEM_REPEAT_TIME = 10;
 
-    static boolean IGD_LOG = false;
-    static boolean IGD_PRINT = true;
-    static boolean PLOTTING = false;
+    static final boolean IGD_LOG = false;
+    static final boolean IGD_PRINT = true;
+    static final boolean PLOTTING = false;
 
     enum Benchmark { CEC2021, CEC2017, WCCI2020; }
 
@@ -120,6 +120,7 @@ public class MaTMY3_main {
     public static MtoAlgorithm algorithmGenerate(Class<?> algorithmClass, ProblemSet problemSet, String XType) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
 		Operator crossover;
+        Operator crossover2;
 		Operator mutation;
 		HashMap<String, Double> parameters;
 
@@ -161,8 +162,14 @@ public class MaTMY3_main {
 		parameters.put("distributionIndex", 20.0);
 		mutation = MutationFactory.getMutationOperator("PolynomialMutation", parameters);
 
-		algorithm.addOperator("crossover", crossover);
-		algorithm.addOperator("mutation", mutation);
+        parameters = new HashMap<>();
+        parameters.put("probability", 0.9);
+        parameters.put("distributionIndex", 20.0);
+        crossover2 = CrossoverFactory.getCrossoverOperator("SBXCrossover",parameters);
+
+        algorithm.addOperator("crossover", crossover);
+        algorithm.addOperator("crossover2", crossover2);
+        algorithm.addOperator("mutation", mutation);
 
 		return algorithm;
 	}
