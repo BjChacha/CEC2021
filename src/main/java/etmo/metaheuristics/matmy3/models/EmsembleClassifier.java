@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matmy3;
+package etmo.metaheuristics.matmy3.models;
 
 import java.util.Arrays;
 

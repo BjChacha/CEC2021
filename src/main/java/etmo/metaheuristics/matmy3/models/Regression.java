@@ -1,4 +1,4 @@
-package etmo.metaheuristics.matmy3;
+package etmo.metaheuristics.matmy3.models;
 
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
