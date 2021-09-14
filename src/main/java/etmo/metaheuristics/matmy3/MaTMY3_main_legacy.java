@@ -16,7 +16,7 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
 
-public class MaTMY3_main {
+public class MaTMY3_main_legacy {
     // CONFIG
     static final Class<?> ALGORITHM_CLAZZ = MaTMY3_Classifier.class;
     static final int MAX_POPULATION_SIZE = 100;
@@ -31,7 +31,7 @@ public class MaTMY3_main {
     static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
     static final int PROBLEM_END = 10;
-    static final int PROBLEM_REPEAT_TIME = 1;
+    static final int PROBLEM_REPEAT_TIME = 10;
 
     static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
@@ -66,38 +66,15 @@ public class MaTMY3_main {
             String pSName = problemSet.get(0).getName();
 			System.out.println(pSName + "\ttaskNum = " + taskNum + "\tfor " + times + " times.");
 
-			List<MtoAlgorithm> algorithms = new ArrayList<>(times);
-			List<SolutionSet[]> populations = new ArrayList<>(times);
-            // 初始化算法
-			for (int t = 0; t < times; t++){
-				algorithms.add(algorithmGenerate(ALGORITHM_CLAZZ, problemSet));
-			}
-
-			// // 并行执行times个算法
-			// algorithms.parallelStream().forEach(a -> {
-			// 	try {
-			// 		populations.add(a.execute());
-			// 	} catch (JMException | ClassNotFoundException e) {
-			// 		e.printStackTrace();
-			// 	}
-			// });
-
-			// 串行执行
-			for (int t = 0; t < times; t++){
-				populations.add(algorithms.get(t).execute());
-			}
-
-            // 计算IGD
-			double[][] igds = new double[taskNum][times];
-			int t = 0;
-			for (SolutionSet[] pop: populations){
-				double igd;
-				for (int k = 0; k < taskNum; k++) {
-					igd = indicators.get(k).getIGD(pop[k], k);
-					igds[k][t] = igd;
-				}
-				t ++;
-			}
+            double[][] igds = new double[taskNum][times];
+            for (int t = 0; t < times; t++) {
+                MtoAlgorithm algorithm = algorithmGenerate(ALGORITHM_CLAZZ, problemSet);
+                SolutionSet[] populations = algorithm.execute();
+                for (int k = 0; k < taskNum; k++) {
+                    double igd = indicators.get(k).getIGD(populations[k], k);
+                    igds[k][t] = igd;
+                }
+            }
 
             if (IGD_LOG) {
 				LogIGD.LogIGD(fileName, problemID, igds);
@@ -119,12 +96,13 @@ public class MaTMY3_main {
 
     public static MtoAlgorithm algorithmGenerate(Class<?> algorithmClass, ProblemSet problemSet) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
 		MtoAlgorithm algorithm;
-        Operator SBXCrossover;
+		Operator SBXCrossover;
         Operator DECrossover;
         Operator BLXAlphaCrossover;
 		Operator mutation;
 		HashMap<String, Double> parameters;
 
+		// algorithm = new MaTMY3(problemSet);
         algorithm = (MtoAlgorithm) algorithmClass
                     .getDeclaredConstructor(ProblemSet.class)
                     .newInstance(problemSet);
