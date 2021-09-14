@@ -102,7 +102,6 @@ public class MaTMY3_main_legacy {
 		Operator mutation;
 		HashMap<String, Double> parameters;
 
-		// algorithm = new MaTMY3(problemSet);
         algorithm = (MtoAlgorithm) algorithmClass
                     .getDeclaredConstructor(ProblemSet.class)
                     .newInstance(problemSet);
