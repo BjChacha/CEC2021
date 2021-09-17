@@ -409,6 +409,13 @@ public class Solution implements Serializable {
 		objective_[i] = value;
 	} // setObjective
 
+	public void setObjectives(double[] values) {
+		assert values.length == objective_.length;
+		for (int i = 0; i < objective_.length; i++) {
+			setObjective(i, values[i]);
+		}
+	}
+
 	/**
 	 * Returns the value of the i-th objective.
 	 * 
