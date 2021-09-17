@@ -18,6 +18,7 @@ import org.knowm.xchart.style.colors.XChartSeriesColors;
 import org.knowm.xchart.style.lines.XChartSeriesLines;
 import org.knowm.xchart.style.markers.XChartSeriesMarkers;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
 import etmo.core.ProblemSet;
@@ -26,6 +27,7 @@ import etmo.core.SolutionSet;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
+import etmo.util.math.Matrix;
 import etmo.util.sorting.NDSortiong;
 
 public class MaTMY3P extends MtoAlgorithm {
@@ -41,8 +43,8 @@ public class MaTMY3P extends MtoAlgorithm {
     private int maxEvaluations;
 
     private String XType;
-
-    private Operator crossover;
+    private Operator DECrossover;
+    private Operator SBXCrossover;
     private Operator mutation;
 
     int[] objStart;
@@ -51,7 +53,13 @@ public class MaTMY3P extends MtoAlgorithm {
     double[] bestDistances;
     int[] stuckTimes;
 
+    double[][][] Ws;
+    double[][] Bs;
+
     boolean isMutate;
+
+    // DEBUG
+    int[][] part;
 
     // DEBUG: IGD
     String[] pf;
@@ -97,16 +105,12 @@ public class MaTMY3P extends MtoAlgorithm {
         maxEvaluations = (Integer) this.getInputParameter("maxEvaluations");
         populationSize = (Integer) this.getInputParameter("populationSize");
 
-        // // DEBUG partly run
-        // maxEvaluations /= taskNum;
-        // problemSet_ = problemSet_.getTask(0);
-        // taskNum = 1;
-
         XType = (String) this.getInputParameter("XType");
         isPlot = (Boolean) this.getInputParameter("isPlot");
         isMutate = (Boolean) this.getInputParameter("isMutate");
 
-        crossover = operators_.get("crossover");
+        DECrossover = operators_.get("DECrossover");
+        SBXCrossover = operators_.get("SBXCrossover");
         mutation = operators_.get("mutation");
 
         objStart = new int[taskNum];
@@ -116,25 +120,41 @@ public class MaTMY3P extends MtoAlgorithm {
         Arrays.fill(bestDistances, Double.MAX_VALUE);
         Arrays.fill(stuckTimes, 0);
 
+        Ws = new double[taskNum][][];
+        Bs = new double[taskNum][];
+        for (int k = 0; k < taskNum; k++) {
+            Ws[k] = new double[varNum][varNum];
+            Bs[k] = new double[varNum];
+            for (int i = 0; i < varNum; i++) {
+                Ws[k][i] = Matrix.randomUnitVector(varNum);
+            }
+            Arrays.fill(Bs[k], 0);
+        }
+
+        part = new int[taskNum][taskNum];
+
         population = new SolutionSet[taskNum];
         offspring = new SolutionSet[taskNum];
         for (int k = 0; k < taskNum; k++) {
             objStart[k] = problemSet_.get(k).getStartObjPos();
             objEnd[k] = problemSet_.get(k).getEndObjPos();
 
+            Arrays.fill(part[k], 0);
+
             population[k] = new SolutionSet(populationSize);
             offspring[k] = new SolutionSet(populationSize);
             for (int i = 0; i < populationSize; i++) {
                 Solution solution = new Solution(problemSet_);
                 solution.setSkillFactor(k);
-                problemSet_.get(k).evaluate(solution);
-                evaluations++;
+                solution.setFlag(i%taskNum);
+                // problemSet_.get(k).evaluate(solution);
+                // evaluations++;
+                transformEvaluate(k, solution);
                 population[k].add(solution);
             }
-
-            updateBestDistances(k);
+            // updateBestDistances(k);
         }
-
+        generation ++;
         // DEBUG: IGD
         pf = new String[taskNum];
         indicators = new ArrayList<>(taskNum);
@@ -155,6 +175,15 @@ public class MaTMY3P extends MtoAlgorithm {
     public void iterate() throws JMException, ClassNotFoundException {
         offspringGeneration(XType);
         environmentSelection();
+        if (generation % 1 == 0) {
+            updateWs();
+        }
+        
+        System.out.println(generation);
+        for (int k = 0; k < taskNum; k++) {
+            System.out.println(Arrays.toString(part[k]));
+        }
+
         generation++;
     }
 
@@ -170,14 +199,19 @@ public class MaTMY3P extends MtoAlgorithm {
                     parents[0] = population[k].get(i);
                     parents[1] = population[k].get(j);
 
-                    Solution child = ((Solution[]) crossover.execute(parents))[PseudoRandom.randInt(0, 1)];
-                    if (isMutate)
-                        mutation.execute(child);
+                    Solution child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+                    mutateIndividual(child);
 
                     child.setSkillFactor(k);
-                    child.setFlag(1);
-                    problemSet_.get(k).evaluate(child);
-                    evaluations++;
+                    if (PseudoRandom.randDouble() < 0.5) {
+                        child.setFlag(parents[0].getFlag());
+                    }
+                    else {
+                        child.setFlag(parents[i].getFlag());
+                    } 
+                    // problemSet_.get(k).evaluate(child);
+                    // evaluations++;
+                    transformEvaluate(k, child);
                     offspring[k].add(child);
                 }
             } else if (type.equalsIgnoreCase("DE")) {
@@ -192,15 +226,14 @@ public class MaTMY3P extends MtoAlgorithm {
                     parents[1] = population[k].get(j2);
                     parents[2] = population[k].get(i);
 
-                    Solution child = (Solution) crossover.execute(new Object[] { population[k].get(i), parents });
-
-                    if (isMutate)
-                        mutation.execute(child);
+                    Solution child = (Solution) DECrossover.execute(new Object[] { population[k].get(i), parents });
+                    mutateIndividual(child);
 
                     child.setSkillFactor(k);
-                    child.setFlag(1);
-                    problemSet_.get(k).evaluate(child);
-                    evaluations++;
+                    child.setFlag(parents[2].getFlag());
+                    // problemSet_.get(k).evaluate(child);
+                    // evaluations++;
+                    transformEvaluate(k, child);
                     offspring[k].add(child);
                 }
             } else {
@@ -210,19 +243,67 @@ public class MaTMY3P extends MtoAlgorithm {
         }
     }
 
+    public void transformEvaluate(int taskID, Solution individual) throws JMException {
+        Solution transformedIndividual = new Solution(individual);
+        double[] transformedFeatures = Matrix.matMul(
+            new double[][] {individual.getDecisionVariablesInDouble()}, 
+            Matrix.matTranspose(Ws[individual.getFlag()]))[0];
+        transformedFeatures = Matrix.normailizeVector(transformedFeatures);
+        transformedIndividual.setDecisionVariables(transformedFeatures);
+        problemSet_.get(taskID).evaluate(transformedIndividual);
+        evaluations ++;
+        for (int i = objStart[taskID]; i <= objEnd[taskID]; i++) {
+            individual.setObjective(i, transformedIndividual.getObjective(i));
+        }
+        // return transformedIndividual.getObjectives();
+    }
+
+    public void updateWs() {
+        for (int k = 0; k < taskNum; k++) {
+            updateW(k);
+        }
+    }
+
+    public void updateW(int taskID) {
+        double[][] sum = new double[varNum][varNum];
+        for (int i = 0; i < population[taskID].size(); i++) {
+            sum = Matrix.matAdd(sum, Ws[population[taskID].get(i).getFlag()]);
+        }
+        Matrix.eMul_(sum, 1.0 / population[taskID].size());
+        for (int i = 0; i < sum.length; i++) {
+            sum[i] = Matrix.unifyVector(sum[i]);
+        }
+        Ws[taskID] = sum;
+    }
+
     public void environmentSelection() throws ClassNotFoundException, JMException {
         for (int k = 0; k < taskNum; k++) {
             SolutionSet union = population[k].union(offspring[k]);
             NDSortiong.sort(union, problemSet_, k);
 
+            Arrays.fill(part[k], 0);
+
             for (int i = 0; i < populationSize; i++) {
+                // union.get(i).setFlag(i%50);
                 population[k].replace(i, union.get(i));
+                
+                part[k][union.get(i).getFlag()] ++;
             }
-            updateBestDistances(k);
+
+            // 判断是否困于局部最优
+            // updateBestDistances(k);
 
             // 灾变
             // catastrophe(k, 0.1, 50);
         }
+    }
+
+    public void mutateIndividual(Solution individual) throws JMException {
+        if (isMutate)
+            mutation.execute(individual);
+
+        // if (PseudoRandom.randDouble() < 0.5)
+        //     mutation.execute(individual);
     }
 
     public void catastrophe(int taskID, double survivalRate, int threshold) throws ClassNotFoundException, JMException {
