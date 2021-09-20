@@ -1,10 +1,5 @@
 package etmo.metaheuristics.mateaaat;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.cpu.nativecpu.NDArray;
-import org.nd4j.linalg.dimensionalityreduction.PCA;
-import org.nd4j.linalg.ops.transforms.Transforms;
-
 class WassersteinDistance {
     public static double getWD(double[][] p1, double[][] p2){
         double distance = 0;
