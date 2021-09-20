@@ -18,24 +18,28 @@ import etmo.util.logging.LogIGD;
 
 public class MaTMY3_main {
     // CONFIG
-    static final Class<?> ALGORITHM_CLAZZ = MaTMY3_Classifier.class;
+    static final Class<?> ALGORITHM_CLAZZ = MaTMY3_Transfer.class;
     static final int MAX_POPULATION_SIZE = 100;
     static final int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-    static final String CROSSOVER_TYPE = "DE";
+    static final String CROSSOVER_TYPE = "SBX";
     static final String TRANSFER_CROSSOVER_TYPE = "SBX";
-    static final double DE_CR = 0.6;
+    static final double DE_CR = 0.5;
     static final double DE_F = 0.5;
     static final boolean IS_MUTATE = false;
-    static final double TRANSFER_PROBABILITY = 0.2;
+    static final double TRANSFER_PROBABILITY = 0.5;
+
+    static final int PLOT_TASK_ID = 47;
 
     static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
     static final int PROBLEM_END = 10;
-    static final int PROBLEM_REPEAT_TIME = 1;
+    static final int PROBLEM_REPEAT_TIME = 10;
 
-    static final boolean IGD_LOG = false;
-    static final boolean IGD_PRINT = true;
+    static final boolean IGD_LOG = true;
+    static final boolean IGD_PRINT = false;
     static final boolean PLOTTING = false;
+
+    static final String ALGO_NAME = "MaTMY3_SBX_PM_bias_momemumT_rand0.5";
 
     enum Benchmark { CEC2021, CEC2017, WCCI2020; }
 
@@ -47,7 +51,7 @@ public class MaTMY3_main {
         int problemEnd = PROBLEM_END;
         int times = PROBLEM_REPEAT_TIME;
 
-        String fileName = "MaTMY3_x" + times + "_" + benchmarkName;
+        String fileName = ALGO_NAME + "_x" + times + "_" + benchmarkName;
 
         System.out.println("\nExperiment started -> " + fileName);
 
@@ -88,17 +92,18 @@ public class MaTMY3_main {
 			}
 
             // 计算IGD
-			double[][] igds = new double[taskNum][times];
-			int t = 0;
-			for (SolutionSet[] pop: populations){
-				double igd;
-				for (int k = 0; k < taskNum; k++) {
-					igd = indicators.get(k).getIGD(pop[k], k);
-					igds[k][t] = igd;
-				}
-				t ++;
-			}
-
+            double[][] igds = new double[taskNum][times];
+            if (IGD_LOG || IGD_PRINT) {
+                int t = 0;
+                for (SolutionSet[] pop: populations){
+                    double igd;
+                    for (int k = 0; k < taskNum; k++) {
+                        igd = indicators.get(k).getIGD(pop[k], k);
+                        igds[k][t] = igd;
+                    }
+                    t ++;
+                }
+            }
             if (IGD_LOG) {
 				LogIGD.LogIGD(fileName, problemID, igds);
 			}
@@ -136,6 +141,7 @@ public class MaTMY3_main {
         algorithm.setInputParameter("isPlot", PLOTTING);
         algorithm.setInputParameter("isMutate", IS_MUTATE);
         algorithm.setInputParameter("transferProbability", TRANSFER_PROBABILITY);
+        algorithm.setInputParameter("plotTaskID", PLOT_TASK_ID);
 
         parameters = new HashMap<>();
         parameters.put("probability", 1.0);
@@ -150,7 +156,7 @@ public class MaTMY3_main {
         parameters = new HashMap<>();
         parameters.put("probability", 1.0);
         parameters.put("distributionIndex", 20.0);
-        parameters.put("alpha", 0.3);
+        parameters.put("alpha", 0.1);
         BLXAlphaCrossover = CrossoverFactory.getCrossoverOperator("BLXAlphaCrossover",parameters);
 
 		parameters = new HashMap<>();
