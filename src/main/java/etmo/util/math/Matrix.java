@@ -98,48 +98,6 @@ public class Matrix {
         return std;
     }
 
-    public static double[] randomUnitVector(int d) {
-        double[] vector = new double[d];
-        double sum = 0;
-        Random r = new Random();
-        for (int i = 0; i < d; i ++) {
-            vector[i] = r.nextGaussian();
-            sum += Math.pow(vector[i], 2);
-        }
-        sum = Math.sqrt(sum);
-        for (int i = 0; i < d; i ++) {
-            vector[i] /= sum;
-        }
-        return vector;
-    }
-
-    public static double[] unifyVector(double[] vector) {
-        double sum = 0;
-        double[] output = new double[vector.length];
-        for (double e: vector) {
-            sum += Math.pow(e, 2);
-        }
-        sum = Math.sqrt(sum);
-        for (int i = 0; i < output.length; i++) {
-            output[i] = vector[i] / sum;
-        }
-        return output;
-    }
-
-    public static double[] normailizeVector(double[] vector) {
-        double[] output = new double[vector.length];
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        for (int i = 0; i < vector.length; i++) {
-            min = Math.min(min, vector[i]);
-            max = Math.max(max, vector[i]);
-        }
-        for (int i = 0; i < vector.length; i++) {
-            output[i] = (vector[i] - min) / (max - min);
-        }
-        return output;
-    }
-
     public static void eAdd_(double[][] mat, double e) {
         for (int i = 0; i < mat.length; i++) {
             for (int j = 0; j < mat[i].length; j++) {
