@@ -29,7 +29,7 @@ public class EMaTOMKT_main {
         Benchmark benchmarkName = Benchmark.WCCI2020;
         int problemStart = 1;
         int problemEnd = 10;
-        int times = 10;
+        int times = 1;
         String fileName = "EMaTOMKT_x" + times + "_" + benchmarkName;
 
         System.out.println("\nExperiment started -> " + fileName);
