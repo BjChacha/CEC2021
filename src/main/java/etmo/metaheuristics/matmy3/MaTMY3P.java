@@ -28,6 +28,7 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
 import etmo.util.math.Matrix;
+import etmo.util.math.Vector;
 import etmo.util.sorting.NDSortiong;
 
 public class MaTMY3P extends MtoAlgorithm {
@@ -126,7 +127,7 @@ public class MaTMY3P extends MtoAlgorithm {
             Ws[k] = new double[varNum][varNum];
             Bs[k] = new double[varNum];
             for (int i = 0; i < varNum; i++) {
-                Ws[k][i] = Matrix.randomUnitVector(varNum);
+                Ws[k][i] = Vector.getRandomUnitVector(varNum);
             }
             Arrays.fill(Bs[k], 0);
         }
@@ -248,7 +249,7 @@ public class MaTMY3P extends MtoAlgorithm {
         double[] transformedFeatures = Matrix.matMul(
             new double[][] {individual.getDecisionVariablesInDouble()}, 
             Matrix.matTranspose(Ws[individual.getFlag()]))[0];
-        transformedFeatures = Matrix.normailizeVector(transformedFeatures);
+        transformedFeatures = Vector.vecNormailize(transformedFeatures);
         transformedIndividual.setDecisionVariables(transformedFeatures);
         problemSet_.get(taskID).evaluate(transformedIndividual);
         evaluations ++;
@@ -271,7 +272,7 @@ public class MaTMY3P extends MtoAlgorithm {
         }
         Matrix.eMul_(sum, 1.0 / population[taskID].size());
         for (int i = 0; i < sum.length; i++) {
-            sum[i] = Matrix.unifyVector(sum[i]);
+            sum[i] = Vector.vecUnify(sum[i]);
         }
         Ws[taskID] = sum;
     }
