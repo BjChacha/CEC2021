@@ -42,7 +42,9 @@ public class MaTMY3 extends MtoAlgorithm {
 
     private String XType;
 
-    private Operator crossover;
+    private Operator DECrossover;
+    private Operator SBXCrossover;
+    private Operator BLXAlphaCrossover;
     private Operator mutation;
 
     int[] objStart;
@@ -92,7 +94,7 @@ public class MaTMY3 extends MtoAlgorithm {
         }
         // if (isPlot)
         // endPlot();
-
+        // System.out.println(igdPlotValues.get(0).toString());
         return population;
     }
 
@@ -105,16 +107,18 @@ public class MaTMY3 extends MtoAlgorithm {
         maxEvaluations = (Integer) this.getInputParameter("maxEvaluations");
         populationSize = (Integer) this.getInputParameter("populationSize");
 
-        // // DEBUG partly run
-        // maxEvaluations /= taskNum;
-        // problemSet_ = problemSet_.getTask(0);
-        // taskNum = 1;
+        // DEBUG partly run
+        maxEvaluations /= taskNum;
+        problemSet_ = problemSet_.getTask(0);
+        taskNum = 1;
 
         XType = (String) this.getInputParameter("XType");
         isPlot = (Boolean) this.getInputParameter("isPlot");
         isMutate = (Boolean) this.getInputParameter("isMutate");
 
-        crossover = operators_.get("crossover");
+        DECrossover = operators_.get("DECrossover");
+        SBXCrossover = operators_.get("SBXCrossover");
+        BLXAlphaCrossover = operators_.get("BLXAlphaCrossover");
         mutation = operators_.get("mutation");
 
         objStart = new int[taskNum];
@@ -178,7 +182,7 @@ public class MaTMY3 extends MtoAlgorithm {
                     parents[0] = population[k].get(i);
                     parents[1] = population[k].get(j);
 
-                    Solution child = ((Solution[]) crossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+                    Solution child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
                     if (isMutate)
                         mutation.execute(child);
 
@@ -200,7 +204,7 @@ public class MaTMY3 extends MtoAlgorithm {
                     parents[1] = population[k].get(j2);
                     parents[2] = population[k].get(i);
 
-                    Solution child = (Solution) crossover.execute(new Object[] { population[k].get(i), parents });
+                    Solution child = (Solution) DECrossover.execute(new Object[] { population[k].get(i), parents });
 
                     if (isMutate)
                         mutation.execute(child);
