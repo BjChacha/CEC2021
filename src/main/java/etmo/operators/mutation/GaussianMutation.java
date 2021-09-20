@@ -16,9 +16,11 @@ public class GaussianMutation extends Mutation {
 
 	private static final List VALID_TYPES = Arrays.asList(RealSolutionType.class);
 
+	private static final Double SIGMA_DEFAULT = 1.0;
+
 	private Double mutationProbability_ = null;
 
-	private Double sigma_ = null;
+	private Double sigma_ = SIGMA_DEFAULT;
 
 	public GaussianMutation(HashMap<String, Object> parameters) {
 		super(parameters);
@@ -64,5 +66,9 @@ public class GaussianMutation extends Mutation {
 
 		return solution;
 	} // execute
+
+	public void setSigma(double sigma) {
+		this.sigma_ = sigma;
+	}
 
 }
