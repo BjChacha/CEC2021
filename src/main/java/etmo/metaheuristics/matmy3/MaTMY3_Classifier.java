@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.WindowConstants;
 
@@ -26,7 +27,11 @@ import etmo.core.SolutionSet;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
+import etmo.util.math.Probability;
 import etmo.util.sorting.NDSortiong;
+import smile.classification.DataFrameClassifier;
+import smile.classification.LogisticRegression;
+import smile.classification.OnlineClassifier;
 import smile.classification.RandomForest;
 import smile.data.DataFrame;
 import smile.data.formula.Formula;
@@ -70,9 +75,9 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
     boolean isMutate;
 
     // model
-    RandomForest[] models;
-    int epoch = 100;
-    double lr = 1e-2;
+    DataFrameClassifier[] models;
+    OnlineClassifier<double[]>[] onlineModels;
+    Properties randomForestProperties;
 
     double transferProbability;
     double archiveReplaceRate;
@@ -117,6 +122,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         }
         // if (isPlot)
         // endPlot();
+
+        // System.out.println(igdPlotValues.get(0).toString());
         return population;
     }
 
@@ -130,7 +137,7 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         populationSize = (Integer) this.getInputParameter("populationSize");
 
         // // DEBUG partly run
-        // maxEvaluations /= taskNum * 2;
+        // maxEvaluations = maxEvaluations / taskNum * 2;
         // // problemSet_ = problemSet_.getTask(0);
         // taskNum = 2;
 
@@ -154,7 +161,15 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         Arrays.fill(stuckTimes, 0);
         Arrays.fill(modelFailTimes, 0);
 
-        models = new RandomForest[taskNum];
+        models = new DataFrameClassifier[taskNum];
+        randomForestProperties = new Properties();
+        randomForestProperties.setProperty("smile.random.forest.max.depth", "16");
+        randomForestProperties.setProperty("smile.random.forest.trees", "300");
+        randomForestProperties.setProperty("smile.random.forest.mtry", "7");
+        randomForestProperties.setProperty("smile.random.forest.max.nodes", String.valueOf(Integer.MAX_VALUE));
+
+        onlineModels = new OnlineClassifier[taskNum];
+
         archive = new SolutionSet[taskNum];
         archiveSize = 300;
 
@@ -183,6 +198,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
             updateBestDistances(k);
         }
 
+        generation ++;
+
         // DEBUG: IGD
         pf = new String[taskNum];
         indicators = new ArrayList<>(taskNum);
@@ -201,26 +218,27 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
     }
 
     public void iterate() throws JMException, ClassNotFoundException {
-        offspringGeneration(XType);
+        offspringGeneration();
         environmentSelection();
         generation++;
     }
 
-    public void offspringGeneration(String type) throws JMException {
+    public void offspringGeneration() throws JMException {
         for (int k = 0; k < taskNum; k++) {
             offspring[k].clear();
-            if (generation > 0 && states[k] == EvolutionMode.MODEL_ASSIST_SEARCH) {
+            if (generation > 1 && states[k] == EvolutionMode.MODEL_ASSIST_SEARCH) {
                 modelAssistGenerating(k);
-                generating(k, type);
+                evolutionaryGenerating(k, XType);
+                // transferGenerating(k, XType, TXType);
             }
             else if (states[k] == EvolutionMode.TRANSFER_EVOLUTION) {
-                transferGenerating(k, TXType);
+                transferGenerating(k, XType, TXType);
             }
             else if (states[k] == EvolutionMode.FINAL_CONVERGE) {
-                BLXGenerating(k);
+                sampleGenerating(k);
             }
             else {
-                generating(k, type);
+                evolutionaryGenerating(k, XType);
             }
         }
     }
@@ -242,7 +260,6 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
 
             SolutionSet union = population[k].union(offspring[k]);
             NDSortiong.sort(union, problemSet_, k);
-            updateArchive(k, union);
             
             int filtedBetter = 0;
             int normalBetter = 0;
@@ -256,26 +273,31 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
             }
             // System.out.println("Normal offspring survival Rate: " + (double)normalBetter / population[k].size());
             // System.out.println("Filted offspring survival Rate: " + (double)filtedBetter / population[k].size());
-            // System.out.println("Classifier Transfer Success Rate: " + filtedBetter + "/" + transferCount);
+            // System.out.println(k+" Normal Transfer Success Rate: " + normalBetter + "/" + reproduceCount);
+            // System.out.println(k+" Classifier Transfer Success Rate: " + filtedBetter + "/" + transferCount);
+
             
-            
-            if ((filtedBetter / (transferCount + 1e-4)) <= (normalBetter / (reproduceCount + 1e-4))) {
-                modelFailTimes[k] ++;
-            } else {
-                modelFailTimes[k] = 0;
+            if (states[k] == EvolutionMode.MODEL_ASSIST_SEARCH) {
+                updateArchive(k, union);
+                trainModel(k);
+                if (generation > 1 && (filtedBetter / (transferCount + 1e-4)) <= (normalBetter / (reproduceCount + 1e-4))) {
+                    modelFailTimes[k] ++;
+                } else {
+                    modelFailTimes[k] = 0;
+                }
+                // if (PseudoRandom.randDouble() < (modelFailTimes[k] * 0.001)) {
+                if (modelFailTimes[k] > 10) {
+                    states[k] = EvolutionMode.TRANSFER_EVOLUTION;
+                    // System.out.println("[" + generation + "]" + "task " + k + " switch to " + states[k]);
+                }
             }
-            
-            if (states[k] == EvolutionMode.MODEL_ASSIST_SEARCH && PseudoRandom.randDouble() < (modelFailTimes[k] / 4.0)  && generation > 0) {
-                states[k] = EvolutionMode.TRANSFER_EVOLUTION;
-            }
-            else if (states[k] == EvolutionMode.TRANSFER_EVOLUTION && PseudoRandom.randDouble() < stuckTimes[k] * 0.05) {
+            else if (states[k] == EvolutionMode.TRANSFER_EVOLUTION && PseudoRandom.randDouble() < stuckTimes[k] * 0.02) {
                 states[k] = EvolutionMode.FINAL_CONVERGE;
+                // System.out.println("[" + generation + "]" + "task " + k + " switch to " + states[k]);
             }
 
-            if (states[k] == EvolutionMode.MODEL_ASSIST_SEARCH){
-                trainModel(k);
-                // System.out.println("G " + generation + " T " + k + " model: " + models[k].metrics().accuracy);
-            }
+
+            // updateOnlineModel(k, union);
             
             updateBestDistances(k);
 
@@ -285,19 +307,88 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         }
     }
 
-    public void generating(int taskID, String type) throws JMException {
-        generating(taskID, taskID, type);
+    public void updateOnlineModel(int taskID, SolutionSet union) throws JMException {
+        int pLength = union.size() / 2;
+        int nLength = pLength;
+        double[][] features = new double[pLength+nLength][];
+        int[] labels = new int[features.length];
+        for (int i = 0; i < union.size(); i++) {
+            features[i] = union.get(i).getDecisionVariablesInDouble();
+            labels[i] = i < pLength ? 0 : 1;
+        }
+
+        if (onlineModels[taskID] == null) {
+            onlineModels[taskID] = LogisticRegression.fit(features, labels);
+        } else {
+            onlineModels[taskID].update(features, labels);
+        }
+
+        // test
+        int[] pre = onlineModels[taskID].predict(features);
+        int TP = 0, TN = 0, FP = 0, FN = 0;
+        for (int i = 0; i < pre.length; i++) {
+            if (pre[i] == 0 && labels[i] == 0) TP ++;
+            else if (pre[i] == 0 && labels[i] == 1) FP ++;
+            else if (pre[i] == 1 && labels[i] == 0) FN ++;
+            else if (pre[i] == 1 && labels[i] == 1) TN ++;
+        }
+        System.out.println("Classifier " + taskID + ":");
+        System.out.println("\t" + TP + "\t" + FN);
+        System.out.println("\t" + FP + "\t" + TN);
+
     }
 
-    public void generating(int taskID, int assistTaskID, String type) throws JMException {
-        if (type.equalsIgnoreCase("SBX") || type.equalsIgnoreCase("BLXalpha")) {
+    public void sampleGenerating(int taskID) throws JMException {
+        sampleGenerating(taskID, populationSize);
+    }
+
+    public void sampleGenerating(int taskID, int num) throws JMException  {
+        double[] mean = population[taskID].getMean();
+        double[] std = population[taskID].getStd();
+        for (int i = 0; i < num && !offspring[taskID].isFull(); i++) {
+            Solution newSolution = new Solution(population[taskID].get(i));
+            double[] newFeatures = Probability.sampleByNorm(mean, std);
+            newSolution.setDecisionVariables(newFeatures);
+            newSolution.setSkillFactor(taskID);
+            problemSet_.get(taskID).evaluate(newSolution);
+            evaluations ++;
+            offspring[taskID].add(newSolution);
+        }
+    }
+
+    public void evolutionaryGenerating(int taskID, String type) throws JMException {
+        evolutionaryGenerating(taskID, taskID, type);
+    }
+
+    public void evolutionaryGenerating(int taskID, int assistTaskID, String type) throws JMException {
+        if (type.equalsIgnoreCase("SBX")) {
             SBXGenerating(taskID, assistTaskID);
         } else if (type.equalsIgnoreCase("DE")) {
             DEGenerating(taskID, assistTaskID);
-        } else {
+        } else if (type.equalsIgnoreCase("BLXAlpha")) {
+            BLXGenerating(taskID, assistTaskID);
+        }
+        else {
             System.out.println("Error: unsupported reproduce type: " + type);
             System.exit(1);
         }
+    }
+
+    public Solution generatingChild(int taskID, int assistTaskID, int i, String type) throws JMException {
+        Solution child = new Solution();
+        if (type.equalsIgnoreCase("SBX")) {
+            child = SBXChildGenerating(taskID, assistTaskID, i);
+        } else if (type.equalsIgnoreCase("DE")) {
+            child = DEChildGenerating(taskID, assistTaskID, i);
+        } else if (type.equalsIgnoreCase("BLXAlpha")) {
+            child = BLXChildGenerating(taskID, assistTaskID, i);
+        }
+        else {
+            System.out.println("Error: unsupported reproduce type: " + type);
+            System.exit(1);
+        }
+
+        return child;
     }
 
     public void modelAssistGenerating(int taskID) throws JMException {
@@ -310,7 +401,7 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
             for (int assistTaskID: taskOrder) {
                 if (assistTaskID == taskID) continue;
                 if (offspring[taskID].isFull()) break;
-                if (judgeIndividual(models[taskID], population[assistTaskID].get(i))) {
+                if (judgeIndividual(taskID, population[assistTaskID].get(i))) {
                     // // SBX
                     // Solution[] parents = new Solution[2];
                     // parents[0] = population[taskID].get(i);
@@ -336,16 +427,26 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         }
     }
 
-    public void transferGenerating(int taskID, String type) throws JMException {
-        // int assistTaskID = findAssistTask(k);
+    public void transferGenerating(int taskID, String normalType, String transferType) throws JMException {
+        int assistTaskID = findAssistTask(taskID);
+
+        for (int i = 0; i < populationSize && !offspring[taskID].isFull(); i++) {
+            if (PseudoRandom.randDouble() < transferProbability) {
+                offspring[taskID].add(generatingChild(taskID, assistTaskID, i, transferType));
+            } else {
+                offspring[taskID].add(generatingChild(taskID, taskID, i, normalType));
+            }
+        }
+    }
+
+    public int findAssistTask(int taskID) {
         int assistTaskID = taskID;
         if (PseudoRandom.randDouble() < transferProbability) {
             while (assistTaskID == taskID) {
                 assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
             }
         }
-
-        generating(taskID, assistTaskID, type);
+        return assistTaskID;
     }
 
     public void DEGenerating(int taskID) throws JMException {
@@ -354,26 +455,31 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
 
     public void DEGenerating(int taskID, int assistTaskID) throws JMException {
         for (int i = 0; i < populationSize && !offspring[taskID].isFull(); i++) {
-            int j1 = i, j2 = i;
-            while (j1 == i && j1 == j2) {
-                j1 = PseudoRandom.randInt(0, populationSize - 1);
-                j2 = PseudoRandom.randInt(0, populationSize - 1);
-            }
-            Solution[] parents = new Solution[3];
-            parents[0] = population[assistTaskID].get(j1);
-            parents[1] = population[assistTaskID].get(j2);
-            parents[2] = population[taskID].get(i);
-
-            Solution child = (Solution) DECrossover.execute(new Object[] { population[taskID].get(i), parents });
-
-            mutateIndividual(child);
-
-            child.setSkillFactor(taskID);
-            child.setFlag(1);
-            problemSet_.get(taskID).evaluate(child);
-            evaluations++;
-            offspring[taskID].add(child);
+            offspring[taskID].add(DEChildGenerating(taskID, assistTaskID, i));
         }
+    }
+
+    public Solution DEChildGenerating(int taskID, int assistTaskID, int i) throws JMException {
+        int j1 = i, j2 = i;
+        while (j1 == i && j1 == j2) {
+            j1 = PseudoRandom.randInt(0, populationSize - 1);
+            j2 = PseudoRandom.randInt(0, populationSize - 1);
+        }
+        Solution[] parents = new Solution[3];
+        parents[0] = population[assistTaskID].get(j1);
+        parents[1] = population[assistTaskID].get(j2);
+        parents[2] = population[taskID].get(i);
+
+        Solution child = (Solution) DECrossover.execute(new Object[] { population[taskID].get(i), parents });
+
+        mutateIndividual(child);
+
+        child.setSkillFactor(taskID);
+        child.setFlag(1);
+        problemSet_.get(taskID).evaluate(child);
+        evaluations++;
+
+        return child;
     }
 
     public void SBXGenerating(int taskID) throws JMException {
@@ -382,23 +488,28 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
 
     public void SBXGenerating(int taskID, int assistTaskID) throws JMException {
         for (int i = 0; i < populationSize && !offspring[taskID].isFull(); i++) {
-            int j = i;
-            while (j == i)
-                j = PseudoRandom.randInt(0, populationSize - 1);
-            Solution[] parents = new Solution[2];
-            parents[0] = population[taskID].get(i);
-            parents[1] = population[assistTaskID].get(j);
-
-            Solution child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
-
-            mutateIndividual(child);
-
-            child.setSkillFactor(taskID);
-            child.setFlag(1);
-            problemSet_.get(taskID).evaluate(child);
-            evaluations++;
-            offspring[taskID].add(child);
+            offspring[taskID].add(SBXChildGenerating(taskID, assistTaskID, i));
         }
+    }
+
+    public Solution SBXChildGenerating(int taskID, int assistTaskID, int i) throws JMException {
+        int j = i;
+        while (j == i)
+            j = PseudoRandom.randInt(0, populationSize - 1);
+        Solution[] parents = new Solution[2];
+        parents[0] = population[taskID].get(i);
+        parents[1] = population[assistTaskID].get(j);
+
+        Solution child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+
+        mutateIndividual(child);
+
+        child.setSkillFactor(taskID);
+        child.setFlag(1);
+        problemSet_.get(taskID).evaluate(child);
+        evaluations++;
+
+        return child;
     }
 
     public void BLXGenerating(int taskID) throws JMException {
@@ -407,31 +518,36 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
 
     public void BLXGenerating(int taskID, int assistTaskID) throws JMException {
         for (int i = 0; i < populationSize && !offspring[taskID].isFull(); i++) {
-            int j = i;
-            while (j == i)
-                j = PseudoRandom.randInt(0, populationSize - 1);
-            Solution[] parents = new Solution[2];
-            parents[0] = population[taskID].get(i);
-            parents[1] = population[assistTaskID].get(j);
-
-            Solution child = ((Solution[]) BLXAlphaCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
-
-            mutateIndividual(child);
-
-            child.setSkillFactor(taskID);
-            child.setFlag(1);
-            problemSet_.get(taskID).evaluate(child);
-            evaluations++;
-            offspring[taskID].add(child);
+            offspring[taskID].add(BLXChildGenerating(taskID, assistTaskID, i));
         }
     }
 
-    public void mutateIndividual(Solution individual) throws JMException {
-        if (isMutate)
-        mutation.execute(individual);
+    public Solution BLXChildGenerating(int taskID, int assistTaskID, int i) throws JMException {
+        int j = i;
+        while (j == i)
+            j = PseudoRandom.randInt(0, populationSize - 1);
+        Solution[] parents = new Solution[2];
+        parents[0] = population[taskID].get(i);
+        parents[1] = population[assistTaskID].get(j);
 
-        // if (PseudoRandom.randDouble() < stuckTimes[taskID] * 0.15)
-        //     mutation.execute(child);
+        Solution child = ((Solution[]) BLXAlphaCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+
+        // mutateIndividual(child);
+
+        child.setSkillFactor(taskID);
+        child.setFlag(1);
+        problemSet_.get(taskID).evaluate(child);
+        evaluations++;
+        
+        return child;
+    }
+
+    public void mutateIndividual(Solution individual) throws JMException {
+        // if (isMutate)
+        //     mutation.execute(individual);
+
+        if (PseudoRandom.randDouble() < 0.5)
+            mutation.execute(individual);
     }
 
     public void catastrophe(int taskID, double survivalRate, int threshold) throws ClassNotFoundException, JMException {
@@ -469,15 +585,21 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         var Y = DataFrame.of(labels, "class");
         var df = X.merge(Y);
 
-        models[taskID] = RandomForest.fit(Formula.lhs("class"), df);
+        models[taskID] = RandomForest.fit(Formula.lhs("class"), df, randomForestProperties);
+        // models[taskID] = AdaBoost.fit(Formula.lhs("class"), df);
     }
 
-    public boolean judgeIndividual(RandomForest model, Solution individual) throws JMException {
+    public boolean judgeIndividual(int taskID, Solution individual) throws JMException {
         double[] features = individual.getDecisionVariablesInDouble();
         double[][] X = new double[1][];
         X[0] = features;
-        var res = model.predict(DataFrame.of(X));
+        var res = models[taskID].predict(DataFrame.of(X));
         return res[0] == 0;
+    }
+
+    public boolean judgeIndividual2(int taskID, Solution individual) throws JMException {
+        var res = onlineModels[taskID].predict(individual.getDecisionVariablesInDouble());
+        return res == 0;
     }
 
     public void updateBestDistances(int taskID) {
