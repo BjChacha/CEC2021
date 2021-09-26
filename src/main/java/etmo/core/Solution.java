@@ -508,9 +508,15 @@ public class Solution implements Serializable {
 
 	public double[] getDecisionVariablesInDouble() throws JMException {
 		double[] res = new double[variable_.length];
-		for (int i = 0; i < variable_.length; i++){
-			res[i] = variable_[i].getValue();
-		}
+		Arrays.parallelSetAll(res, i -> {
+			double arr = 0;
+			try {
+				arr = variable_[i].getValue();
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
+			return arr;
+		});
 		return res;
 	}
 
