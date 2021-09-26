@@ -13,6 +13,12 @@ public class Distance {
         return Math.pow(distance, 1/d);
     }
 
+    public static double getCosineSimilarity(double[] v1, double[] v2) {
+        double similarity = 0;
+        similarity = Vector.vecDot(v1, v2) / (Vector.vecModule(v1) * Vector.vecModule(v2));
+        return similarity;
+    }
+
     public static double getWassersteinDistance(double[][] p1, double[][] p2) {
         double distance = 0;
         int size = p1.length;

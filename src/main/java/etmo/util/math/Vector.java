@@ -1,5 +1,6 @@
 package etmo.util.math;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class Vector {
@@ -30,23 +31,26 @@ public class Vector {
 
     public static void vecAdd_(double[] vec1, double[] vec2) {
         assert vec1.length == vec2.length;
-        for(int i = 0; i < vec1.length; i++) {
-            vec1[i] += vec2[i];
-        }
+        Arrays.parallelSetAll(vec1, i -> vec1[i] + vec2[i]);
     }
 
-    public static double[] vecElemMul(double[] vec, double e) {
-        double[] output = new double[vec.length];
-        for(int i = 0; i < vec.length; i++) {
-            output[i] = vec[i] * e;
+    public static double vecDot(double[] vec1, double[] vec2) {
+        assert vec1.length == vec2.length;
+        double result = 0;
+        for (int i = 0; i < vec1.length; i++) {
+            result += vec1[i] * vec2[i];
         }
+        return result;
+    }
+
+    public static double[] vecElemMul(double[] vec, double factor) {
+        double[] output = new double[vec.length];
+        Arrays.parallelSetAll(output, i -> vec[i] * factor);
         return output;
     }
 
-    public static void vecElemMul_(double[] vec, double e) {
-        for(int i = 0; i < vec.length; i++) {
-            vec[i] *= e;
-        }
+    public static void vecElemMul_(double[] vec, double factor) {
+        Arrays.parallelSetAll(vec, i -> vec[i] * factor);
     }
 
     public static void vecClip_(double[] vec, double lb, double ub) {
@@ -54,6 +58,15 @@ public class Vector {
             vec[i] = Math.min(vec[i], ub);
             vec[i] = Math.max(vec[i], lb);
         }
+    }
+
+    public static double vecModule(double[] vector) {
+        double module = 0;
+        for (double e: vector) {
+            module += Math.pow(e, 2);
+        }
+        module = Math.sqrt(module);
+        return module;
     }
 
     public static double[] getRandomUnitVector(int d) {
