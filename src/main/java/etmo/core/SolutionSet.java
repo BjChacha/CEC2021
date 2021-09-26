@@ -456,7 +456,7 @@ public class SolutionSet implements Serializable {
 	} // writeObjectivesMatrix
 
 	public double[][] writeObjectivesToMatrix(int objStart, int objEnd) {
-		if (this.size() == 0 || objStart > objEnd || objEnd < 0 || objStart >= size()) {
+		if (this.size() == 0 || objStart > objEnd || objEnd < 0) {
 			return null;
 		}
 		double[][] objectives = new double[size()][objEnd-objStart+1];
@@ -521,59 +521,83 @@ public class SolutionSet implements Serializable {
 		return sol;
 	}
 
-    public double getMeanOfIdx(int idx) throws JMException {
+	public double getWeightedMeanOfIdx(int idx, double[] weights) {
+		assert weights.length == solutionsList_.size();
 		double sum = 0;
 		for (int i = 0; i < solutionsList_.size(); i++){
-			sum += solutionsList_.get(i).getDecisionVariables(idx);
+			try {
+				sum += (solutionsList_.get(i).getDecisionVariables(idx) * weights[i]);
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
+		}
+		return sum / Arrays.stream(weights).sum();
+	}
+
+    public double getMeanOfIdx(int idx) {
+		double sum = 0;
+		for (int i = 0; i < solutionsList_.size(); i++){
+			try {
+				sum += solutionsList_.get(i).getDecisionVariables(idx);
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
 		}
 		return sum / solutionsList_.size();
 	}
 
-	public double getStdOfIdx(int idx) throws JMException {
+	public double getStdOfIdx(int idx) {
 		double sum = 0;
 		double mean = getMeanOfIdx(idx);
 		for (int i = 0; i < solutionsList_.size(); i++){
-			sum += Math.pow(solutionsList_.get(i).getDecisionVariables(idx) - mean, 2);
+			try {
+				sum += Math.pow(solutionsList_.get(i).getDecisionVariables(idx) - mean, 2);
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
 		}
-		return Math.sqrt(sum / solutionsList_.size());
+		return Math.sqrt(sum / (solutionsList_.size() - 1));
 	}
 
 	public double[] getMean(){
-		double[] mean = new double[0];
-		try {
-			mean = new double[solutionsList_.get(0).numberOfVariables()];
-			for (int i = 0; i < mean.length; i++){
-				mean[i] = getMeanOfIdx(i);
-			}
-			return mean;
-		} catch (JMException e) {
-			e.printStackTrace();
+		double[] mean = null;
+		mean = new double[solutionsList_.get(0).numberOfVariables()];
+		for (int i = 0; i < mean.length; i++){
+			mean[i] = getMeanOfIdx(i);
 		}
 		return mean;
 	}
 
 	public double[] getStd(){
-		double[] std = new double[0];
-		try {
-			std = new double[solutionsList_.get(0).numberOfVariables()];
-			for (int i = 0; i < std.length; i++){
-				std[i] = getStdOfIdx(i);
-			}
-			return std;
-		} catch (JMException e) {
-			e.printStackTrace();
+		double[] std = null;
+		std = new double[solutionsList_.get(0).numberOfVariables()];
+		for (int i = 0; i < std.length; i++){
+			std[i] = getStdOfIdx(i);
 		}
 		return std;
 	}
 
-	public double[][] getMat() throws JMException {
-		int numVar = solutionsList_.get(0).numberOfVariables();
-		double[][] mat = new double[solutionsList_.size()][numVar];
-		for (int i = 0; i < solutionsList_.size(); i++){
-			for (int j = 0; j < numVar; j++){
-				mat[i][j] = solutionsList_.get(i).getDecisionVariables(j);
-			}
+	public double[] getWeightedMean(double[] weights) {
+		assert weights.length == solutionsList_.size();
+		double[] mean = null;
+		mean = new double[solutionsList_.get(0).numberOfVariables()];
+		for (int i = 0; i < mean.length; i++){
+			mean[i] = getWeightedMeanOfIdx(i, weights);
 		}
+		return mean;
+	}
+
+	public double[][] getMat() throws JMException {
+		double[][] mat = new double[solutionsList_.size()][];
+		Arrays.parallelSetAll(mat, i -> {
+			double[] variables = null;
+			try {
+				variables = solutionsList_.get(i).getDecisionVariablesInDouble();
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
+			return variables;
+		});
 		return mat;
 	}
 
