@@ -9,8 +9,6 @@ import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 
-import breeze.stats.mean;
-
 public class Matrix {
     public static double[][] matMul(double[][] mat1, double[][] mat2) {
         // mat1: d1 x d2

@@ -226,8 +226,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
     public void offspringGeneration() throws JMException {
         for (int k = 0; k < taskNum; k++) {
             offspring[k].clear();
-            if (generation > 1 && states[k] == EvolutionMode.MODEL_ASSIST_SEARCH) {
-                // modelAssistGenerating(k);
+            if (generation > 1 && generation < 800 && models[k].getF1() >= 0.57) {
+                modelAssistGenerating(k);
                 evolutionaryGenerating(k, XType);
                 // transferGenerating(k, XType, TXType);
             }
@@ -284,8 +284,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
             // System.out.println(k+" Classifier Transfer Success Rate: " + filtedBetter + "/" + transferCount);
             // System.out.println(k+" Not Classifier Transfer Success Rate: " + notModelBetter + "/" + notModelCount);
 
-            // trainModel(k, union.getMat());
-            // models[k].evaluate(union.getMat());
+            if (generation < 800)
+                trainModel(k, union.getMat());
         }
     }
 
@@ -409,18 +409,18 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
                     evaluations ++;
                     offspring[taskID].add(newSolution);
                 } 
-                // DEBUG
-                else {
-                    // explicit
-                    Solution newSolution = new Solution(population[assistTaskID].get(i));
+                // // DEBUG
+                // else {
+                //     // explicit
+                //     Solution newSolution = new Solution(population[assistTaskID].get(i));
 
-                    newSolution.setSkillFactor(taskID);
-                    newSolution.setFlag(3);
-                    newSolution.resetObjective();
-                    problemSet_.get(taskID).evaluate(newSolution);
-                    evaluations ++;
-                    offspring[taskID].add(newSolution);
-                }
+                //     newSolution.setSkillFactor(taskID);
+                //     newSolution.setFlag(3);
+                //     newSolution.resetObjective();
+                //     problemSet_.get(taskID).evaluate(newSolution);
+                //     evaluations ++;
+                //     offspring[taskID].add(newSolution);
+                // }
             }
         }
     }
