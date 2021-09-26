@@ -18,7 +18,6 @@ import org.knowm.xchart.style.colors.XChartSeriesColors;
 import org.knowm.xchart.style.lines.XChartSeriesLines;
 import org.knowm.xchart.style.markers.XChartSeriesMarkers;
 
-import ch.qos.logback.core.joran.conditional.ElseAction;
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
 import etmo.core.ProblemSet;
@@ -270,7 +269,7 @@ public class MaTMY3P extends MtoAlgorithm {
         for (int i = 0; i < population[taskID].size(); i++) {
             sum = Matrix.matAdd(sum, Ws[population[taskID].get(i).getFlag()]);
         }
-        Matrix.eMul_(sum, 1.0 / population[taskID].size());
+        Matrix.matMul_(sum, 1.0 / population[taskID].size());
         for (int i = 0; i < sum.length; i++) {
             sum[i] = Vector.vecUnify(sum[i]);
         }

@@ -3,6 +3,7 @@ package etmo.metaheuristics.matmy3.models;
 import java.util.Arrays;
 
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.BatchNormalization;
 import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -36,15 +37,14 @@ public class Classifier {
             .weightInit(WeightInit.NORMAL)
             .updater(new AdaGrad(lr))
             .list()
-            .layer(0, new DenseLayer.Builder().nIn(inD).nOut((int)(hiddenD*1.5)).activation(Activation.TANH).biasInit(0).build())
-            .layer(1, new DenseLayer.Builder().nIn((int)(hiddenD*1.5)).nOut(hiddenD/2).activation(Activation.TANH).biasInit(0).build())
-            // .layer(2, new DenseLayer.Builder().nIn(hiddenD*2).nOut(hiddenD).activation(Activation.TANH).biasInit(0).build())
-            // .layer(3, new DenseLayer.Builder().nIn(hiddenD).nOut(hiddenD/2).activation(Activation.TANH).biasInit(0).build())
-            .layer(2, new OutputLayer.Builder().nIn(hiddenD/2).nOut(1).activation(Activation.SIGMOID).lossFunction(LossFunction.XENT).build())
+            .layer(new BatchNormalization.Builder().nIn(inD).nOut(inD).build())
+            .layer(new DenseLayer.Builder().nIn(inD).nOut((int)(hiddenD / 2)).activation(Activation.TANH).biasInit(0).build())
+            .layer(new DenseLayer.Builder().nIn(hiddenD / 2).nOut(hiddenD / 4).activation(Activation.TANH).biasInit(0).build())
+            .layer(new OutputLayer.Builder().nIn(hiddenD / 4).nOut(1).activation(Activation.SIGMOID).lossFunction(LossFunction.XENT).build())
             .build();
 
         net = new MultiLayerNetwork(config);
-        // net.setListeners(new ScoreIterationListener(10));
+        net.setListeners(new ScoreIterationListener(epoch / 5));
         net.init();
     }
 
@@ -62,6 +62,20 @@ public class Classifier {
         }
     }
 
+    public void train(double[][] positive, double[][] negative, int newEpoch) {
+        int pLength = positive.length;
+        int nLength = negative.length;
+        INDArray pX = new NDArray(positive);
+        INDArray nX = new NDArray(negative);
+        DataSet data = DataSet.merge(Arrays.asList(
+            new DataSet(pX, Nd4j.zeros(pLength, 1)),
+            new DataSet(nX, Nd4j.ones(nLength, 1))));
+
+        for (int i = 0; i < newEpoch; i++) {
+            net.fit(data);
+        }
+    }
+
     public boolean judge(double[] x, double threshold) {
         return net.output(new NDArray(new double[][] {x})).getDouble(0) < threshold;
     }
@@ -73,10 +87,10 @@ public class Classifier {
     public void evaluate(double[][] testData) {
         Evaluation evaluator = new Evaluation(1);
         int length = testData.length / 2;
-        // INDArray pLabel = Nd4j.zeros(length, 1);
-        // INDArray nLabel = Nd4j.ones(length, 1);
-        INDArray pLabel = Nd4j.ones(length, 1);
-        INDArray nLabel = Nd4j.zeros(length, 1);
+        INDArray pLabel = Nd4j.zeros(length, 1);
+        INDArray nLabel = Nd4j.ones(length, 1);
+        // INDArray pLabel = Nd4j.ones(length, 1);
+        // INDArray nLabel = Nd4j.zeros(length, 1);
         INDArray labels = Nd4j.vstack(pLabel, nLabel);
         INDArray output = net.output(new NDArray(testData));
         evaluator.eval(labels, output);

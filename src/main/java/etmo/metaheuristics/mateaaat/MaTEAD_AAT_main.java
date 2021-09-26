@@ -17,7 +17,7 @@ import java.util.List;
 public class MaTEAD_AAT_main {
 	static int MAX_POPULATION_SIZE = 100;
 	static int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-	static boolean LOG_IGD = false;
+	static boolean LOG_IGD = true;
 	static boolean IGD_PRINT = true;
 
 	public static MtoAlgorithm algorithmGenerate(Class algorithmClass, ProblemSet problemSet) throws JMException, InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
@@ -86,12 +86,12 @@ public class MaTEAD_AAT_main {
 		String algorithmName = algorithmClass.getName();
 		int taskStart = 1;
 		int taskEnd = 10;
-		int times = 5;
+		int times = 10;
 
 		// System.out.println("Algo:" + algorithmName + ".");
 
 		System.out.println();
-		String fileName = "MOEAD_T_archive1" + "_x" + times + "_" + benchmarkName;
+		String fileName = "MaTEAD_AAT" + "_x" + times + "_" + benchmarkName;
 		System.out.println("Experiment started -> " + fileName);
 
 		long startTime = System.currentTimeMillis();
