@@ -53,6 +53,12 @@ public class Vector {
         Arrays.parallelSetAll(vec, i -> vec[i] * factor);
     }
 
+    public static double[] vecElemDiv(double[] vec1, double[] vec2) {
+        double[] output = new double[vec1.length];
+        Arrays.parallelSetAll(output, i -> vec1[i] / vec2[i]);
+        return output;
+    }
+
     public static void vecClip_(double[] vec, double lb, double ub) {
         for (int i = 0; i < vec.length; i++) {
             vec[i] = Math.min(vec[i], ub);
