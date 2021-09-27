@@ -384,11 +384,11 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
                 if (assistTaskID == taskID) continue;
                 if (offspring[taskID].isFull()) break;
                 if (judgeIndividual(taskID, population[assistTaskID].get(i))) {
-                    // // SBX
-                    // Solution[] parents = new Solution[2];
-                    // parents[0] = population[taskID].get(i);
-                    // parents[1] = population[assistTaskID].get(i);
-                    // Solution newSolution = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+                    // SBX
+                    Solution[] parents = new Solution[2];
+                    parents[0] = population[taskID].get(i);
+                    parents[1] = population[assistTaskID].get(i);
+                    Solution newSolution = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
                         
                     // // DE
                     // int[] pids = PseudoRandom.randomPermutation(populationSize, 2);
@@ -399,8 +399,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
                     // parents[2] = population[assistTaskID].get(i);
                     // Solution newSolution = (Solution) DECrossover.execute(new Object[] { population[assistTaskID].get(i), parents });
 
-                    // explicit
-                    Solution newSolution = new Solution(population[assistTaskID].get(i));
+                    // // explicit
+                    // Solution newSolution = new Solution(population[assistTaskID].get(i));
 
                     newSolution.setSkillFactor(taskID);
                     newSolution.setFlag(2);
