@@ -55,7 +55,7 @@ public class Vector {
 
     public static double[] vecElemDiv(double[] vec1, double[] vec2) {
         double[] output = new double[vec1.length];
-        Arrays.parallelSetAll(output, i -> vec1[i] / vec2[i]);
+        Arrays.parallelSetAll(output, i -> vec1[i] / (vec2[i] + 1e-13));
         return output;
     }
 

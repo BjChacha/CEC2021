@@ -51,6 +51,7 @@ public class Coral {
         SDVariable wt2 = sd.nn().tanh(wt1.mmul(Wtrg2).add(Btrg2));
 
         // TODO: compute loss
+        // sd.loss().sigmoidCrossEntropy(label, predictionLogits, weights)
     }
 
     // TODO: Coral loss function

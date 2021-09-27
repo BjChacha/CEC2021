@@ -36,10 +36,13 @@ import etmo.util.JMException;
 import etmo.util.PseudoRandom;
 import etmo.util.math.Distance;
 import etmo.util.math.Matrix;
+import etmo.util.math.NonLinear;
 import etmo.util.math.Probability;
 import etmo.util.math.Random;
 import etmo.util.math.Vector;
 import etmo.util.sorting.NDSortiong;
+import etmo.util.sorting.SortingIdx;
+import scala.reflect.internal.StdAttachments.ImportableAttachment;
 
 public class MaTMY3_DRA extends MtoAlgorithm {
     private SolutionSet[] population;
@@ -65,7 +68,9 @@ public class MaTMY3_DRA extends MtoAlgorithm {
 
     private double[] decisionDistances;
     private double[] objectiveDistances;
-    
+    private double[] improvements;
+    private double[] resources;
+
     private double mutationProbability;
     private double transferProbability;
     private double[][] tP;
@@ -113,6 +118,7 @@ public class MaTMY3_DRA extends MtoAlgorithm {
         // endPlot();
         // System.out.println(igdPlotValues.get(0).toString());
 
+        System.out.println(Arrays.toString(resources));
         return population;
     }
 
@@ -150,6 +156,8 @@ public class MaTMY3_DRA extends MtoAlgorithm {
 
         decisionDistances = new double[taskNum];
         objectiveDistances = new double[taskNum];
+        improvements = new double[taskNum];
+        resources = new double[taskNum];
 
         mutationProbability = 0.5;
 
@@ -194,60 +202,78 @@ public class MaTMY3_DRA extends MtoAlgorithm {
     void iterate() throws JMException, ClassNotFoundException {
         offspringGeneration();
         environmentSelection();
+        resourceAllocation(5);
         updateState();
-        System.out.println(generation + " obj: " + 
-        Arrays.toString(Vector.vecElemDiv(
-            objectiveDistances, decisionDistances)));
     }
 
     void offspringGeneration() throws JMException {
         for (int k = 0; k < taskNum; k++) {
-            offspring[k].clear();
-            Solution child;
+            offspringGeneration(k);
+        }
+    }
 
-            int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
-            for (int i = 0; i < populationSize; i ++) {
-                child = null;
-                if (PseudoRandom.randDouble() < transferProbability) {
-                    int k2 = getAssistTaskID(k);
-                    child = transferGenerating(k, k2, perm[i], TXType);
-                } else {
-                    child = evolutionaryGenerating(k, perm[i], XType);
-                }
+    void offspringGeneration(int taskID) throws JMException {
+        int k = taskID;
+        offspring[k].clear();
+        Solution child;
 
-                evaluate(child, k);
-                offspring[k].add(child);
+        int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
+        for (int i = 0; i < populationSize && evaluations < maxEvaluations; i ++) {
+            child = null;
+            if (PseudoRandom.randDouble() < transferProbability) {
+                int k2 = getAssistTaskID(k);
+                child = transferGenerating(k, k2, perm[i], TXType);
+            } else {
+                child = evolutionaryGenerating(k, perm[i], XType);
             }
+
+            evaluate(child, k);
+            offspring[k].add(child);
         }
     }
 
     void environmentSelection() throws ClassNotFoundException, JMException {
         for (int k = 0; k < taskNum; k++) {
-            SolutionSet union = population[k].union(offspring[k]);
-            NDSortiong.sort(union, problemSet_, k);
-
-            double[][] oldDecisionPosition = population[k].getMat();
-            double[][] oldObjectivePosition = population[k].writeObjectivesToMatrix(objStart[k], objEnd[k]);
-
-            for (int i = 0; i < populationSize; i++) {
-                // union.get(i).setFlag(0);
-                union.get(i).setSkillFactor(k);
-                population[k].replace(i, union.get(i));
-            }
-
-            double[][] newDecisionPosition = population[k].getMat();
-            double[][] newObjectivePosition = population[k].writeObjectivesToMatrix(objStart[k], objEnd[k]);
-
-
-            decisionDistances[k] = Distance.getWassersteinDistance(
-                oldDecisionPosition,
-                newDecisionPosition);
-            objectiveDistances[k] = Distance.getWassersteinDistance(
-                oldObjectivePosition, 
-                newObjectivePosition);
+            environmentSelection(k);
         }
     }
 
+    void environmentSelection(int taskID) throws ClassNotFoundException, JMException {
+        int k = taskID;
+        SolutionSet union = population[k].union(offspring[k]);
+        NDSortiong.sort(union, problemSet_, k);
+
+        double[][] oldDecisionPosition = population[k].getMat();
+        double[][] oldObjectivePosition = population[k].writeObjectivesToMatrix(objStart[k], objEnd[k]);
+
+        for (int i = 0; i < populationSize; i++) {
+            // union.get(i).setFlag(0);
+            union.get(i).setSkillFactor(k);
+            population[k].replace(i, union.get(i));
+        }
+
+        double[][] newDecisionPosition = population[k].getMat();
+        double[][] newObjectivePosition = population[k].writeObjectivesToMatrix(objStart[k], objEnd[k]);
+
+        decisionDistances[k] = Distance.getWassersteinDistance(
+            oldDecisionPosition,
+            newDecisionPosition);
+        objectiveDistances[k] = Distance.getWassersteinDistance(
+            oldObjectivePosition, 
+            newObjectivePosition);
+        improvements[k] = objectiveDistances[k] / decisionDistances[k];
+        resources[k] += 1.0;
+    }
+
+    void resourceAllocation(int num) throws JMException, ClassNotFoundException {
+        int[] order = SortingIdx.sort(Vector.vecElemDiv(
+            objectiveDistances, decisionDistances), false);
+        
+        for (int i = 0; i < num; i ++) {
+            offspringGeneration(order[i]);
+            environmentSelection(order[i]);
+        }
+    }
 
     Solution transferGenerating(int taskID, int assistTaskID, int i, String type) throws JMException {
         int j = PseudoRandom.randInt(0, population[assistTaskID].size() - 1);
@@ -354,9 +380,12 @@ public class MaTMY3_DRA extends MtoAlgorithm {
     int getAssistTaskID(int taskID) throws JMException {
         int assistTaskID = taskID;
 
-        while (assistTaskID == taskID) {
-            assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
-        }
+        // // random
+        // while (assistTaskID == taskID) {
+        //     assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
+        // }
+
+        assistTaskID = Random.rouletteWheel(resources);
 
         // double[] scores = new double[taskNum];
         // for (int i = 0; i < scores.length; i ++) {
@@ -481,10 +510,14 @@ public class MaTMY3_DRA extends MtoAlgorithm {
             s.setMarker(XChartSeriesMarkers.NONE);
         }
 
+        double[] varXX = new double[taskNum];
+        for (int i = 0; i < varX.length; i++) {
+            varXX[i] = i + 1;
+        }
+        double[] varYY = Vector.vecElemDiv(objectiveDistances, decisionDistances);
         chartDRA = new XYChartBuilder().title("DRA: " + generation).build();
         chartDRA.getStyler().setLegendVisible(false);
-        s = chartDRA.addSeries("DRA", varX, Vector.vecElemDiv(
-            objectiveDistances, decisionDistances));
+        s = chartDRA.addSeries("DRA", varXX, varYY);
         s.setLineColor(XChartSeriesColors.BLUE);
         s.setLineStyle(XChartSeriesLines.SOLID);
         s.setMarker(XChartSeriesMarkers.NONE);
@@ -541,13 +574,14 @@ public class MaTMY3_DRA extends MtoAlgorithm {
                         chartVar.updateXYSeries("Solution " + i, varX,
                                 population[plotTaskID].get(i).getDecisionVariablesInDouble(), null);
                     } catch (JMException e) {
-                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                 }
                 
+                double[] varXX = new double[taskNum];
+                Arrays.parallelSetAll(varXX, i -> i + 1);
                 chartDRA.setTitle("DRA: " + generation);
-                chartDRA.updateXYSeries("DRA", varX, Vector.vecElemDiv(
+                chartDRA.updateXYSeries("DRA", varXX, Vector.vecElemDiv(
                     objectiveDistances, decisionDistances), null);
                 sw4.repaintChart();
 

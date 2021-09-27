@@ -16,7 +16,7 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
 
-public class MaTMY3_main {
+public class MaTMY3_DRA_main {
     // CONFIG
     static final Class<?> ALGORITHM_CLAZZ = MaTMY3_DRA.class;
     static final int MAX_POPULATION_SIZE = 100;

@@ -16,9 +16,9 @@ import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.logging.LogIGD;
 
-public class MaTMY3_main {
+public class MaTMY3_Gaussian_main {
     // CONFIG
-    static final Class<?> ALGORITHM_CLAZZ = MaTMY3_DRA.class;
+    static final Class<?> ALGORITHM_CLAZZ = MaTMY3_Transfer.class;
     static final int MAX_POPULATION_SIZE = 100;
     static final int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
     static final String CROSSOVER_TYPE = "DE";
@@ -32,12 +32,12 @@ public class MaTMY3_main {
 
     static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
-    static final int PROBLEM_END = 1;
-    static final int PROBLEM_REPEAT_TIME = 1;
+    static final int PROBLEM_END = 10;
+    static final int PROBLEM_REPEAT_TIME = 10;
 
     static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
-    static final boolean PLOTTING = true;
+    static final boolean PLOTTING = false;
 
     static final String ALGO_NAME = "MaTMY3_SBX_randPM0.5_Gaussian_rand0.5";
 

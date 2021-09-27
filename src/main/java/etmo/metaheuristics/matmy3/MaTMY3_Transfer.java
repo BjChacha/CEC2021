@@ -7,9 +7,6 @@ import java.util.List;
 
 import javax.swing.WindowConstants;
 
-import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.linear.SingularMatrixException;
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.SwingWrapper;
@@ -20,8 +17,6 @@ import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.colors.XChartSeriesColors;
 import org.knowm.xchart.style.lines.XChartSeriesLines;
 import org.knowm.xchart.style.markers.XChartSeriesMarkers;
-
-import smile.manifold.TSNE;
 
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
@@ -266,13 +261,14 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
 
             Arrays.fill(models, null);
             for (int kk = 0; kk < taskNum; kk++) {
-                if (kk == k) continue;
-                try {
-                    models[kk] = new MultiVarGaussian(means[k], sigmas[kk]);
-                }
-                catch (org.apache.commons.math3.linear.SingularMatrixException e) {
-                    models[kk] = new GaussianDistribution(means[k], stds[kk]);
-                }
+                // if (kk == k) continue;
+                // try {
+                //     models[kk] = new MultiVarGaussian(means[k], sigmas[kk]);
+                // }
+                // catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+                //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
+                // }
+                models[kk] = new GaussianDistribution(means[k], stds[kk]);
             }
 
             int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
