@@ -10,7 +10,7 @@ public class Distance {
         for (int i = 0; i < p1.length; i++) {
             distance += Math.abs(Math.pow(p1[i] - p2[i], d));
         }
-        return Math.pow(distance, 1/d);
+        return Math.pow(distance, 1.0 / d);
     }
 
     public static double getCosineSimilarity(double[] v1, double[] v2) {
