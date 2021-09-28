@@ -278,14 +278,12 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
             for (int i = 0; i < populationSize && !offspring[k].isFull(); i ++) {
                 child = null;
-                if (generation <= 1000) {
-                    if (PseudoRandom.randDouble() < transferProbability) {
-                        int k2 = getAssistTaskID(k);
-                        child = transferGenerating(k, k2, perm[i], TXType);
-                        transferredCounts[k][k2] ++;
-                    } else {
-                        child = evolutionaryGenerating(k, perm[i], XType);
-                    }
+                if (PseudoRandom.randDouble() < transferProbability) {
+                    int k2 = getAssistTaskID(k);
+                    child = transferGenerating(k, k2, perm[i], TXType);
+                    transferredCounts[k][k2] ++;
+                } else {
+                    child = evolutionaryGenerating(k, perm[i], XType);
                 }
                 evaluate(child, k);
                 offspring[k].add(child);
@@ -321,7 +319,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         
         // explicit
         Solution child = null;
-        if (PseudoRandom.randDouble() < 1.0) {
+        if (PseudoRandom.randDouble() < .5) {
             child = new Solution(population[assistTaskID].get(j));
             // double[] newFeatures = Probability.sampleByNorm(means[taskID], sigmas[assistTaskID]);
             double[] newFeatures = Probability.sampleByNorm(means[taskID], stds[assistTaskID]);
@@ -430,7 +428,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             //     System.out.println(Arrays.toString(confidences[k]));
             //     // System.out.println(Arrays.toString(lastTransferSuccessRate[k]));
 
-            updateBestDistances(k);
+            // updateBestDistances(k);
 
             // // 灾变
             // catastrophe(k, 0, 8);
@@ -519,8 +517,8 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                 weights[i] = 1 / (population[k].get(i).getRank() + 1.0);
             }
             means[k] = tmpSet[k].getWeightedMean(weights);
-            // means[k] = tmpSet[k].getMean();
             stds[k] = tmpSet[k].getWeightedStd(weights);
+            // means[k] = tmpSet[k].getMean();
             // sigmas[k] = Matrix.getMatSigma(tmpSet[k].getMat());
         }
         // Arrays.parallelSetAll(means, k -> tmpSet[k].getMean());
@@ -608,14 +606,29 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         if (updated) {
             stuckTimes[taskID] = 0;
         } else {
-
             stuckTimes[taskID]++;
         }
     }
     
     void updateDistances() throws JMException {
         for (int k = 0; k < taskNum; k++) {
-            for (int kk = k + 1; kk < taskNum; kk++) {
+            final int srcTaskID = k;
+            Arrays.parallelSetAll(distances[k], trgTaskID -> {
+                double dist = 0;
+                if (trgTaskID > srcTaskID) {
+                    try {
+                        dist = Distance.getCoralLoss(
+                            population[srcTaskID].getMat(), 
+                            population[trgTaskID].getMat());
+                    } catch (JMException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    dist = distances[trgTaskID][srcTaskID];
+                }
+                return dist;
+            });
+            // for (int kk = k + 1; kk < taskNum; kk++) {
                 // WD
                 // distances[k][kk] = distances[kk][k] = Distance.getWassersteinDistance(
                 //     population[kk].getMat(),
@@ -629,11 +642,11 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                 //     Distance.getWassersteinDistance(clusters[k], clusters[kk]);
 
                 // co-variance matrix similarity
-                // Coral Loss
-                distances[k][kk] = distances[kk][k] = Distance.getCoralLoss(
-                    population[k].getMat(), 
-                    population[kk].getMat());
-            }
+                // // Coral Loss
+                // distances[k][kk] = distances[kk][k] = Distance.getCoralLoss(
+                //     population[k].getMat(), 
+                //     population[kk].getMat());
+            // }
         }
     }
         

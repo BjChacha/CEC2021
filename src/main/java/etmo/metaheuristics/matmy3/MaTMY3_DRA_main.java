@@ -39,7 +39,7 @@ public class MaTMY3_DRA_main {
     static final boolean IGD_PRINT = true;
     static final boolean PLOTTING = false;
 
-    static final String ALGO_NAME = "MaTMY3_SBX_randPM0.5_Gaussian_rand0.5";
+    static final String ALGO_NAME = "MaTMY3_SBX_randPM0.5_DRA_rand0.5";
 
     enum Benchmark { CEC2021, CEC2017, WCCI2020; }
 

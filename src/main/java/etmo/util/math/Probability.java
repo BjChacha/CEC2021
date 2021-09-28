@@ -1,5 +1,6 @@
 package etmo.util.math;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -13,9 +14,7 @@ public class Probability {
 
     public static double[] sampleByNorm(double[] mean, double[] std) {
         double[] sample = new double[mean.length];
-        for (int i = 0; i < sample.length; i++) {
-            sample[i] = sampleByNorm(mean[i], std[i]);
-        }
+        Arrays.parallelSetAll(sample, i -> sampleByNorm(mean[i], std[i]));
         return sample;
     }
 
