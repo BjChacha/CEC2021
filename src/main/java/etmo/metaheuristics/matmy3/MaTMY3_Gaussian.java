@@ -1,6 +1,10 @@
 package etmo.metaheuristics.matmy3;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +31,7 @@ import etmo.metaheuristics.matmy3.models.AbstractDistribution;
 import etmo.metaheuristics.matmy3.models.GaussianDistribution;
 import etmo.metaheuristics.matmy3.models.MultiVarGaussian;
 import etmo.qualityIndicator.QualityIndicator;
+import etmo.util.Configuration;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
 import etmo.util.math.Distance;
@@ -36,7 +41,7 @@ import etmo.util.math.Random;
 import etmo.util.math.Vector;
 import etmo.util.sorting.NDSortiong;
 
-public class MaTMY3_Transfer extends MtoAlgorithm {
+public class MaTMY3_Gaussian extends MtoAlgorithm {
     private SolutionSet[] population;
     private SolutionSet[] offspring;
 
@@ -111,7 +116,7 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
     List<Integer> generations;
     List<List<Double>> igdPlotValues;
 
-    public MaTMY3_Transfer(ProblemSet problemSet) {
+    public MaTMY3_Gaussian(ProblemSet problemSet) {
         super(problemSet);
     }
 
@@ -218,8 +223,7 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
                 evaluate(solution, k);
                 population[k].add(solution);
             }
-
-            updateBestDistances(k);
+            // updateBestDistances(k);
         }
 
         // DEBUG: IGD
@@ -245,34 +249,34 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
     void iterate() throws JMException, ClassNotFoundException {
         offspringGeneration();
         environmentSelection();
-
+        // writePopulationVariablesMatrix(plotTaskID, generation);
         generation++;
     }
 
     void offspringGeneration() throws JMException {
         updateDistributions(0.5);
-        // updateDistances();
+        updateDistances();
         // updateBias();
         // if (generation % 50 == 1)
 
         for (int k = 0; k < taskNum; k++) {
             offspring[k].clear();
             Solution child;
-
-            Arrays.fill(models, null);
-            for (int kk = 0; kk < taskNum; kk++) {
-                // if (kk == k) continue;
-                // try {
-                //     models[kk] = new MultiVarGaussian(means[k], sigmas[kk]);
-                // }
-                // catch (org.apache.commons.math3.linear.SingularMatrixException e) {
-                //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
-                // }
-                models[kk] = new GaussianDistribution(means[k], stds[kk]);
-            }
-
+            
+            // Arrays.fill(models, null);
+            // for (int kk = 0; kk < taskNum; kk++) {
+                //     // if (kk == k) continue;
+                //     // try {
+                    //         // models[kk] = new MultiVarGaussian(means[k], sigmas[kk]);
+                    //     // }
+                    //     // catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+                        //     //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
+                        //     // }
+                        //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
+                        // }
+                        
             int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
-            for (int i = 0; i < populationSize; i ++) {
+            for (int i = 0; i < populationSize && !offspring[k].isFull(); i ++) {
                 child = null;
                 if (generation <= 1000) {
                     if (PseudoRandom.randDouble() < transferProbability) {
@@ -282,13 +286,24 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
                     } else {
                         child = evolutionaryGenerating(k, perm[i], XType);
                     }
-                } else {
-                    child = sampleGenerating(k, perm[i]);
                 }
                 evaluate(child, k);
                 offspring[k].add(child);
             }
         }
+    }
+
+    Solution generatingChild(int taskID, int i) throws JMException {
+        Solution child = null;
+        int[] perm = PseudoRandom.randomPermutation(population[taskID].size(), population[taskID].size());
+        if (PseudoRandom.randDouble() < transferProbability) {
+            int assistTaskID = getAssistTaskID(taskID);
+            child = transferGenerating(taskID, assistTaskID, perm[i], TXType);
+            transferredCounts[taskID][assistTaskID] ++;
+        } else {
+            child = evolutionaryGenerating(taskID, perm[i], XType);
+        }
+        return child;
     }
 
     Solution sampleGenerating(int taskID, int i) throws JMException {
@@ -309,13 +324,14 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
         if (PseudoRandom.randDouble() < 1.0) {
             child = new Solution(population[assistTaskID].get(j));
             // double[] newFeatures = Probability.sampleByNorm(means[taskID], sigmas[assistTaskID]);
-            // double[] newFeatures = Probability.sampleByNorm(means[taskID], stds[assistTaskID]);
+            double[] newFeatures = Probability.sampleByNorm(means[taskID], stds[assistTaskID]);
             // double[] newFeatures = new MultivariateNormalDistribution(
             //     means[taskID], sigmas[assistTaskID]).sample();
-            double[] newFeatures = null;
-            newFeatures = models[assistTaskID].sample();
+            // double[] newFeatures = null;
+            // newFeatures = models[assistTaskID].sample();
             Vector.vecClip_(newFeatures, 0.0, 1.0);
             child.setDecisionVariables(newFeatures);
+            mutateIndividual(taskID, child);
             child.resetObjective();
         } else {
             child = offsetIndividual(population[assistTaskID].get(j), assistTaskID, taskID);
@@ -502,30 +518,44 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
                 tmpSet[k].add(population[k].get(i));
                 weights[i] = 1 / (population[k].get(i).getRank() + 1.0);
             }
-            // // means[k] = tmpSet.getWeightedMean(weights);
+            means[k] = tmpSet[k].getWeightedMean(weights);
             // means[k] = tmpSet[k].getMean();
-            // stds[k] = tmpSet[k].getStd();
+            stds[k] = tmpSet[k].getWeightedStd(weights);
             // sigmas[k] = Matrix.getMatSigma(tmpSet[k].getMat());
         }
-        Arrays.parallelSetAll(means, k -> tmpSet[k].getMean());
-        Arrays.parallelSetAll(stds, k -> tmpSet[k].getStd());
-        Arrays.parallelSetAll(sigmas, k -> {
-            double[][] output = null;
-            try {
-				output = Matrix.getMatSigma(tmpSet[k].getMat());
-			} catch (JMException e) {
-				e.printStackTrace();
-			}
-            return output;
-		});
+        // Arrays.parallelSetAll(means, k -> tmpSet[k].getMean());
+        // Arrays.parallelSetAll(stds, k -> tmpSet[k].getStd());
+        // Arrays.parallelSetAll(sigmas, k -> {
+        //     double[][] output = null;
+        //     try {
+		// 		output = Matrix.getMatSigma(tmpSet[k].getMat());
+		// 	} catch (JMException e) {
+		// 		e.printStackTrace();
+		// 	}
+        //     return output;
+		// });
     }
 
     int getAssistTaskID(int taskID) throws JMException {
         int assistTaskID = taskID;
 
-        while (assistTaskID == taskID) {
-            assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
+        // // random
+        // while (assistTaskID == taskID) {
+        //     assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
+        // }
+
+        // coral distance
+        int[] perm = PseudoRandom.randomPermutation(taskNum, taskNum);
+        double minDist = Double.MAX_VALUE;
+        int selectTaskID = -1;
+        // TODO: hard code
+        for (int k = 0; k < 10; k ++) {
+            if (distances[taskID][k] < minDist) {
+                minDist = distances[taskID][perm[k]];
+                selectTaskID = perm[k];
+            }
         }
+        assistTaskID = selectTaskID == -1 ? taskID : selectTaskID;
 
         // double[] scores = new double[taskNum];
         // for (int i = 0; i < scores.length; i ++) {
@@ -584,27 +614,6 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
     }
     
     void updateDistances() throws JMException {
-        // // t-SNE
-        // SolutionSet total = new SolutionSet(populationSize * taskNum / 2);
-        // for (int k = 0; k < taskNum; k++) {
-        //     for (int i = 0; i < population[k].size() / 2; i++){
-        //         total.add(population[k].get(i));
-        //     }
-        // }
-        // TSNE tSNE = null;
-        // try {
-        //     tSNE = new TSNE(total.getMat(), 2);
-        // } catch (JMException e) {
-        //     e.printStackTrace();
-        // }
-        // double[][] points = tSNE.coordinates;
-        // double[][][] clusters = new double[taskNum][][];
-        // for (int k = 0; k < taskNum; k++) {
-        //     clusters[k] = Matrix.matSlice(points, 
-        //     k * (populationSize / 2), (k + 1) * (populationSize / 2) - 1, 
-        //     0, points[0].length - 1);
-        // }
-
         for (int k = 0; k < taskNum; k++) {
             for (int kk = k + 1; kk < taskNum; kk++) {
                 // WD
@@ -621,13 +630,9 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
 
                 // co-variance matrix similarity
                 // Coral Loss
-                double dist = 0;
-                for (int i = 0; i < varNum; i ++) {
-                    for (int j = 0; j < varNum; j ++) {
-                        dist += Math.pow(sigmas[k][i][j] - sigmas[kk][i][j], 2);
-                    }
-                }
-                dist = Math.sqrt(dist) / (4.0 * Math.pow(varNum, 2));
+                distances[k][kk] = distances[kk][k] = Distance.getCoralLoss(
+                    population[k].getMat(), 
+                    population[kk].getMat());
             }
         }
     }
@@ -670,6 +675,45 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
             }
             stuckTimes[taskID] = 0;
         }
+    }
+
+    void resetFlag() {
+        for (int k = 0; k < taskNum; k++) {
+            for (int i = 0; i < population[k].size(); i++) {
+                population[k].get(i).setFlag(0);
+            }
+        }
+    }
+
+    void writePopulationVariablesMatrix(int taskID, int generation) throws JMException {
+        String algoName = "Gaussian_exp"; 
+        String folderPath = "./data/variables";
+        File folder = new File(folderPath);
+        if (!folder.exists()){
+            folder.mkdirs();
+        }
+        String filePath = folderPath + "/" + algoName + "_" + generation + ".txt";
+        double[][] data = population[taskID].getMat();
+        try {
+            FileOutputStream fos = new FileOutputStream(filePath);
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+            BufferedWriter bw = new BufferedWriter(osw);
+
+            for (double[] line: data) {
+                String sLine = Arrays.toString(line)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(",", "")
+                    .strip();
+                bw.write(sLine);
+                bw.newLine();
+            }
+            bw.close();
+        } catch (IOException e) {
+            Configuration.logger_.severe("Error acceding to the file");
+            e.printStackTrace();
+        }
+
     }
 
     // DEBUG: IGD
@@ -897,14 +941,6 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
             // problemSet_.get(0).getName(), VectorGraphicsFormat.PDF);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    void resetFlag() {
-        for (int k = 0; k < taskNum; k++) {
-            for (int i = 0; i < population[k].size(); i++) {
-                population[k].get(i).setFlag(0);
-            }
         }
     }
 }

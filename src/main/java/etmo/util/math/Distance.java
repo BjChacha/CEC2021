@@ -37,4 +37,18 @@ public class Distance {
 
         return distance / size;
     }
+
+    public static double getCoralLoss(double[][] p1, double[][] p2) {
+        int d = p1[0].length; 
+        double dist = 0;
+        double[][] sigma1 = Matrix.getMatSigma(p1);
+        double[][] sigma2 = Matrix.getMatSigma(p2);
+
+        for (int i = 0; i < d; i ++) {
+            for (int j = 0; j < d; j ++) {
+                dist += Math.pow(sigma1[i][j] - sigma2[i][j], 2);
+            }
+        }
+        return Math.sqrt(dist) / (4.0 * Math.pow(d, 2));
+    }
 }

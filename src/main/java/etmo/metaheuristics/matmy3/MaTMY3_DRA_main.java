@@ -30,14 +30,14 @@ public class MaTMY3_DRA_main {
 
     static final int PLOT_TASK_ID = 0;
 
-    static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
+    static final Benchmark BENCHMARK_TYPE = Benchmark.CEC2017;
     static final int PROBLEM_START = 1;
-    static final int PROBLEM_END = 1;
+    static final int PROBLEM_END = 9;
     static final int PROBLEM_REPEAT_TIME = 1;
 
     static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
-    static final boolean PLOTTING = true;
+    static final boolean PLOTTING = false;
 
     static final String ALGO_NAME = "MaTMY3_SBX_randPM0.5_Gaussian_rand0.5";
 

@@ -21,28 +21,19 @@ import org.knowm.xchart.style.colors.XChartSeriesColors;
 import org.knowm.xchart.style.lines.XChartSeriesLines;
 import org.knowm.xchart.style.markers.XChartSeriesMarkers;
 
-import smile.manifold.TSNE;
-
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
 import etmo.core.ProblemSet;
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
-import etmo.metaheuristics.matmy3.models.AbstractDistribution;
-import etmo.metaheuristics.matmy3.models.GaussianDistribution;
-import etmo.metaheuristics.matmy3.models.MultiVarGaussian;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
 import etmo.util.math.Distance;
-import etmo.util.math.Matrix;
-import etmo.util.math.NonLinear;
-import etmo.util.math.Probability;
 import etmo.util.math.Random;
 import etmo.util.math.Vector;
 import etmo.util.sorting.NDSortiong;
 import etmo.util.sorting.SortingIdx;
-import scala.reflect.internal.StdAttachments.ImportableAttachment;
 
 public class MaTMY3_DRA extends MtoAlgorithm {
     private SolutionSet[] population;
@@ -202,7 +193,7 @@ public class MaTMY3_DRA extends MtoAlgorithm {
     void iterate() throws JMException, ClassNotFoundException {
         offspringGeneration();
         environmentSelection();
-        resourceAllocation(5);
+        resourceAllocation(1);
         updateState();
     }
 

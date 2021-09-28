@@ -18,6 +18,7 @@ import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.colors.XChartSeriesColors;
 import org.knowm.xchart.style.lines.XChartSeriesLines;
 import org.knowm.xchart.style.markers.XChartSeriesMarkers;
+import org.mapdb.elsa.ElsaException;
 
 import etmo.core.MtoAlgorithm;
 import etmo.core.Operator;
@@ -25,17 +26,15 @@ import etmo.core.ProblemSet;
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
 import etmo.metaheuristics.matmy3.models.Classifier;
+import etmo.metaheuristics.matmy3.models.CoralClassifier;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
 import etmo.util.PseudoRandom;
+import etmo.util.math.Distance;
 import etmo.util.math.Probability;
 import etmo.util.sorting.NDSortiong;
-import smile.classification.DataFrameClassifier;
 import smile.classification.LogisticRegression;
 import smile.classification.OnlineClassifier;
-import smile.classification.RandomForest;
-import smile.data.DataFrame;
-import smile.data.formula.Formula;
 
 enum EvolutionMode {
     MODEL_ASSIST_SEARCH,
@@ -76,11 +75,12 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
     boolean isMutate;
 
     // model
-    int epoch = 200;
+    int epoch = 50;
     double lr = 2e-3;
     Classifier[] models;
     OnlineClassifier<double[]>[] onlineModels;
     Properties randomForestProperties;
+    CoralClassifier[] models2;
 
     double transferProbability;
     double archiveReplaceRate;
@@ -159,6 +159,7 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         Arrays.fill(modelFailTimes, 0);
 
         models = new Classifier[taskNum];
+        models2 = new CoralClassifier[taskNum];
         randomForestProperties = new Properties();
         randomForestProperties.setProperty("smile.random.forest.max.depth", "16");
         randomForestProperties.setProperty("smile.random.forest.trees", "300");
@@ -226,16 +227,10 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
     public void offspringGeneration() throws JMException {
         for (int k = 0; k < taskNum; k++) {
             offspring[k].clear();
-            if (generation > 1 && generation < 800 && models[k].getF1() >= 0.57) {
+            if (generation > 1 && generation <= 1000) {
                 modelAssistGenerating(k);
                 evolutionaryGenerating(k, XType);
                 // transferGenerating(k, XType, TXType);
-            }
-            else if (states[k] == EvolutionMode.TRANSFER_EVOLUTION) {
-                transferGenerating(k, XType, TXType);
-            }
-            else if (states[k] == EvolutionMode.FINAL_CONVERGE) {
-                sampleGenerating(k);
             }
             else {
                 evolutionaryGenerating(k, XType);
@@ -284,8 +279,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
             // System.out.println(k+" Classifier Transfer Success Rate: " + filtedBetter + "/" + transferCount);
             // System.out.println(k+" Not Classifier Transfer Success Rate: " + notModelBetter + "/" + notModelCount);
 
-            if (generation < 800)
-                trainModel(k, union.getMat());
+            // if (generation < 800)
+            // trainModel2(k, union.getMat());
         }
     }
 
@@ -381,14 +376,20 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         for (int i = 0; i < num && !offspring[taskID].isFull(); i++) {
             int[] taskOrder = PseudoRandom.randomPermutation(taskNum, taskNum);
             for (int assistTaskID: taskOrder) {
+                // int assistTaskID = taskID;
+                while (assistTaskID == taskID)
+                    assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
                 if (assistTaskID == taskID) continue;
-                if (offspring[taskID].isFull()) break;
-                if (judgeIndividual(taskID, population[assistTaskID].get(i))) {
-                    // SBX
-                    Solution[] parents = new Solution[2];
-                    parents[0] = population[taskID].get(i);
-                    parents[1] = population[assistTaskID].get(i);
-                    Solution newSolution = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+                if (offspring[taskID].isFull() || offspring[taskID].size() >= num) break;
+
+                trainModel2(taskID, assistTaskID);
+
+                if (judgeIndividual2(taskID, population[assistTaskID].get(i))) {
+                    // // SBX
+                    // Solution[] parents = new Solution[2];
+                    // parents[0] = population[taskID].get(i);
+                    // parents[1] = population[assistTaskID].get(i);
+                    // Solution newSolution = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
                         
                     // // DE
                     // int[] pids = PseudoRandom.randomPermutation(populationSize, 2);
@@ -399,8 +400,8 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
                     // parents[2] = population[assistTaskID].get(i);
                     // Solution newSolution = (Solution) DECrossover.execute(new Object[] { population[assistTaskID].get(i), parents });
 
-                    // // explicit
-                    // Solution newSolution = new Solution(population[assistTaskID].get(i));
+                    // explicit
+                    Solution newSolution = new Solution(population[assistTaskID].get(i));
 
                     newSolution.setSkillFactor(taskID);
                     newSolution.setFlag(2);
@@ -421,7 +422,7 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
                 //     evaluations ++;
                 //     offspring[taskID].add(newSolution);
                 // }
-            }
+            // }
         }
     }
 
@@ -576,9 +577,47 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         models[taskID].train(pTrain, nTrain);;
     }
 
+    public void trainModel2(int taskID, int assistTaskID) throws JMException {
+        int length = population[taskID].size();
+        double[][] labels = new double[length][2];
+        for (int i = 0; i < length; i ++) {
+            if (i < length / 2)
+                labels[i][0] = 1;
+            else
+                labels[i][1] = 1;
+        }
+
+        double[][] srcData = population[taskID].getMat();
+        double[][] trgData = population[assistTaskID].getMat();
+
+        models2[taskID] = new CoralClassifier(epoch, lr, trgData);
+        models2[taskID].train(srcData, labels);
+    }
+
+    public void trainModel(int taskID) throws JMException {
+        int length = population[taskID].size();
+        double[][] labels = new double[length][2];
+        for (int i = 0; i < length; i ++) {
+            if (i < length / 2)
+                labels[i][0] = 1;
+            else
+                labels[i][1] = 1;
+        }
+
+        double[][] srcData = population[taskID].getMat();
+
+        models2[taskID] = new CoralClassifier(epoch, lr, null);
+        models2[taskID].train(srcData, labels);
+    }
+
     public boolean judgeIndividual(int taskID, Solution individual) throws JMException {
         double[] features = individual.getDecisionVariablesInDouble();
         return models[taskID].judge(features, 0.5);
+    }
+
+    public boolean judgeIndividual2(int taskID, Solution individual) throws JMException {
+        double[] features = individual.getDecisionVariablesInDouble();
+        return models2[taskID].predict(features);
     }
 
     public void updateBestDistances(int taskID) {

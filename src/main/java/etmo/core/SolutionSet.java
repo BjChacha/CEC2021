@@ -577,6 +577,29 @@ public class SolutionSet implements Serializable {
 		return std;
 	}
 
+	public double[] getWeightedStd(double[] weights) {
+		assert weights.length == solutionsList_.size();
+		double[] std = null;
+		std = new double[solutionsList_.get(0).numberOfVariables()];
+		for (int i = 0; i < std.length; i++){
+			std[i] = getWeightedStdOfIdx(i, weights);
+		}
+		return std;
+	}
+
+	public double getWeightedStdOfIdx(int idx, double[] weights) {
+		double sum = 0;
+		double mean = getWeightedMeanOfIdx(idx, weights);
+		for (int i = 0; i < solutionsList_.size(); i++){
+			try {
+				sum += Math.pow((solutionsList_.get(i).getDecisionVariables(idx) - mean) * weights[i] , 2);
+			} catch (JMException e) {
+				e.printStackTrace();
+			}
+		}
+		return Math.sqrt(sum / (solutionsList_.size() - 1));
+	}
+
 	public double[] getWeightedMean(double[] weights) {
 		assert weights.length == solutionsList_.size();
 		double[] mean = null;

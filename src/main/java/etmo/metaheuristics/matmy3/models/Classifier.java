@@ -40,7 +40,7 @@ public class Classifier {
             .updater(new AdaGrad(lr))
             .l2(2e-5)
             .list()
-            .layer(new BatchNormalization.Builder().nIn(inD).nOut(inD).build())
+            // .layer(new BatchNormalization.Builder().nIn(inD).nOut(inD).build())
             .layer(new DenseLayer.Builder().nIn(inD).nOut((int)(hiddenD / 2)).activation(Activation.TANH).biasInit(0).build())
             .layer(new DenseLayer.Builder().nIn(hiddenD / 2).nOut(hiddenD / 4).activation(Activation.TANH).biasInit(0).build())
             .layer(new OutputLayer.Builder().nIn(hiddenD / 4).nOut(1).activation(Activation.SIGMOID).biasInit(0).lossFunction(LossFunction.XENT).build())
