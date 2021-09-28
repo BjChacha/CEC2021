@@ -30,9 +30,9 @@ public class MaTMY3_Classifier_main {
 
     static final int PLOT_TASK_ID = 1;
 
-    static final Benchmark BENCHMARK_TYPE = Benchmark.CEC2017;
+    static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
-    static final int PROBLEM_END = 1;
+    static final int PROBLEM_END = 10;
     static final int PROBLEM_REPEAT_TIME = 1;
 
     static final boolean IGD_LOG = false;

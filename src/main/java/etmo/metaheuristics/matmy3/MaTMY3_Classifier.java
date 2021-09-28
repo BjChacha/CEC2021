@@ -373,6 +373,7 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
     }
 
     public void modelAssistGenerating(int taskID, int num) throws JMException {
+        trainModel2(taskID);
         for (int i = 0; i < num && !offspring[taskID].isFull(); i++) {
             int[] taskOrder = PseudoRandom.randomPermutation(taskNum, taskNum);
             for (int assistTaskID: taskOrder) {
@@ -381,8 +382,6 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
                     assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
                 if (assistTaskID == taskID) continue;
                 if (offspring[taskID].isFull() || offspring[taskID].size() >= num) break;
-
-                trainModel2(taskID, assistTaskID);
 
                 if (judgeIndividual2(taskID, population[assistTaskID].get(i))) {
                     // // SBX
@@ -594,7 +593,7 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
         models2[taskID].train(srcData, labels);
     }
 
-    public void trainModel(int taskID) throws JMException {
+    public void trainModel2(int taskID) throws JMException {
         int length = population[taskID].size();
         double[][] labels = new double[length][2];
         for (int i = 0; i < length; i ++) {
