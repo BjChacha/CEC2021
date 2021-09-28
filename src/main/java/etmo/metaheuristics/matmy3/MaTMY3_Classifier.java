@@ -422,7 +422,7 @@ public class MaTMY3_Classifier extends MtoAlgorithm {
                 //     evaluations ++;
                 //     offspring[taskID].add(newSolution);
                 // }
-            // }
+            }
         }
     }
 
