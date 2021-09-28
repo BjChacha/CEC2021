@@ -44,7 +44,7 @@ public class CoralClassifier {
 
     public void train(double[][] features, double[][] labels) {
         int srcN = features.length;
-        int trgN = trgDataMat.length;
+        // int trgN = trgDataMat.length;
         int inD = features[0].length;
         int hD1 = inD / 2;
         int hD2 = hD1 / 2;
