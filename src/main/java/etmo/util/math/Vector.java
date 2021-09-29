@@ -7,31 +7,28 @@ public class Vector {
     public static double[] vecSub(double[] vec1, double[] vec2) {
         assert vec1.length == vec2.length;
         double[] output = new double[vec1.length];
-        for(int i = 0; i < vec1.length; i++) {
-            output[i] = vec1[i] - vec2[i];
-        }
+        Arrays.setAll(output, i -> vec1[i] - vec2[i]);
         return output;
     }
 
     public static void vecSub_(double[] vec1, double[] vec2) {
         assert vec1.length == vec2.length;
-        for(int i = 0; i < vec1.length; i++) {
-            vec1[i] -= vec2[i];
-        }
+        Arrays.setAll(vec1, i -> vec1[i] - vec2[i]);
     }
 
     public static double[] vecAdd(double[] vec1, double[] vec2) {
         assert vec1.length == vec2.length;
         double[] output = new double[vec1.length];
-        for(int i = 0; i < vec1.length; i++) {
-            output[i] = vec1[i] + vec2[i];
-        }
+        Arrays.setAll(output, i -> vec1[i] + vec2[i]);
         return output;
     }
 
     public static void vecAdd_(double[] vec1, double[] vec2) {
         assert vec1.length == vec2.length;
-        Arrays.parallelSetAll(vec1, i -> vec1[i] + vec2[i]);
+        // for (int i = 0; i < vec1.length; i ++) {
+        //     vec1[i] = vec1[i] - vec2[i];
+        // }
+        Arrays.setAll(vec1, i -> vec1[i] + vec2[i]);
     }
 
     public static double vecDot(double[] vec1, double[] vec2) {
@@ -45,17 +42,17 @@ public class Vector {
 
     public static double[] vecElemMul(double[] vec, double factor) {
         double[] output = new double[vec.length];
-        Arrays.parallelSetAll(output, i -> vec[i] * factor);
+        Arrays.setAll(output, i -> vec[i] * factor);
         return output;
     }
 
     public static void vecElemMul_(double[] vec, double factor) {
-        Arrays.parallelSetAll(vec, i -> vec[i] * factor);
+        Arrays.setAll(vec, i -> vec[i] * factor);
     }
 
     public static double[] vecElemDiv(double[] vec1, double[] vec2) {
         double[] output = new double[vec1.length];
-        Arrays.parallelSetAll(output, i -> vec1[i] / (vec2[i] + 1e-13));
+        Arrays.setAll(output, i -> vec1[i] / (vec2[i] + 1e-13));
         return output;
     }
 

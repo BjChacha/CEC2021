@@ -65,7 +65,7 @@ public class Matrix {
 
     public static double[][] matElemMul(double[][] mat, double factor) {
         double[][] output = mat.clone();
-        Arrays.parallelSetAll(output, i -> Vector.vecElemMul(mat[i], factor));
+        Arrays.setAll(output, i -> Vector.vecElemMul(mat[i], factor));
         return output;
     }
 
@@ -180,7 +180,7 @@ public class Matrix {
         double[][] sigma = new double[n][n];
 
         double[] mean = new double[n];
-        Arrays.parallelSetAll(mean, i -> { 
+        Arrays.setAll(mean, i -> { 
             double sum = 0;
             for (int j = 0; j < m; j ++)
                 sum += mat[j][i];
@@ -188,13 +188,9 @@ public class Matrix {
         });
 
         double[][] X = mat.clone();
-        Arrays.parallelSetAll(X, i -> Vector.vecSub(X[i], mean));
+        Arrays.setAll(X, i -> Vector.vecSub(X[i], mean));
 
         sigma = matElemMul(matMul(matTranspose(X), X), 1.0 / (m - 1));
-
-        for (int i = 0; i < n; i++) {
-            sigma[i][i] *= 1.001;
-        }
 
         return sigma;
     }

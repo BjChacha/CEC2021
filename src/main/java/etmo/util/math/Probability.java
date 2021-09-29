@@ -14,18 +14,24 @@ public class Probability {
 
     public static double[] sampleByNorm(double[] mean, double[] std) {
         double[] sample = new double[mean.length];
-        Arrays.parallelSetAll(sample, i -> sampleByNorm(mean[i], std[i]));
+        Arrays.setAll(sample, i -> sampleByNorm(mean[i], std[i]));
         return sample;
     }
 
     public static double[] sampleByNorm(double[] mean, double[][] sigma) {
+        double[][] simgaClone = sigma.clone();      
+        for (int i = 0; i < simgaClone.length; i++) {
+            simgaClone[i][i] *= 1.001;
+        }
+
         double[] sample = new double[mean.length];
         Random randomer = new Random();
         for (int i = 0; i < sample.length; i++) {
             sample[i] = randomer.nextGaussian();
         }
+
         RealMatrix mX = new Array2DRowRealMatrix(sample);
-        RealMatrix mSigma = new Array2DRowRealMatrix(sigma);
+        RealMatrix mSigma = new Array2DRowRealMatrix(simgaClone);
         SingularValueDecomposition svd = new SingularValueDecomposition(mSigma);
         RealMatrix S = svd.getS();
         for (int i = 0; i < S.getColumnDimension(); i++) {

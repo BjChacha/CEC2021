@@ -65,6 +65,11 @@ public class SolutionSet implements Serializable {
 		capacity_ = solutionList.size();
 	}
 
+	public SolutionSet(Solution[] solutionArray){
+		solutionsList_ = Arrays.asList(solutionArray);
+		capacity_ = solutionArray.length;
+	}
+
 	public SolutionSet(SolutionSet solutionSet) {
 		solutionsList_ = new ArrayList<Solution>();
 		for (int i = 0; i < solutionSet.size(); i++) {
@@ -420,6 +425,25 @@ public class SolutionSet implements Serializable {
 		return union;
 	} // union
 
+	public SolutionSet union(Solution[] solutionArray) {
+		// Check the correct size. In development
+		int newSize = this.size() + solutionArray.length;
+		if (newSize < capacity_)
+			newSize = capacity_;
+
+		// Create a new population
+		SolutionSet union = new SolutionSet(newSize);
+		for (int i = 0; i < this.size(); i++) {
+			union.add(this.get(i));
+		} // for
+
+		for (int i = this.size(); i < (this.size() + solutionArray.length); i++) {
+			union.add(solutionArray[i - this.size()]);
+		} // for
+
+		return union;
+	} 
+
 	/**
 	 * Replaces a solution by a new one
 	 * 
@@ -562,18 +586,20 @@ public class SolutionSet implements Serializable {
 	public double[] getMean(){
 		double[] mean = null;
 		mean = new double[solutionsList_.get(0).numberOfVariables()];
-		for (int i = 0; i < mean.length; i++){
-			mean[i] = getMeanOfIdx(i);
-		}
+		// for (int i = 0; i < mean.length; i++){
+		// 	mean[i] = getMeanOfIdx(i);
+		// }
+		Arrays.setAll(mean, i -> getMeanOfIdx(i));
 		return mean;
 	}
 
 	public double[] getStd(){
 		double[] std = null;
 		std = new double[solutionsList_.get(0).numberOfVariables()];
-		for (int i = 0; i < std.length; i++){
-			std[i] = getStdOfIdx(i);
-		}
+		// for (int i = 0; i < std.length; i++){
+		// 	std[i] = getStdOfIdx(i);
+		// }
+		Arrays.setAll(std, i -> getStdOfIdx(i));
 		return std;
 	}
 

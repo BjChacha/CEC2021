@@ -27,13 +27,14 @@ public class MaTMY3_Gaussian_main {
     static final double DE_F = 0.5;
     static final boolean IS_MUTATE = false;
     static final double TRANSFER_PROBABILITY = 0.5;
+    static final double MUTATION_PROBABILITY = 0.5;
 
-    static final int PLOT_TASK_ID = 1;
+    static final int PLOT_TASK_ID = 44;
 
     static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
     static final int PROBLEM_END = 10;
-    static final int PROBLEM_REPEAT_TIME = 10;
+    static final int PROBLEM_REPEAT_TIME = 1;
 
     static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
@@ -141,6 +142,7 @@ public class MaTMY3_Gaussian_main {
         algorithm.setInputParameter("isPlot", PLOTTING);
         algorithm.setInputParameter("isMutate", IS_MUTATE);
         algorithm.setInputParameter("transferProbability", TRANSFER_PROBABILITY);
+        algorithm.setInputParameter("mutationProbability", MUTATION_PROBABILITY);
         algorithm.setInputParameter("plotTaskID", PLOT_TASK_ID);
 
         parameters = new HashMap<>();
