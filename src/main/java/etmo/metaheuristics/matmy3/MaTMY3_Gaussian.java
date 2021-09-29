@@ -330,7 +330,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         //         child = evolutionaryGenerating(taskID, perm[i], XType);
         //     }
         //     evaluate(child, taskID);
-        //     offspring[taskID].add(child);
+        //     offspring[taskID][i] = child;
         // }
 
         Arrays.parallelSetAll(offspring[taskID], i -> {
@@ -532,6 +532,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             //     tmpSet[k].add(population[k].get(i));
             //     weights[i] = 1 / (population[k].get(i).getRank() + 1.0);
             // }
+
             tmpSet[k] = new SolutionSet();
             for (int i = 0; i < population[k].size(); i ++) {
                 if (population[k].get(i).getRank() == 0 || tmpSet[k].size() < 10) {
