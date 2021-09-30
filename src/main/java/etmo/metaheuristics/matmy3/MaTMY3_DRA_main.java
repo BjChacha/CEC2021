@@ -21,18 +21,18 @@ public class MaTMY3_DRA_main {
     static final Class<?> ALGORITHM_CLAZZ = MaTMY3_DRA.class;
     static final int MAX_POPULATION_SIZE = 100;
     static final int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-    static final String CROSSOVER_TYPE = "DE";
+    static final String CROSSOVER_TYPE = "SBX";
     static final String TRANSFER_CROSSOVER_TYPE = "SBX";
     static final double DE_CR = 0.6;
     static final double DE_F = 0.5;
     static final boolean IS_MUTATE = false;
-    static final double TRANSFER_PROBABILITY = 0.5;
+    static final double TRANSFER_PROBABILITY = 0.0;
 
     static final int PLOT_TASK_ID = 0;
 
-    static final Benchmark BENCHMARK_TYPE = Benchmark.CEC2017;
-    static final int PROBLEM_START = 1;
-    static final int PROBLEM_END = 9;
+    static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
+    static final int PROBLEM_START = 2;
+    static final int PROBLEM_END = 2;
     static final int PROBLEM_REPEAT_TIME = 1;
 
     static final boolean IGD_LOG = false;

@@ -247,15 +247,16 @@ public class MaTMY3_Transfer extends MtoAlgorithm {
         int j = PseudoRandom.randInt(0, population[assistTaskID].size() - 1);
         Solution child = null;
         
-        // // explicit
-        // child = new Solution(population[assistTaskID].get(j));
-
-        // SBX implicit
-        Solution[] parents = new Solution[2];
-        parents[0] = population[taskID].get(i);
-        parents[1] = population[assistTaskID].get(j);
-        child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+        // explicit
+        child = new Solution(population[assistTaskID].get(j));
         mutateIndividual(taskID, child);
+        
+        // // SBX implicit
+        // Solution[] parents = new Solution[2];
+        // parents[0] = population[taskID].get(i);
+        // parents[1] = population[assistTaskID].get(j);
+        // child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+        // mutateIndividual(taskID, child);
         
         // // combine with Gaussian Distribution
         // Solution[] parents = new Solution[2];

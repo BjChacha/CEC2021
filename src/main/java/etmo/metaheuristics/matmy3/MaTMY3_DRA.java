@@ -193,8 +193,44 @@ public class MaTMY3_DRA extends MtoAlgorithm {
     void iterate() throws JMException, ClassNotFoundException {
         offspringGeneration();
         environmentSelection();
-        resourceAllocation(1);
+        // resourceAllocation(1);
+        if (generation >= 100)
+            test();
         updateState();
+    }
+
+    void test() throws JMException, ClassNotFoundException {
+        int t = 20;
+        int fromTaskID = 1;
+        int toTaskID = 0;
+        for (int i = 0; i < t; i++) {
+            offspringGeneration(fromTaskID);
+            environmentSelection(fromTaskID);
+        }
+
+        int k = toTaskID;
+        offspring[k].clear();
+        Solution child;
+        int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
+        for (int i = 0; i < populationSize && evaluations < maxEvaluations; i ++) {
+            child = transferGenerating(k, fromTaskID, perm[i], TXType);
+            child.setFlag(1);
+            evaluate(child, k);
+            offspring[k].add(child);
+        }
+
+        int count = 0;
+        SolutionSet union = population[k].union(offspring[k]);
+        NDSortiong.sort(union, problemSet_, k);
+        for (int i = 0; i < populationSize; i++) {
+            if (union.get(i).getFlag() == 1) {
+                count ++;
+            }
+            union.get(i).setFlag(0);
+            union.get(i).setSkillFactor(k);
+            population[k].replace(i, union.get(i));
+        }
+        System.out.println("pause");
     }
 
     void offspringGeneration() throws JMException {
@@ -246,14 +282,14 @@ public class MaTMY3_DRA extends MtoAlgorithm {
         double[][] newDecisionPosition = population[k].getMat();
         double[][] newObjectivePosition = population[k].writeObjectivesToMatrix(objStart[k], objEnd[k]);
 
-        decisionDistances[k] = Distance.getWassersteinDistance(
-            oldDecisionPosition,
-            newDecisionPosition);
-        objectiveDistances[k] = Distance.getWassersteinDistance(
-            oldObjectivePosition, 
-            newObjectivePosition);
-        improvements[k] = objectiveDistances[k] / decisionDistances[k];
-        resources[k] += 1.0;
+        // decisionDistances[k] = Distance.getWassersteinDistance(
+        //     oldDecisionPosition,
+        //     newDecisionPosition);
+        // objectiveDistances[k] = Distance.getWassersteinDistance(
+        //     oldObjectivePosition, 
+        //     newObjectivePosition);
+        // improvements[k] = objectiveDistances[k] / decisionDistances[k];
+        // resources[k] += 1.0;
     }
 
     void resourceAllocation(int num) throws JMException, ClassNotFoundException {
@@ -269,16 +305,17 @@ public class MaTMY3_DRA extends MtoAlgorithm {
     Solution transferGenerating(int taskID, int assistTaskID, int i, String type) throws JMException {
         int j = PseudoRandom.randInt(0, population[assistTaskID].size() - 1);
         
-        // // explicit
-        // Solution child = null;
-        // child = new Solution(population[assistTaskID].get(j));
-
-        // SBX implicit
-        Solution[] parents = new Solution[2];
-        parents[0] = population[taskID].get(i);
-        parents[1] = population[assistTaskID].get(j);
-        Solution child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+        // explicit
+        Solution child = null;
+        child = new Solution(population[assistTaskID].get(j));
         mutateIndividual(taskID, child);
+
+        // // SBX implicit
+        // Solution[] parents = new Solution[2];
+        // parents[0] = population[taskID].get(i);
+        // parents[1] = population[assistTaskID].get(j);
+        // Solution child = ((Solution[]) SBXCrossover.execute(parents))[PseudoRandom.randInt(0, 1)];
+        // mutateIndividual(taskID, child);
         
         // // combine with Gaussian Distribution
         // Solution[] parents = new Solution[2];
