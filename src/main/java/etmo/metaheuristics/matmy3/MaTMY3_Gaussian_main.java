@@ -29,20 +29,20 @@ public class MaTMY3_Gaussian_main {
     static final double TRANSFER_PROBABILITY = 0.5;
     static final double MUTATION_PROBABILITY = 0.5;
 
-    static final int PLOT_TASK_ID = 44;
+    static final int PLOT_TASK_ID = 31;
 
     static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
     static final int PROBLEM_END = 10;
-    static final int PROBLEM_REPEAT_TIME = 10;
+    static final int PROBLEM_REPEAT_TIME = 1;
 
-    static final boolean IGD_LOG = true;
+    static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
     static final boolean PLOTTING = false;
 
     static final String ALGO_NAME = "MaTMY3_SBX_randPM0.5_EliteGauRandT0.5";
 
-    enum Benchmark { CEC2021, CEC2017, WCCI2020; }
+    enum Benchmark { CEC2021, CEC2017, WCCI2020 }
 
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, JMException {
         ProblemSet problemSet;

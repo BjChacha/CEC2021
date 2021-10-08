@@ -79,21 +79,12 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
 
     boolean isMutate;
 
-    double biasPartition;
-    double[] center;
-    double[][] bias;
-    double[][] momentum;
-    // momentum effect factor
-    double alpha;
-    // momentum update factor
-    double beta;
-
-    // TODO: duplicate with bias
     double[][] means;
     double[][] stds;
     double[][][] sigmas;
     AbstractDistribution[] models;
     boolean[] isSingular;
+    double[][] eliteDirections;
 
     // parallel runner
     Object[] runner;
@@ -183,14 +174,6 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         stuckTimes = new int[taskNum];
         Arrays.fill(bestDistances, Double.MAX_VALUE);
         Arrays.fill(stuckTimes, 0);
-
-        biasPartition = 0.5;
-        center = new double[varNum];
-        Arrays.fill(center, 0.5);
-        bias = new double[taskNum][varNum];
-        momentum = new double[taskNum][varNum];
-        alpha = 0.5;
-        beta = 0.8;
         
         confidences = new double[taskNum][taskNum];
         transferredCounts = new int[taskNum][taskNum];
@@ -203,6 +186,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         sigmas = new double[taskNum][varNum][varNum];
         models = new AbstractDistribution[taskNum];
         isSingular = new boolean[taskNum];
+        eliteDirections = new double[taskNum][varNum];
 
         population = new SolutionSet[taskNum];
         union = new SolutionSet[taskNum];
@@ -215,9 +199,8 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             Arrays.fill(distances[k], 0);
             Arrays.fill(means[k], 0);
             Arrays.fill(stds[k], 0);
+            Arrays.fill(eliteDirections[k], 0);
 
-            Arrays.fill(bias[k], 0);
-            Arrays.fill(momentum[k], 0);
             Arrays.fill(tP[k], transferProbability);
             Arrays.fill(confidences[k], 0.01);
             Arrays.fill(transferredCounts[k], 0);
@@ -270,7 +253,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
 
     void offspringGeneration() throws JMException {
         updateDistributions(0.5);
-        // updateDistances();
+        updateDistances();
         // updateBias();
         // if (generation % 50 == 1)
 
@@ -285,63 +268,64 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             return res;
         });
 
-        // for (int k = 0; k < taskNum; k++) {
-        //     Arrays.fill(offspring[k], null);
-        //     Solution child;
-            
-        //     // Arrays.fill(models, null);
-        //     // for (int kk = 0; kk < taskNum; kk++) {
-        //         //     // if (kk == k) continue;
-        //         //     // try {
-        //             //         // models[kk] = new MultiVarGaussian(means[k], sigmas[kk]);
-        //             //     // }
-        //             //     // catch (org.apache.commons.math3.linear.SingularMatrixException e) {
-        //                 //     //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
-        //                 //     // }
-        //                 //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
-        //                 // }
-        //     int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
-        //     for (int i = 0; i < populationSize; i ++) {
-        //         child = null;
-        //         if (PseudoRandom.randDouble() < transferProbability) {
-        //             int k2 = getAssistTaskID(k);
-        //             child = transferGenerating(k, k2, perm[i], TXType);
-        //         } else {
-        //             child = evolutionaryGenerating(k, perm[i], XType);
-        //         }
-        //         evaluate(child, k);
-        //         offspring[k][i] = child;
-        //     }
-        // }
+//         for (int k = 0; k < taskNum; k++) {
+//             Arrays.fill(offspring[k], null);
+//             Solution child;
+//
+//             // Arrays.fill(models, null);
+//             // for (int kk = 0; kk < taskNum; kk++) {
+//                 //     // if (kk == k) continue;
+//                 //     // try {
+//                     //         // models[kk] = new MultiVarGaussian(means[k], sigmas[kk]);
+//                     //     // }
+//                     //     // catch (org.apache.commons.math3.linear.SingularMatrixException e) {
+//                         //     //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
+//                         //     // }
+//                         //     models[kk] = new GaussianDistribution(means[k], stds[kk]);
+//                         // }
+//             int[] perm = PseudoRandom.randomPermutation(population[k].size(), population[k].size());
+//             for (int i = 0; i < populationSize; i ++) {
+//                 child = null;
+//                 if (PseudoRandom.randDouble() < transferProbability) {
+//                     int k2 = getAssistTaskID(k);
+//                     child = transferGenerating(k, k2, perm[i], TXType);
+//                 } else {
+//                     child = evolutionaryGenerating(k, perm[i], XType);
+//                 }
+//                 evaluate(child, k);
+//                 offspring[k][i] = child;
+//             }
+//         }
     }
 
     Object generatingOffspring(int taskID) throws JMException {
         Arrays.fill(offspring[taskID], null);
         int[] perm = PseudoRandom.randomPermutation(population[taskID].size(), population[taskID].size());
         
-        // Solution child;
-        // for (int i = 0; i < populationSize; i ++) {
-        //     child = null;
-        //     if (PseudoRandom.randDouble() < transferProbability) {
-        //         int k2 = getAssistTaskID(taskID);
-        //         child = transferGenerating(taskID, k2, perm[i], TXType);
-        //         transferredCounts[taskID][k2] ++;
-        //     } else {
-        //         child = evolutionaryGenerating(taskID, perm[i], XType);
-        //     }
-        //     evaluate(child, taskID);
-        //     offspring[taskID][i] = child;
-        // }
+         Solution child;
+         for (int i = 0; i < populationSize; i ++) {
+             child = null;
+             if (PseudoRandom.randDouble() < transferProbability) {
+                 int k2 = getAssistTaskID(taskID);
+                 child = transferGenerating(taskID, k2, perm[i], TXType);
+                 transferredCounts[taskID][k2] ++;
+             } else {
+                 child = evolutionaryGenerating(taskID, perm[i], XType);
+             }
+             evaluate(child, taskID);
+             offspring[taskID][i] = child;
+         }
 
-        Arrays.parallelSetAll(offspring[taskID], i -> {
-            Solution child = null;
-            try {
-                child = generatingChild(taskID, perm[i]);
-            } catch (JMException e) {
-                e.printStackTrace();
-            }
-            return child;
-        });
+//        Arrays.parallelSetAll(offspring[taskID], i -> {
+//            Solution child = null;
+//            try {
+//                child = generatingChild(taskID, perm[i]);
+//            } catch (JMException e) {
+//                e.printStackTrace();
+//            }
+//            return child;
+//        });
+
         return null;
     }
 
@@ -382,9 +366,14 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                 // double[] newFeatures = null;
                 // newFeatures = models[assistTaskID].sample();
 
+//            double[] tmpMean = population[assistTaskID].getMean();
+//            Vector.vecSub_(tmpMean, means[assistTaskID]);
+//            Vector.vecAdd_(tmpMean, means[taskID]);
+
             double[] tmpMean = population[assistTaskID].getMean();
-            Vector.vecSub_(tmpMean, means[assistTaskID]);
-            Vector.vecAdd_(tmpMean, means[taskID]);
+            Vector.vecAdd_(tmpMean, means[assistTaskID]);
+            Vector.vecSub_(tmpMean, means[taskID]);
+
             double[] tmpStd = population[assistTaskID].getStd();
             double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpStd);
             // double[][] tmpSigma = Matrix.getMatSigma(population[assistTaskID].getMat());
@@ -495,53 +484,27 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         }
     }
 
-    void updateBias() throws JMException {
-        for (int k = 0; k < taskNum; k++) {
-            updateBias(k, biasPartition);
-        }
-    }
-
-    void updateBias(int taskID, double partition) throws JMException {
-        // update bias distance
-        double[] oldBias = bias[taskID].clone();
-        Arrays.fill(bias[taskID], 0);
-        for (int i = 0; i < (int)(populationSize * partition); i ++) {
-            Vector.vecAdd_(bias[taskID], Vector.vecSub(population[taskID].get(i).getDecisionVariablesInDouble(), center));
-        }
-        Vector.vecElemMul_(bias[taskID], 2.0 / populationSize);
-        
-        // update momentum
-        if (generation >= 2) {
-            // momentum[k] = Vector.vecSub(bias[k], oldBias);
-            double[] newMomentum = Vector.vecSub(bias[taskID], oldBias);
-            momentum[taskID] = Vector.vecAdd(
-                Vector.vecElemMul(momentum[taskID], 1 - beta),
-                Vector.vecElemMul(newMomentum, beta)
-            );
-        }
-    }
-
     void updateDistributions(double partition) throws JMException {
         double[] weights = null;
         SolutionSet[] tmpSet = new SolutionSet[taskNum];
         for (int k = 0; k < taskNum; k++) {
-            // int size = (int)(population[k].size() * partition);
-            // weights = new double[size];
-            // tmpSet[k] = new SolutionSet(size);
-            // for (int i = 0; i < size; i++) {
-            //     tmpSet[k].add(population[k].get(i));
-            //     weights[i] = 1 / (population[k].get(i).getRank() + 1.0);
-            // }
+             int size = (int)(population[k].size() * partition);
+             weights = new double[size];
+             tmpSet[k] = new SolutionSet(size);
+             for (int i = 0; i < size; i++) {
+                 tmpSet[k].add(population[k].get(i));
+                 weights[i] = 1 / (population[k].get(i).getRank() + 1.0);
+             }
 
-            tmpSet[k] = new SolutionSet();
-            for (int i = 0; i < population[k].size(); i ++) {
-                if (population[k].get(i).getRank() == 0 || tmpSet[k].size() < 10) {
-                    tmpSet[k].add(population[k].get(i));
-                }
-                else {
-                    break;
-                }
-            }
+//            tmpSet[k] = new SolutionSet();
+//            for (int i = 0; i < population[k].size(); i ++) {
+//                if (population[k].get(i).getRank() == 0 || tmpSet[k].size() < 10) {
+//                    tmpSet[k].add(population[k].get(i));
+//                }
+//                else {
+//                    break;
+//                }
+//            }
 
             // means[k] = tmpSet[k].getWeightedMean(weights);
             // stds[k] = tmpSet[k].getWeightedStd(weights);
@@ -559,15 +522,18 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
 			}
             return output;
 		});
+        Arrays.setAll(eliteDirections, k -> Vector.vecSub(means[k], population[k].getMean()));
     }
 
     int getAssistTaskID(int taskID) throws JMException {
         int assistTaskID = taskID;
 
-        // random
-        while (assistTaskID == taskID) {
-            assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
-        }
+//        // random
+//        while (assistTaskID == taskID) {
+//            assistTaskID = PseudoRandom.randInt(0, taskNum - 1);
+//        }
+
+
 
         // // coral distance
         // int[] perm = PseudoRandom.randomPermutation(taskNum, taskNum);
@@ -587,6 +553,15 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         //     scores[i] = 1.0 / distances[taskID][i];
         // }
         // assistTaskID = Random.rouletteWheel(scores, taskID);
+
+//        // DEBUG
+//        if (taskID == plotTaskID) {
+//            assistTaskID = 0;
+////            System.out.println(generation + ": " + Arrays.toString(stds[assistTaskID]));
+////            for (int i = 0; i < stds[assistTaskID].length; i++) {
+////                stds[assistTaskID][i] = Math.max(stds[assistTaskID][i], 2e-4);
+////            }
+//        }
 
         return assistTaskID;
     }
@@ -638,30 +613,30 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
     
     void updateDistances() throws JMException {
         for (int k = 0; k < taskNum; k++) {
-            final int srcTaskID = k;
-            Arrays.setAll(distances[k], trgTaskID -> {
-                double dist = 0;
-                if (trgTaskID > srcTaskID) {
-                    try {
-                        dist = Distance.getCoralLoss(
-                            population[srcTaskID].getMat(), 
-                            population[trgTaskID].getMat());
-                    } catch (JMException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    dist = distances[trgTaskID][srcTaskID];
-                }
-                return dist;
-            });
-            // for (int kk = k + 1; kk < taskNum; kk++) {
+//            final int srcTaskID = k;
+//            Arrays.setAll(distances[k], trgTaskID -> {
+//                double dist = 0;
+//                if (trgTaskID > srcTaskID) {
+//                    try {
+//                        dist = Distance.getCoralLoss(
+//                            population[srcTaskID].getMat(),
+//                            population[trgTaskID].getMat());
+//                    } catch (JMException e) {
+//                        e.printStackTrace();
+//                    }
+//                } else {
+//                    dist = distances[trgTaskID][srcTaskID];
+//                }
+//                return dist;
+//            });
+             for (int kk = k + 1; kk < taskNum; kk++) {
                 // WD
                 // distances[k][kk] = distances[kk][k] = Distance.getWassersteinDistance(
                 //     population[kk].getMat(),
                 //     population[k].getMat());
 
                 // Cosine
-                // distances[k][kk] = distances[kk][k] = Distance.getCosineSimilarity(bias[k], bias[kk]);
+                 distances[k][kk] = distances[kk][k] = Distance.getCosineSimilarity(means[k], means[kk]);
             
                 // // t-SNE + WD
                 // distances[k][kk] = distances[kk][k] = 
@@ -672,7 +647,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                 // distances[k][kk] = distances[kk][k] = Distance.getCoralLoss(
                 //     population[k].getMat(), 
                 //     population[kk].getMat());
-            // }
+             }
         }
     }
         
