@@ -17,14 +17,19 @@ public class Utils {
         double[][] KL = rbfDot(mat1, mat2, sigma);
 
         for (int i = 0; i < d; i++) {
-            double sumK = 0;
-            double sumL = 0;
-            double sumKL = 0;
-            for (int j = 0; j < d; j++) {
-                sumK += K[i][j];
-                sumL += L[i][j];
-                sumKL += KL[i][j];
-            }
+            // double sumK = 0;
+            // double sumL = 0;
+            // double sumKL = 0;
+            // for (int j = 0; j < d; j++) {
+            //     sumK += K[i][j];
+            //     sumL += L[i][j];
+            //     sumKL += KL[i][j];
+            // }
+
+            double sumK = Arrays.stream(K[i]).sum();
+            double sumL = Arrays.stream(L[i]).sum();
+            double sumKL = Arrays.stream(KL[i]).sum();
+
             mmd += (sumK / Math.pow(d, 2) + sumL / Math.pow(d, 2) - 2 * sumKL / Math.pow(d, 2));
         }
 

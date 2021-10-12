@@ -17,6 +17,7 @@ import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.math.Matrix;
 import etmo.util.math.Probability;
+import etmo.util.math.Vector;
 import etmo.util.sorting.SortingIdx;
 
 import smile.clustering.KMeans;
@@ -122,7 +123,6 @@ public class EMaTOMKT extends MtoAlgorithm{
         // TODO: adaptive with CEC2021
         double[][][][] models = LEKT(10, 5);
         updatePopulation(models);
-
         // DEBUG: pring IGD
         calIGD();
     }
@@ -188,9 +188,24 @@ public class EMaTOMKT extends MtoAlgorithm{
     private void calculateMMD() throws JMException {
         double sigma = 1.0;
         for (int i = 0; i < taskNum; i++) {
-            for (int j = i + 1; j < taskNum; j++) {
-                differences[i][j] = differences[j][i] = Utils.MMD(population[i].getMat(), population[j].getMat(), sigma);
-            }
+            final int ii = i;
+            Arrays.parallelSetAll(differences[ii], jj -> {
+                double dist = 0;
+                if (jj > ii) {
+                    try {
+                        dist = Utils.MMD(population[ii].getMat(), population[jj].getMat(), sigma);
+                    } catch (JMException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    dist = differences[jj][ii];
+                }
+                return dist;
+            });
+
+            // for (int j = i + 1; j < taskNum; j++) {
+            //     differences[i][j] = differences[j][i] = Utils.MMD(population[i].getMat(), population[j].getMat(), sigma);
+            // }
         }
     }
 
@@ -223,7 +238,7 @@ public class EMaTOMKT extends MtoAlgorithm{
             }
             for (int i = 0; i < clusterNum; i++) {
                 if (clusters.get(i).size() == 0) {
-                    System.out.println("Warning: Empty cluster detected!");
+                    // System.out.println("Warning: Empty cluster detected!");
                     clusters.get(i).add(kmeans.centroids[i]);
                 }
                 models[k][i][0] = Matrix.getMeanOfMat(clusters.get(i));
@@ -267,6 +282,8 @@ public class EMaTOMKT extends MtoAlgorithm{
                     int clusterID2 = population[k].get(j).getFlag();
                     double[] variables1 = Probability.sampleByNorm(models[k][clusterID1][0], models[k][clusterID1][1]);
                     double[] variables2 = Probability.sampleByNorm(models[k][clusterID2][0], models[k][clusterID2][1]);
+                    Vector.vecClip_(variables1, 0.0, 1.0);
+                    Vector.vecClip_(variables2, 0.0, 1.0);
                     Solution child1 = new Solution(population[k].get(i));
                     Solution child2 = new Solution(population[k].get(j));
                     child1.setSkillFactor(k);
