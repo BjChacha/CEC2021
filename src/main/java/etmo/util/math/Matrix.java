@@ -211,6 +211,25 @@ public class Matrix {
         return output;
     }
 
+    public static double matTrace(double[][] mat) {
+        assert mat.length > 0 && mat.length == mat[0].length;
+        double trace = 0;
+        for (int i = 0; i < mat.length; i ++) {
+            trace += mat[i][i];
+        }
+        return trace;
+    }
+
+    public static double matNorm(double[][] mat) {
+        double res = 0;
+        for (int i = 0; i < mat.length; i ++) {
+            for (int j = 0; j < mat[i].length; j ++) {
+                res += Math.pow(mat[i][j], 2);
+            }
+        }
+        return res;
+    }
+
     public static boolean matIsNonSingular(double[][] mat) {
         RealMatrix m = new Array2DRowRealMatrix(mat);
         SingularValueDecomposition svd = new SingularValueDecomposition(m);

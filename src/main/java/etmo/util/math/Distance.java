@@ -51,4 +51,21 @@ public class Distance {
         }
         return Math.sqrt(dist) / (4.0 * Math.pow(d, 2));
     }
+
+    public static double getCoralLossWithSigma(double[][] sigma1, double[][] sigma2) {
+        int d = sigma1.length; 
+        double dist = 0;
+        for (int i = 0; i < d; i ++) {
+            for (int j = 0; j < d; j ++) {
+                dist += Math.pow(sigma1[i][j] - sigma2[i][j], 2);
+            }
+        }
+        return Math.sqrt(dist) / (4.0 * Math.pow(d, 2));
+    }
+
+    public static double getCorrelationMatrixDistance(double[][] sigma1, double[][] sigma2) {
+        double dist = 0;
+        dist = Matrix.matTrace(Matrix.matMul(sigma1, sigma2)) / Matrix.matNorm(sigma1) / Matrix.matNorm(sigma2);
+        return 1 - dist;
+    }
 }
