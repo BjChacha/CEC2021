@@ -508,7 +508,7 @@ public class Solution implements Serializable {
 
 	public double[] getDecisionVariablesInDouble() throws JMException {
 		double[] res = new double[variable_.length];
-		Arrays.parallelSetAll(res, i -> {
+		Arrays.setAll(res, i -> {
 			double arr = 0;
 			try {
 				arr = variable_[i].getValue();
