@@ -89,6 +89,8 @@ public class Solution implements Serializable {
 
 	private int flag;
 
+	private int flag2;
+
 	/**
 	 * Stores the distance to his k-nearest neighbor into a
 	 * <code>SolutionSet</code>. Used in SPEA2.
@@ -1014,6 +1016,14 @@ public class Solution implements Serializable {
 
 	public int getFlag(){
 		return this.flag;
+	}
+
+	public void setFlag2(int flag) {
+		this.flag2 = flag;
+	}
+
+	public int getFlag2() {
+		return this.flag2;
 	}
 
     public void setPdf(double density) {this.pdf_ = density; }
