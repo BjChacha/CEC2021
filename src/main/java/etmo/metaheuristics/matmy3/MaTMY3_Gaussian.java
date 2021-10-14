@@ -70,6 +70,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
     private double transferProbability;
     private double[] tP;
     private double[][] distances;
+    private double[][] distances2;
     private double[][] confidences;
     private int[][] transferredCounts;
     private int[][] transferredEliteCounts;
@@ -182,6 +183,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         transferredEliteCounts = new int[taskNum][taskNum];
 
         distances = new double[taskNum][taskNum];
+        distances2 = new double[taskNum][taskNum];
 
         means = new double[taskNum][varNum];
         stds = new double[taskNum][varNum];
@@ -199,6 +201,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             objEnd[k] = problemSet_.get(k).getEndObjPos();
 
             Arrays.fill(distances[k], 0);
+            Arrays.fill(distances2[k], 0);
             Arrays.fill(means[k], 0);
             Arrays.fill(stds[k], 0);
             Arrays.fill(eliteDirections[k], 0);
@@ -210,12 +213,22 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             population[k] = new SolutionSet(populationSize);
             union[k] = new SolutionSet();
             for (int i = 0; i < populationSize; i++) {
+                // if (k == 0) {
                 Solution solution = new Solution(problemSet_);
                 solution.setSkillFactor(k);
                 evaluate(solution, k);
                 population[k].add(solution);
+                // } else {
+                //     Solution solution = new Solution(population[0].get(i));
+                //     solution.setSkillFactor(k);
+                //     evaluate(solution, k);
+                //     population[k].add(solution);
+                // }
             }
             NDSortiong.sort(population[k], problemSet_, k);
+            for (int i = 0; i < populationSize; i ++) {
+                population[k].get(i).setFlag2(population[k].get(i).getRank());
+            }
             // updateBestDistances(k);
         }
 
@@ -305,6 +318,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                 child = evolutionaryGenerating(taskID, perm[i], XType);
             }
             evaluate(child, taskID);
+            child.setFlag2(-1);
             offspring[taskID][i] = child;
         }
         return null;
@@ -366,6 +380,19 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             SolutionSet union = population[taskID].union(offspringSet);
             NDSortiong.sort(union, problemSet_, taskID);
     
+            // double improvement = 0;
+            // for (int i = 0; i < union.size(); i ++) {
+            //     if (union.get(i).getFlag2() >= 0) {
+            //         improvement += (union.get(i).getRank() - union.get(i).getFlag2());
+            //     }
+            // }
+            // improvement /= populationSize;
+            // tP[taskID] = improvement > 1 ? 0.5 : 0.5 * (2 - improvement);
+            // tP[taskID] = improvement > 1 ? 0.5 : 0.5 * improvement;
+            // if (taskID == plotTaskID) {
+            //     System.out.println(generation + ": " + improvement);
+            //     System.out.println(generation + ": " + tP[taskID]);
+            // }
             // Arrays.fill(transferredEliteCounts[taskID], 0);
             // int eliteCount = 0;
             // int transferredEliteCount = 0;
@@ -379,7 +406,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                 //         transferredEliteCount ++;
                 //     }
                 // }
-
+                union.get(i).setFlag2(union.get(i).getRank());
                 union.get(i).setSkillFactor(taskID);
                 population[taskID].replace(i, union.get(i));
             }
@@ -535,9 +562,26 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         // Arrays.setAll(scores, i -> transferredEliteCounts[taskID][i]);
         // assistTaskID = Random.rouletteWheel(scores, taskID);
 
+        // double[] scores = new double[taskNum];
+        // Arrays.setAll(scores, i -> distances[taskID][i]);
+        // assistTaskID = Random.rouletteWheel(scores, taskID);
+
         double[] scores = new double[taskNum];
+        // CMD
         Arrays.setAll(scores, i -> distances[taskID][i]);
-        assistTaskID = Random.rouletteWheel(scores, taskID);
+        int res1 = Random.rouletteWheel(scores, taskID);
+        // elite mean distance
+        Arrays.setAll(scores, i -> 1 / distances2[taskID][i]);
+        int res2 = Random.rouletteWheel(scores, taskID);
+        assistTaskID = PseudoRandom.randDouble() < 0.5 ? res1 : res2;
+
+        // int length = 10;
+        // double[] scores = new double[length];
+        // while (assistTaskID == taskID) {
+        //     int[] perm = PseudoRandom.randomPermutation(taskNum, length);
+        //     Arrays.setAll(scores, i -> distances[taskID][perm[i]]);
+        //     assistTaskID = perm[Random.rouletteWheel(scores)];
+        // }
 
         // // coral distance
         // int[] perm = PseudoRandom.randomPermutation(taskNum, taskNum);
@@ -570,12 +614,30 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                         //     }
                         // }
                         // dist = Math.sqrt(dist);
-                        dist = Distance.getCorrelationMatrixDistance(sigmas[srcTaskID], sigmas[trgTaskID]);
+                        dist = Distance.getCorrelationMatrixDistance(sigmas[srcTaskID], sigmas[trgTaskID]);    
+                        // dist = Distance.getCosineSimilarity(eliteDirections[srcTaskID], eliteDirections[trgTaskID]);
+                        // dist = (1 + dist) / 2 * -1;
+                    } else {
+                        dist = distances[trgTaskID][srcTaskID];
+                    }
+                return dist;
+            });
+            Arrays.parallelSetAll(distances2[k], trgTaskID -> {
+            double dist = 0;
+            if (trgTaskID > srcTaskID) {
+                    // int d = sigmas[srcTaskID].length;
+                    // for (int i = 0; i < d; i ++) {
+                    //     for (int j = 0; j < d; j ++) {
+                    //         dist += Math.pow(sigmas[srcTaskID][i][j] - sigmas[trgTaskID][i][j], 2);
+                    //     }
+                    // }
+                    // dist = Math.sqrt(dist);
+                    dist = Distance.getDistance(means[srcTaskID], means[trgTaskID]);    
                 } else {
-                    dist = distances[trgTaskID][srcTaskID];
+                    dist = distances2[trgTaskID][srcTaskID];
                 }
-               return dist;
-           });
+            return dist;
+            });
         }
     }
       
