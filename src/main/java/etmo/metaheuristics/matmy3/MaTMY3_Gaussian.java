@@ -76,6 +76,8 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
     private int[][] transferredEliteCounts;
     private double[][] lastTransferSuccessRate;
 
+    private double elitePart;
+
     boolean isMutate;
 
     double[][] means;
@@ -157,6 +159,8 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
 
         transferProbability = (Double) this.getInputParameter("transferProbability");
         mutationProbability = (Double) this.getInputParameter("mutationProbability");
+        
+        elitePart = (Double) this.getInputParameter("elitePartition");
 
         tP = new double[taskNum];
         Arrays.fill(tP, transferProbability);
@@ -191,6 +195,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         models = new AbstractDistribution[taskNum];
         isSingular = new boolean[taskNum];
         eliteDirections = new double[taskNum][varNum];
+
 
         population = new SolutionSet[taskNum];
         union = new SolutionSet[taskNum];
@@ -266,7 +271,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
     }
 
     void offspringGeneration() throws JMException {
-        updateDistributions(0.5);
+        updateDistributions(elitePart);
         updateDistances();
 
         // parallel
@@ -343,9 +348,9 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         double[] tmpStd = population[assistTaskID].getStd();
         // double[] tmpStd = population[taskID].getStd();
 
-        double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpStd);
-        // double[][] tmpSigma = Matrix.getMatSigma(population[assistTaskID].getMat());
-        // double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpSigma);
+        // double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpStd);
+        double[][] tmpSigma = Matrix.getMatSigma(population[assistTaskID].getMat());
+        double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpSigma);
 
         Vector.vecClip_(newFeatures, 0.0, 1.0);
         child.setDecisionVariables(newFeatures);
