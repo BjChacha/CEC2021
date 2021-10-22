@@ -345,12 +345,12 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         // Vector.vecAdd_(tmpMean, means[assistTaskID]);
 
         // double[] tmpStd = stds[assistTaskID];
-        double[] tmpStd = population[assistTaskID].getStd();
         // double[] tmpStd = population[taskID].getStd();
-
-        // double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpStd);
-        double[][] tmpSigma = Matrix.getMatSigma(population[assistTaskID].getMat());
-        double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpSigma);
+        
+        double[] tmpStd = population[assistTaskID].getStd();
+        double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpStd);
+        // double[][] tmpSigma = Matrix.getMatSigma(population[assistTaskID].getMat());
+        // double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpSigma);
 
         Vector.vecClip_(newFeatures, 0.0, 1.0);
         child.setDecisionVariables(newFeatures);

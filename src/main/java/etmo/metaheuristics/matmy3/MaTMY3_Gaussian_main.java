@@ -21,7 +21,7 @@ public class MaTMY3_Gaussian_main {
     static final Class<?> ALGORITHM_CLAZZ = MaTMY3_Gaussian.class;
     static final int MAX_POPULATION_SIZE = 100;
     static final int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-    static final String CROSSOVER_TYPE = "SBX";
+    static final String CROSSOVER_TYPE = "DE";
     static final String TRANSFER_CROSSOVER_TYPE = "SBX";
     static final double DE_CR = 0.6;
     static final double DE_F = 0.5;
@@ -31,16 +31,16 @@ public class MaTMY3_Gaussian_main {
 
     static final int PLOT_TASK_ID = 31;
 
-    static final Benchmark BENCHMARK_TYPE = Benchmark.CEC2019;
+    static final Benchmark BENCHMARK_TYPE = Benchmark.CEC2017;
     static final int PROBLEM_START = 1;
-    static final int PROBLEM_END = 6;
+    static final int PROBLEM_END = 9;
     static final int PROBLEM_REPEAT_TIME = 1;
 
     static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
     static final boolean PLOTTING = false;
 
-    static final String ALGO_NAME = "MaTMY3_SBX_PM0.5_Gau0.5_(0.5CMD(noSIM)_0.5EliteClosest)_MultiVarGuassian";
+    static final String ALGO_NAME = "MaTMY3_SBX_PM0.5_Gau0.5_(0.5CMD(noSIM)_0.5EliteClosest)_CEC2019";
 
     enum Benchmark { CEC2021, CEC2017, CEC2019, WCCI2020 }
 
