@@ -11,6 +11,8 @@ import java.util.List;
 
 import javax.swing.WindowConstants;
 
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.SwingWrapper;
@@ -339,18 +341,31 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         double[] tmpMean = population[assistTaskID].getMean();
         Vector.vecSub_(tmpMean, means[assistTaskID]);
         Vector.vecAdd_(tmpMean, means[taskID]);
-
-        // double[] tmpMean = means[taskID];
-        // Vector.vecSub_(tmpMean, population[assistTaskID].getMean());
-        // Vector.vecAdd_(tmpMean, means[assistTaskID]);
-
-        // double[] tmpStd = stds[assistTaskID];
-        // double[] tmpStd = population[taskID].getStd();
         
         double[] tmpStd = population[assistTaskID].getStd();
         double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpStd);
         // double[][] tmpSigma = Matrix.getMatSigma(population[assistTaskID].getMat());
         // double[] newFeatures = Probability.sampleByNorm(tmpMean, tmpSigma);
+
+        Vector.vecClip_(newFeatures, 0.0, 1.0);
+        child.setDecisionVariables(newFeatures);
+        mutateIndividual(taskID, child);
+        child.resetObjective();
+
+        child.setFlag(1);
+        return child;
+    }
+
+    Solution transferGenerating2(int taskID, int assistTaskID, int i, String type) throws JMException {
+        int j = PseudoRandom.randInt(0, population[assistTaskID].size() - 1);
+        
+        Solution child = null;
+        child = new Solution(population[assistTaskID].get(j));
+
+        double[] newFeatures = Utils.subspaceAlignment(
+            population[assistTaskID].getMat(), 
+            population[taskID].getMat(),
+            population[assistTaskID].get(j).getDecisionVariablesInDouble());
 
         Vector.vecClip_(newFeatures, 0.0, 1.0);
         child.setDecisionVariables(newFeatures);
@@ -518,11 +533,11 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             // sigmas[k] = Matrix.getMatSigma(tmpSet[k].getMat());
         }
         Arrays.parallelSetAll(means, k -> tmpSet[k].getMean());
-        Arrays.parallelSetAll(stds, k -> tmpSet[k].getStd());
+        // Arrays.parallelSetAll(stds, k -> tmpSet[k].getStd());
         Arrays.parallelSetAll(sigmas, k -> {
             double[][] output = null;
             try {
-				output = Matrix.getMatSigma(tmpSet[k].getMat());
+				output = Matrix.getMatSigma(population[k].getMat());
 			} catch (JMException e) {
 				e.printStackTrace();
 			}
@@ -571,14 +586,20 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         // Arrays.setAll(scores, i -> distances[taskID][i]);
         // assistTaskID = Random.rouletteWheel(scores, taskID);
 
+        // CMD + EMD
         double[] scores = new double[taskNum];
         // CMD
         Arrays.setAll(scores, i -> distances[taskID][i]);
         int res1 = Random.rouletteWheel(scores, taskID);
-        // elite mean distance
+        // EMD
         Arrays.setAll(scores, i -> 1 / distances2[taskID][i]);
         int res2 = Random.rouletteWheel(scores, taskID);
         assistTaskID = PseudoRandom.randDouble() < 0.5 ? res1 : res2;
+
+        // // CMD + EMD 2
+        // double[] scores = new double[taskNum];
+        // Arrays.setAll(scores, i -> distances[taskID][i] / distances[taskID][i]);
+        // assistTaskID = Random.rouletteWheel(scores, taskID);
 
         // int length = 10;
         // double[] scores = new double[length];

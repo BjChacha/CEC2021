@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3785e055-dd78-403a-bdac-4cda1bf08803" name="Default Changelist" comment="backup: 2021-08-09">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Maven__com_github_fommil_netlib_core_1_1.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CEC2021.iml" beforeDir="false" afterPath="$PROJECT_DIR$/CEC2021.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matmy3/MaTMY3_Gaussian.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matmy3/MaTMY3_Gaussian.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matmy3/MaTMY3_Gaussian_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/etmo/metaheuristics/matmy3/MaTMY3_Gaussian_main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
