@@ -11,8 +11,6 @@ import java.util.List;
 
 import javax.swing.WindowConstants;
 
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.SwingWrapper;
@@ -101,6 +99,9 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
     List<QualityIndicator> indicators;
     double[] igd;
 
+    boolean isProcessLog;
+    double[][] processIGD;
+
     // DEBUG: PLOT
     boolean isPlot;
     int plotTaskID;
@@ -125,17 +126,24 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         initState();
         if (isPlot)
             initPlot();
+        if (isProcessLog)
+            updateProcessIGD();
         while (evaluations < maxEvaluations) {
             iterate();
             // long startTime = System.currentTimeMillis();
             if (isPlot) {
                 updatePlot();
             }
+            if (isProcessLog) 
+                updateProcessIGD();
             resetFlag();
         }
         // if (isPlot)
         // endPlot();
         // System.out.println(igdPlotValues.get(plotTaskID).toString());
+
+        if (isProcessLog)
+            writeProcessIGD();
 
         return population;
     }
@@ -158,7 +166,7 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         TXType = (String) this.getInputParameter("TXType");
         isPlot = (Boolean) this.getInputParameter("isPlot");
         isMutate = (Boolean) this.getInputParameter("isMutate");
-
+        isProcessLog = (Boolean) this.getInputParameter("isProcessLog");
         transferProbability = (Double) this.getInputParameter("transferProbability");
         mutationProbability = (Double) this.getInputParameter("mutationProbability");
         
@@ -249,6 +257,8 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
                     + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
             indicators.add(new QualityIndicator(problemSet_.get(k), pf[k]));
         }
+
+        processIGD = new double[taskNum][maxEvaluations/populationSize/taskNum];
 
         // DEBUG: PLOT
         generations = new ArrayList<>();
@@ -508,7 +518,6 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         // double[] weights = null;
         SolutionSet[] tmpSet = new SolutionSet[taskNum];
         for (int k = 0; k < taskNum; k++) {
-
              int size = (int)(population[k].size() * partition);
             //  weights = new double[size];
              tmpSet[k] = new SolutionSet(size);
@@ -786,6 +795,39 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
             e.printStackTrace();
         }
 
+    }
+
+    void writeProcessIGD() throws JMException {
+        // 就在data目录创建，具体的目录结构由上层函数再处理
+        String folderPath = "./data";
+  
+        String filePath = folderPath + "/" + "tmp.txt";
+        double[][] data = processIGD;
+        try {
+            FileOutputStream fos = new FileOutputStream(filePath);
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+            BufferedWriter bw = new BufferedWriter(osw);
+
+            for (double[] line: data) {
+                String sLine = Arrays.toString(line)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(",", "")
+                    .strip();
+                bw.write(sLine);
+                bw.newLine();
+            }
+            bw.close();
+        } catch (IOException e) {
+            Configuration.logger_.severe("Error acceding to the file");
+            e.printStackTrace();
+        }
+    }
+
+    void updateProcessIGD() {
+        for (int k = 0; k < taskNum; k++) {
+            processIGD[k][generation] = indicators.get(k).getIGD(population[k], k);
+        }
     }
 
     // DEBUG: IGD

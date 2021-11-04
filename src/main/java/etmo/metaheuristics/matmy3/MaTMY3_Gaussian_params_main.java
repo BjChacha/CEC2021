@@ -34,14 +34,14 @@ public class MaTMY3_Gaussian_params_main {
     static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
     static final int PROBLEM_END = 10;
-    static final int PROBLEM_REPEAT_TIME = 10;
+    static final int PROBLEM_REPEAT_TIME = 5;
 
     static final boolean IGD_LOG = true;
-    static final boolean IGD_PRINT = false;
+    static final boolean IGD_PRINT = true;
     static final boolean PLOTTING = false;
 
     // static final String ALGO_NAME = "MaTMY3_SBX_PM0.5_Gau0.5_(0.5CMD(noSIM)_0.5EliteClosest)";
-    static final String ALGO_NAME = "par(%s)_MaTMY3_SBX_PM%f_Gau%f_(0.5CMD(noSIM)_0.5EliteClosest)";
+    static final String ALGO_NAME = "par(%s)_MaTMY3_SBX_PM%.1f_Gau%.1f_(0.5CMD(noSIM)_0.5EliteClosest)";
 
     enum Benchmark { CEC2021, CEC2017, WCCI2020 }
 

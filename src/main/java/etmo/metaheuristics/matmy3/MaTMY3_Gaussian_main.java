@@ -1,5 +1,6 @@
 package etmo.metaheuristics.matmy3;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,7 @@ public class MaTMY3_Gaussian_main {
     static final Class<?> ALGORITHM_CLAZZ = MaTMY3_Gaussian.class;
     static final int MAX_POPULATION_SIZE = 100;
     static final int MAX_EVALUATION_PER_INDIVIDUAL = 1000;
-    static final String CROSSOVER_TYPE = "DE";
+    static final String CROSSOVER_TYPE = "SBX";
     static final String TRANSFER_CROSSOVER_TYPE = "SBX";
     static final double DE_CR = 0.6;
     static final double DE_F = 0.5;
@@ -31,14 +32,15 @@ public class MaTMY3_Gaussian_main {
 
     static final int PLOT_TASK_ID = 31;
 
-    static final Benchmark BENCHMARK_TYPE = Benchmark.CEC2017;
+    static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
-    static final int PROBLEM_END = 9;
-    static final int PROBLEM_REPEAT_TIME = 1;
+    static final int PROBLEM_END = 10;
+    static final int PROBLEM_REPEAT_TIME = 10;
 
     static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
     static final boolean PLOTTING = false;
+    static final boolean PROCESS_LOG = true;
 
     static final String ALGO_NAME = "MaTMY3_SBX_PM0.5_Gau0.5_(0.5CMD(noSIM)_0.5EliteClosest)_CEC2019";
 
@@ -53,12 +55,32 @@ public class MaTMY3_Gaussian_main {
         int times = PROBLEM_REPEAT_TIME;
 
         String fileName = ALGO_NAME + "_x" + times + "_" + benchmarkName;
+        String folderPath;
+        File folder;
+        if (PROCESS_LOG) {
+            folderPath = "./data/process";
+            folder = new File(folderPath);
+            if (!folder.exists()){
+                folder.mkdirs();
+            }
+            folder = new File(folderPath + "/" + fileName);
+            if (!folder.exists()){
+                folder.mkdirs();
+            }
+        }
 
         System.out.println("\nExperiment started -> " + fileName);
 
         long startTime = System.currentTimeMillis();
 
         for (int problemID = problemStart; problemID <= problemEnd; problemID ++) {
+            if (PROCESS_LOG) {
+                folder = new File(folderPath + "/" + fileName + "/" + Integer.toString(problemID));
+                if (!folder.exists()){
+                    folder.mkdirs();
+                }
+            }
+
             problemSet = getProblemSet(benchmarkName, problemID);
             int taskNum = problemSet.size();
             String[] pf = new String[taskNum];
@@ -90,6 +112,12 @@ public class MaTMY3_Gaussian_main {
 			// 串行执行
 			for (int t = 0; t < times; t++){
 				populations.add(algorithms.get(t).execute());
+
+                if (PROCESS_LOG) {
+                    File src = new File("./data/tmp.txt");
+                    File trg = new File(folderPath + "/" + fileName + "/" + Integer.toString(problemID) + "/" + Integer.toString(t+1) + ".txt");
+                    src.renameTo(trg);
+                }
 			}
 
             // 计算IGD
@@ -140,6 +168,7 @@ public class MaTMY3_Gaussian_main {
         algorithm.setInputParameter("XType", CROSSOVER_TYPE);
         algorithm.setInputParameter("TXType", TRANSFER_CROSSOVER_TYPE);
         algorithm.setInputParameter("isPlot", PLOTTING);
+        algorithm.setInputParameter("isProcessLog", PROCESS_LOG);
         algorithm.setInputParameter("isMutate", IS_MUTATE);
         algorithm.setInputParameter("transferProbability", TRANSFER_PROBABILITY);
         algorithm.setInputParameter("mutationProbability", MUTATION_PROBABILITY);
