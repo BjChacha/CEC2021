@@ -1,5 +1,6 @@
 package etmo.metaheuristics.matde;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -15,39 +16,70 @@ import etmo.core.SolutionSet;
 import etmo.operators.crossover.CrossoverFactory;
 import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.JMException;
-import etmo.util.logging.LogIGD;
 
 public class MaTDE_main {
+    static final boolean PROCESS_LOG = true;
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException, InstantiationException {
         int problemStart = 1;
-        int problemEnd = 10;
+        int problemEnd = 6;
 
-        int times = 10;
+        int times = 20;
 
-        String benchmark_name;
+        String ALGO_NAME = "MaTDE";
+        String benchmarkName = "CEC2019";
+        String fileName = ALGO_NAME + "_x" + times + "_" + benchmarkName;
+        String folderPath;
+        File folder;
+        if (PROCESS_LOG) {
+            folderPath = "./data/process";
+            folder = new File(folderPath);
+            if (!folder.exists()){
+                folder.mkdirs();
+            }
+            folder = new File(folderPath + "/" + fileName);
+            if (!folder.exists()){
+                folder.mkdirs();
+            }
+        }
+
 
         System.out.println("Algo: MaTDE.");
 
         long startTime = System.currentTimeMillis();
 
         for (int pCase = problemStart; pCase <= problemEnd; pCase++){
+
+            if (PROCESS_LOG) {
+                folder = new File(folderPath + "/" + fileName + "/" + Integer.toString(pCase));
+                if (!folder.exists()){
+                    folder.mkdirs();
+                }
+            }
+
             ProblemSet problemSet;
         //   // CEC 2021
-        //   benchmark_name = "CEC2021";
+        //   benchmarkName = "CEC2021";
         //   problemSet = (ProblemSet) Class
         //           .forName("etmo.problems.CEC2021.ETMOF" + pCase)
         //           .getMethod("getProblem")
         //           .invoke(null, null);
 
-            // WCCI 2020
-            benchmark_name = "WCCI2020";
+            // // WCCI 2020
+            // benchmarkName = "WCCI2020";
+            // problemSet = (ProblemSet) Class
+            //         .forName("etmo.problems.WCCI2020.MATP" + pCase)
+            //         .getMethod("getProblem")
+            //         .invoke(null, null);
+
+            // CEC2019
+            benchmarkName = "CEC2019";
             problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.WCCI2020.MATP" + pCase)
+                    .forName("etmo.problems.CEC2019.MATP" + pCase)
                     .getMethod("getProblem")
                     .invoke(null, null);
 
             //  // CEC2017
-            //  benchmark_name = "CEC2017";
+            //  benchmarkName = "CEC2017";
             //  ProblemSet[] cec2017 = {
             //      CIHS.getProblem(),
             //      CIMS.getProblem(),
@@ -81,14 +113,26 @@ public class MaTDE_main {
 			for (int t = 0; t < times; t++){
 				algorithms.add(algorithmGenerate(problemSet));
 			}
-			// 并行执行times个算法
-			algorithms.parallelStream().forEach(a -> {
-				try {
-					populations.add(a.execute());
-				} catch (JMException | ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			});
+
+            // 串行执行
+			for (int t = 0; t < times; t++){
+				populations.add(algorithms.get(t).execute());
+
+                if (PROCESS_LOG) {
+                    File src = new File("./data/tmp_matde.txt");
+                    File trg = new File(folderPath + "/" + fileName + "/" + Integer.toString(pCase) + "/" + Integer.toString(t+1) + ".txt");
+                    src.renameTo(trg);
+                }
+			}
+
+			// // 并行执行times个算法
+			// algorithms.parallelStream().forEach(a -> {
+			// 	try {
+			// 		populations.add(a.execute());
+			// 	} catch (JMException | ClassNotFoundException e) {
+			// 		e.printStackTrace();
+			// 	}
+			// });
 
             double[][] igds = new double[taskNum][times];
             int t = 0;
@@ -101,7 +145,7 @@ public class MaTDE_main {
 				}
 				t ++;
 			}
-            // LogIGD.LogIGD("MaTDE_" + "x" + times + "_" + benchmark_name, pCase, igds);
+            // LogIGD.LogIGD("MaTDE_" + "x" + times + "_" + benchmarkName, pCase, igds);
 
             double[] igdMean = new double[taskNum];
             // System.out.println("Subproblem " + problemID + ": ");
@@ -130,6 +174,7 @@ public class MaTDE_main {
         algorithm.setInputParameter("populationSize", 100);
         algorithm.setInputParameter("archiveSize", 300);
         algorithm.setInputParameter("maxEvaluations", 1000 * taskNum * 100);
+        algorithm.setInputParameter("isProcessLog", PROCESS_LOG);
 
         // 迁移交叉概率
         algorithm.setInputParameter("alpha", 0.1);

@@ -11,12 +11,14 @@ import etmo.util.JMException;
 import etmo.util.comparators.LocationComparator;
 import etmo.util.logging.LogIGD;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 
 public class MFEADDRA_main {
+    static final boolean PROCESS_LOG = true;
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException {
         ProblemSet problemSet; // The problem to solve
         Algorithm algorithm; // The algorithm to use
@@ -26,25 +28,56 @@ public class MFEADDRA_main {
         HashMap parameters; // Operator parameters
 
         int taskStart = 1;
-        int taskEnd = 8;
+        int taskEnd = 10;
 
-        int times = 30;
+        int times = 20;
 
         DecimalFormat form = new DecimalFormat("#.####E0");
 
-        System.out.println("Algo: MFEADDRA.");
+        String ALGO_NAME = "MFEADDRA";
+        String benchmarkName = "WCCI2020";
+        String fileName = ALGO_NAME + "_x" + times + "_" + benchmarkName;
+        String folderPath;
+        File folder;
+        if (PROCESS_LOG) {
+            folderPath = "./data/process";
+            folder = new File(folderPath);
+            if (!folder.exists()){
+                folder.mkdirs();
+            }
+            folder = new File(folderPath + "/" + fileName);
+            if (!folder.exists()){
+                folder.mkdirs();
+            }
+        }
+
+        System.out.println("Algo: " + ALGO_NAME + ".");
 
         for (int pCase = taskStart; pCase <= taskEnd; pCase++) {
-			problemSet = (ProblemSet) Class
-					.forName("etmo.problems.CEC2021.ETMOF" + pCase)
-					.getMethod("getProblem")
-					.invoke(null, null);
+            if (PROCESS_LOG) {
+                folder = new File(folderPath + "/" + fileName + "/" + Integer.toString(pCase));
+                if (!folder.exists()){
+                    folder.mkdirs();
+                }
+            }
 
-        //    // WCCI 2020
-        //    problemSet = (ProblemSet) Class
-        //            .forName("etmo.problems.WCCI2020.MATP" + pCase)
-        //            .getMethod("getProblem")
-        //            .invoke(null, null);
+            // // CEC2021
+			// problemSet = (ProblemSet) Class
+			// 		.forName("etmo.problems.CEC2021.ETMOF" + pCase)
+			// 		.getMethod("getProblem")
+			// 		.invoke(null, null);
+
+            // WCCI 2020
+            problemSet = (ProblemSet) Class
+                    .forName("etmo.problems.WCCI2020.MATP" + pCase)
+                    .getMethod("getProblem")
+                    .invoke(null, null);
+
+            // // CEC2019
+            // problemSet = (ProblemSet) Class
+            //         .forName("etmo.problems.CEC2019.MATP" + pCase)
+            //         .getMethod("getProblem")
+            //         .invoke(null, null);
 
 //            // CEC2017
 //            ProblemSet[] cec2017 = {
@@ -81,6 +114,7 @@ public class MFEADDRA_main {
             algorithm.setInputParameter("nr", 2);
             algorithm.setInputParameter("T", 10);
             algorithm.setInputParameter("dataDirectory", "resources/weightVectorFiles/moead");
+            algorithm.setInputParameter("isProcessLog", PROCESS_LOG);
 
             parameters = new HashMap();
             parameters.put("CR", 0.9);
@@ -104,6 +138,13 @@ public class MFEADDRA_main {
                 SolutionSet population = algorithm.execute();
 
                 long endTime = System.currentTimeMillis();
+
+                if (PROCESS_LOG) {
+                    File src = new File("./data/tmp_mfeaddra.txt");
+                    File trg = new File(folderPath + "/" + fileName + "/" + Integer.toString(pCase) + "/" + Integer.toString(t+1) + ".txt");
+                    src.renameTo(trg);
+                }
+
                 System.out.println("epoch: " + t + "\trunning: " + (endTime - startTime) / 1000 + " s.");
                 SolutionSet[] resPopulation = new SolutionSet[taskNum];
                 for (int i = 0; i < taskNum; i++)

@@ -1,11 +1,17 @@
 package etmo.metaheuristics.matde;
 
 import etmo.core.*;
+import etmo.qualityIndicator.QualityIndicator;
 import etmo.util.*;
 import etmo.util.comparators.CrowdingComparator;
 import etmo.util.comparators.DominanceComparator;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -17,6 +23,8 @@ public class MaTDE extends MtoAlgorithm {
 
     private int evaluations;
     private int maxEvaluations;
+    private int generation;
+    private int taskNum;
 
     Operator crossover1;
     Operator crossover2;
@@ -29,6 +37,11 @@ public class MaTDE extends MtoAlgorithm {
 
     double[][] probability;
     double[][] reward;
+
+    String[] pf;
+    List<QualityIndicator> indicators;
+    boolean isProcessLog;
+    double[][] processIGD;
 
     /**
      * Constructor
@@ -58,15 +71,33 @@ public class MaTDE extends MtoAlgorithm {
         crossover2 = operators_.get("crossover2");
         dominance = new DominanceComparator();
 
+        taskNum = problemSet_.size();
         evaluations = 0;
+        generation = 0;
         problemSet_.size();
 
+        pf = new String[taskNum];
+        indicators = new ArrayList<>(taskNum);
+        for (int k = 0; k < taskNum; k++) {
+            pf[k] = "resources/PF/StaticPF/" + problemSet_.get(k).getHType() + "_"
+                    + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
+            indicators.add(new QualityIndicator(problemSet_.get(k), pf[k]));
+        }
+        isProcessLog = (Boolean) this.getInputParameter("isProcessLog");
+        processIGD = new double[taskNum][maxEvaluations/populationSize/taskNum];
+
         initPopulation();
+        if (isProcessLog)
+            updateProcessIGD();
         while (evaluations < maxEvaluations){
             createOffspringPopulation();
             updateArchives();
+            generation ++;
+            if (isProcessLog) 
+                updateProcessIGD();
         }
-
+        if (isProcessLog)
+            writeProcessIGD();
         return population;
     }
 
@@ -260,6 +291,39 @@ public class MaTDE extends MtoAlgorithm {
         else{
             int idx = PseudoRandom.randInt(0, archiveSize - 1);
             archives[task].replace(idx, p);
+        }
+    }
+
+    void writeProcessIGD() throws JMException {
+        // 就在data目录创建，具体的目录结构由上层函数再处理
+        String folderPath = "./data";
+  
+        String filePath = folderPath + "/" + "tmp_matde.txt";
+        double[][] data = processIGD;
+        try {
+            FileOutputStream fos = new FileOutputStream(filePath);
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+            BufferedWriter bw = new BufferedWriter(osw);
+
+            for (double[] line: data) {
+                String sLine = Arrays.toString(line)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(",", "")
+                    .strip();
+                bw.write(sLine);
+                bw.newLine();
+            }
+            bw.close();
+        } catch (IOException e) {
+            Configuration.logger_.severe("Error acceding to the file");
+            e.printStackTrace();
+        }
+    }
+
+    void updateProcessIGD() {
+        for (int k = 0; k < taskNum; k++) {
+            processIGD[k][generation] = indicators.get(k).getIGD(population[k], k);
         }
     }
 }

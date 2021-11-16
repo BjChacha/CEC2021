@@ -206,7 +206,6 @@ public class MaTMY3_Gaussian extends MtoAlgorithm {
         isSingular = new boolean[taskNum];
         eliteDirections = new double[taskNum][varNum];
 
-
         population = new SolutionSet[taskNum];
         union = new SolutionSet[taskNum];
         // offspring = new SolutionSet[taskNum];

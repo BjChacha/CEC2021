@@ -28,21 +28,22 @@ public class MaTMY3_Gaussian_main {
     static final double DE_F = 0.5;
     static final boolean IS_MUTATE = false;
     static final double TRANSFER_PROBABILITY = 0.5;
-    static final double MUTATION_PROBABILITY = 0.5;
+    static final double MUTATION_PROBABILITY = 0.9;
+    static final double ELITE_PART = 0.5;
 
     static final int PLOT_TASK_ID = 31;
 
     static final Benchmark BENCHMARK_TYPE = Benchmark.WCCI2020;
     static final int PROBLEM_START = 1;
     static final int PROBLEM_END = 10;
-    static final int PROBLEM_REPEAT_TIME = 10;
+    static final int PROBLEM_REPEAT_TIME = 20;
 
     static final boolean IGD_LOG = false;
     static final boolean IGD_PRINT = true;
     static final boolean PLOTTING = false;
     static final boolean PROCESS_LOG = true;
 
-    static final String ALGO_NAME = "MaTMY3_SBX_PM0.5_Gau0.5_(0.5CMD(noSIM)_0.5EliteClosest)_CEC2019";
+    static final String ALGO_NAME = "MaTMY3_M9";
 
     enum Benchmark { CEC2021, CEC2017, CEC2019, WCCI2020 }
 
@@ -173,7 +174,7 @@ public class MaTMY3_Gaussian_main {
         algorithm.setInputParameter("transferProbability", TRANSFER_PROBABILITY);
         algorithm.setInputParameter("mutationProbability", MUTATION_PROBABILITY);
         algorithm.setInputParameter("plotTaskID", PLOT_TASK_ID);
-        algorithm.setInputParameter("elitePartition", 0.5);
+        algorithm.setInputParameter("elitePartition", ELITE_PART);
 
         parameters = new HashMap<>();
         parameters.put("probability", 1.0);

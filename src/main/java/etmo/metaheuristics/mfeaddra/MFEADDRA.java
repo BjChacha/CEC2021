@@ -1,6 +1,8 @@
 package etmo.metaheuristics.mfeaddra;
 
 import etmo.core.*;
+import etmo.qualityIndicator.QualityIndicator;
+import etmo.util.Configuration;
 import etmo.util.Distance;
 import etmo.util.JMException;
 import etmo.util.PORanking;
@@ -8,8 +10,12 @@ import etmo.util.PseudoRandom;
 import etmo.util.comparators.CrowdingComparator;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,6 +52,11 @@ public class MFEADDRA extends Algorithm {
 
     Distance distance = new Distance();
 
+    String[] pf;
+    List<QualityIndicator> indicators;
+    boolean isProcessLog;
+    double[][] processIGD;
+
     public MFEADDRA(ProblemSet problemSet) {
         super(problemSet);
     }
@@ -53,10 +64,15 @@ public class MFEADDRA extends Algorithm {
     @Override
     public SolutionSet execute() throws JMException, ClassNotFoundException {
         initState();
+        if (isProcessLog)
+            updateProcessIGD();
         while (evaluations < maxEvaluations) {
             iteration();
+            if (isProcessLog)
+                updateProcessIGD();
         }
-
+        if (isProcessLog)
+            writeProcessIGD();
         return population;
     }
 
@@ -79,6 +95,16 @@ public class MFEADDRA extends Algorithm {
         savedValues = new ArrayList<>(populationSize);
 
         rate = 30;
+
+        pf = new String[taskNum];
+        indicators = new ArrayList<>(taskNum);
+        for (int k = 0; k < taskNum; k++) {
+            pf[k] = "resources/PF/StaticPF/" + problemSet_.get(k).getHType() + "_"
+                    + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
+            indicators.add(new QualityIndicator(problemSet_.get(k), pf[k]));
+        }
+        isProcessLog = (Boolean) this.getInputParameter("isProcessLog");
+        processIGD = new double[taskNum][maxEvaluations/populationSize];
 
         evaluations = 0;
         generation = 0;
@@ -436,6 +462,44 @@ public class MFEADDRA extends Algorithm {
                     front.get(j).setLocation(loc);
                 loc++;
             }
+        }
+    }
+    void writeProcessIGD() throws JMException {
+        // 就在data目录创建，具体的目录结构由上层函数再处理
+        String folderPath = "./data";
+  
+        String filePath = folderPath + "/" + "tmp_mfeaddra.txt";
+        double[][] data = processIGD;
+        try {
+            FileOutputStream fos = new FileOutputStream(filePath);
+            OutputStreamWriter osw = new OutputStreamWriter(fos);
+            BufferedWriter bw = new BufferedWriter(osw);
+
+            for (double[] line: data) {
+                String sLine = Arrays.toString(line)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(",", "")
+                    .strip();
+                bw.write(sLine);
+                bw.newLine();
+            }
+            bw.close();
+        } catch (IOException e) {
+            Configuration.logger_.severe("Error acceding to the file");
+            e.printStackTrace();
+        }
+    }
+
+    void updateProcessIGD() {
+        if (generation >= processIGD[0].length) return;
+        for (int k = 0; k < taskNum; k++) {
+            SolutionSet tmpSet = new SolutionSet();
+            for (int i = 0; i < population.size(); i++) {
+                if (population.get(i).getSkillFactor() == k) 
+                    tmpSet.add(population.get(i));
+            }
+            processIGD[k][generation] = indicators.get(k).getIGD(tmpSet, k);
         }
     }
 }
