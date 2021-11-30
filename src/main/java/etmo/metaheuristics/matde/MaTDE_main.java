@@ -20,13 +20,13 @@ import etmo.util.JMException;
 public class MaTDE_main {
     static final boolean PROCESS_LOG = true;
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JMException, IOException, InstantiationException {
-        int problemStart = 1;
-        int problemEnd = 6;
+        int problemStart = 10;
+        int problemEnd = 10;
 
         int times = 20;
 
         String ALGO_NAME = "MaTDE";
-        String benchmarkName = "CEC2019";
+        String benchmarkName = "WCCI2020";
         String fileName = ALGO_NAME + "_x" + times + "_" + benchmarkName;
         String folderPath;
         File folder;
@@ -64,19 +64,19 @@ public class MaTDE_main {
         //           .getMethod("getProblem")
         //           .invoke(null, null);
 
-            // // WCCI 2020
-            // benchmarkName = "WCCI2020";
-            // problemSet = (ProblemSet) Class
-            //         .forName("etmo.problems.WCCI2020.MATP" + pCase)
-            //         .getMethod("getProblem")
-            //         .invoke(null, null);
-
-            // CEC2019
-            benchmarkName = "CEC2019";
+            // WCCI 2020
+            benchmarkName = "WCCI2020";
             problemSet = (ProblemSet) Class
-                    .forName("etmo.problems.CEC2019.MATP" + pCase)
+                    .forName("etmo.problems.WCCI2020.MATP" + pCase)
                     .getMethod("getProblem")
                     .invoke(null, null);
+
+            // // CEC2019
+            // benchmarkName = "CEC2019";
+            // problemSet = (ProblemSet) Class
+            //         .forName("etmo.problems.CEC2019.MATP" + pCase)
+            //         .getMethod("getProblem")
+            //         .invoke(null, null);
 
             //  // CEC2017
             //  benchmarkName = "CEC2017";

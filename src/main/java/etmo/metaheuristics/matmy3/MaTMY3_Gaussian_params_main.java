@@ -147,10 +147,10 @@ public class MaTMY3_Gaussian_params_main {
         algorithm.setInputParameter("TXType", TRANSFER_CROSSOVER_TYPE);
         algorithm.setInputParameter("isPlot", PLOTTING);
         algorithm.setInputParameter("isMutate", IS_MUTATE);
-        algorithm.setInputParameter("transferProbability", TRANSFER_PROBABILITY);
-        algorithm.setInputParameter("mutationProbability", params.getOrDefault("mutationProbability", 0.5));
+        algorithm.setInputParameter("transferProbability", params.getOrDefault("transferProbability", 0.5));
+        algorithm.setInputParameter("mutationProbability", MUTATION_PROBABILITY);
         algorithm.setInputParameter("plotTaskID", PLOT_TASK_ID);
-        algorithm.setInputParameter("elitePartition", params.getOrDefault("elitePartition", 0.5));
+        algorithm.setInputParameter("elitePartition", 0.5);
 
         parameters = new HashMap<>();
         parameters.put("probability", 1.0);

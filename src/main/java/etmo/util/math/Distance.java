@@ -68,4 +68,16 @@ public class Distance {
         dist = Matrix.matTrace(Matrix.matMul(sigma1, sigma2)) / Matrix.matNorm(sigma1) / Matrix.matNorm(sigma2);
         return 1 - dist;
     }
+
+    public static double getKLDivergence(double[][] p1, double[][] p2) {
+        double dist = 0;
+        // TODO
+        return dist;
+    }
+
+    public static double getJSDivergence(double[][] p1, double[][] p2) {
+        double dist = 0;
+        // TODO        
+        return dist;
+    }
 }

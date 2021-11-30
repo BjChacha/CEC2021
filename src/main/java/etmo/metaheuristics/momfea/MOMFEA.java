@@ -1,10 +1,20 @@
 package etmo.metaheuristics.momfea;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import etmo.core.Algorithm;
 import etmo.core.Operator;
 import etmo.core.ProblemSet;
 import etmo.core.Solution;
 import etmo.core.SolutionSet;
+import etmo.qualityIndicator.QualityIndicator;
+import etmo.util.Configuration;
 import etmo.util.Distance;
 import etmo.util.JMException;
 import etmo.util.PORanking;
@@ -20,8 +30,10 @@ public class MOMFEA extends Algorithm {
 	private SolutionSet offspringPopulation;
 	private SolutionSet union;
 	
+	int taskNum;
 	int evaluations;
 	int maxEvaluations;
+	int generation;
 	
 	Operator crossover;
 	Operator mutation;
@@ -31,6 +43,14 @@ public class MOMFEA extends Algorithm {
 
 	Distance distance = new Distance();
 	
+	// Log process IGD
+    String[] pf;
+    List<QualityIndicator> indicators;
+    double[] igd;
+
+    boolean isProcessLog;
+    double[][] processIGD;
+
 	public MOMFEA(ProblemSet problemSet) {
 		super(problemSet);
 	}
@@ -40,18 +60,36 @@ public class MOMFEA extends Algorithm {
 		populationSize = ((Integer) getInputParameter("populationSize")).intValue();
 		maxEvaluations = ((Integer) getInputParameter("maxEvaluations")).intValue();
 		rmp =  ((Double) getInputParameter("rmp")).doubleValue();
-
+		isProcessLog = (Boolean) this.getInputParameter("isProcessLog");
 		crossover = operators_.get("crossover");
 		mutation = operators_.get("mutation");
 		selection = operators_.get("selection");
-
+		taskNum = problemSet_.size();
 		evaluations = 0;
+		generation = 0;
+        // DEBUG: IGD
+        pf = new String[taskNum];
+        indicators = new ArrayList<>(taskNum);
+        for (int k = 0; k < taskNum; k++) {
+            pf[k] = "resources/PF/StaticPF/" + problemSet_.get(k).getHType() + "_"
+                    + problemSet_.get(k).getNumberOfObjectives() + "D.pf";
+            indicators.add(new QualityIndicator(problemSet_.get(k), pf[k]));
+        }
+
+        processIGD = new double[taskNum][maxEvaluations/populationSize];
+
 
 		initPopulation();
+		updateProcessIGD();
 		while (evaluations < maxEvaluations) {
 			createOffspringPopulation();
 			getNextPopulation();
+			generation ++;
+			updateProcessIGD();
 		}
+
+		if (isProcessLog)
+			writeProcessIGD();
 		
 		return population;
 	}
@@ -211,4 +249,41 @@ public class MOMFEA extends Algorithm {
 //			resPopulation[k].printObjectivesToFile("MOMFEA\\" + "MOMFEA_"+problemSet_.get(k).getNumberOfObjectives()+"Obj_"+
 //					problemSet_.get(k).getName()+ "_" + problemSet_.get(k).getNumberOfVariables() + "D" + eval + ".txt");
 //	}
+	void writeProcessIGD() throws JMException {
+			// 就在data目录创建，具体的目录结构由上层函数再处理
+			String folderPath = "./data";
+	
+			String filePath = folderPath + "/" + "tmp_mfea.txt";
+			double[][] data = processIGD;
+			try {
+				FileOutputStream fos = new FileOutputStream(filePath);
+				OutputStreamWriter osw = new OutputStreamWriter(fos);
+				BufferedWriter bw = new BufferedWriter(osw);
+
+				for (double[] line: data) {
+					String sLine = Arrays.toString(line)
+						.replace("[", "")
+						.replace("]", "")
+						.replace(",", "")
+						.strip();
+					bw.write(sLine);
+					bw.newLine();
+				}
+				bw.close();
+			} catch (IOException e) {
+				Configuration.logger_.severe("Error acceding to the file");
+				e.printStackTrace();
+			}
+		}
+
+		void updateProcessIGD() {
+			for (int k = 0; k < taskNum; k++) {
+            SolutionSet tmpSet = new SolutionSet();
+            for (int i = 0; i < population.size(); i++) {
+                if (population.get(i).getSkillFactor() == k) 
+                    tmpSet.add(population.get(i));
+            }
+				processIGD[k][generation] = indicators.get(k).getIGD(tmpSet, k);
+			}
+		}
 }

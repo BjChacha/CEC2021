@@ -138,14 +138,14 @@ public class MFEADDRA_main {
                 SolutionSet population = algorithm.execute();
 
                 long endTime = System.currentTimeMillis();
-
+                System.out.println("epoch: " + t + "\trunning: " + (endTime - startTime) / 1000 + " s.");
+                
                 if (PROCESS_LOG) {
                     File src = new File("./data/tmp_mfeaddra.txt");
                     File trg = new File(folderPath + "/" + fileName + "/" + Integer.toString(pCase) + "/" + Integer.toString(t+1) + ".txt");
                     src.renameTo(trg);
                 }
 
-                System.out.println("epoch: " + t + "\trunning: " + (endTime - startTime) / 1000 + " s.");
                 SolutionSet[] resPopulation = new SolutionSet[taskNum];
                 for (int i = 0; i < taskNum; i++)
                     resPopulation[i] = new SolutionSet();
